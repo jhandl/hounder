@@ -1,0 +1,16 @@
+multiSearcher.hosts=
+
+multiSearcher.timeout=5000
+multiSearcher.workerThreads=200
+
+#for CompositeMultiSearcher
+
+compositeMultiSearcher.useTrafficLimiting=true
+compositeMultiSearcher.useQueriesInProgress=true
+compositeMultiSearcher.useCache=true
+compositeMultiSearcher.useSuggestQuery=false
+
+multiSearcher.trafficLimiting.maxSimultaneousQueries=10
+multiSearcher.trafficLimiting.maxTimeInQueue=1000
+multiSearcher.suggestQuerySearcher.factor=0.5
+multiSearcher.suggestQuerySearcher.dictionaryDir=

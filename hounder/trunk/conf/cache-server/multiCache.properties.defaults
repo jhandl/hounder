@@ -1,0 +1,29 @@
+multiCache.hosts=
+multiCache.workerThreads=10
+multiCache.timeout=1000
+
+clustering.enable=yes
+clustering.node.type=cacheServer
+
+HTTPCacheServer.frameTemplate=\
+<meta http-equiv="Content-Type" content="text/html; charset=US-ASCII">\
+<BASE HREF="$url$">\
+<table border="0" bgcolor="#ffffff" cellpadding="10" cellspacing="0" width="100%" color="#ffffff">\
+	<tr><td>\
+		<font face=arial,sans-serif color=black size=-1>\
+			This is <strong>Search4j</strong>'s cached version of <a href="$url$">$url$</a><br/>\
+			<small>This cached page may reference images which are no longer available.<br/>Search4j is neither affiliated with the authors of this page nor responsible for its content.<br/></small>\
+		</font>\
+	</td></tr>\
+</table>\
+<div style="position:relative">
+
+HTTPCacheServer.notFound=<html><head><title>$url$ not in cache</title></head><body>\
+<table border="0" bgcolor="#ffffff" cellpadding="10" cellspacing="0" width="100%" color="#ffffff">\
+    <tr><td>\
+        <font face=arial,sans-serif color=black size=-1>\
+            <a href="$url$">$url$</a> is not available in <strong>Search4j</strong>'s cache.
+        </font>\
+    </td></tr>\
+</table>\
+</body>

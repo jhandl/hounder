@@ -1,0 +1,15 @@
+
+# this is a comma-separated list of search4j fields that should be shown in the search results.
+# Note that the 3 opensearch standard field (title, link, description) are allways shown
+#Dont forget to add also the snippet of that field ('snippet_<field>') if you need so
+opensearch.show.search4j.fields=
+
+# OpenSearch standard, forces to have 3 fields: title, link, description
+# The name in the index of those fields might be different so we have to
+# map between the index-name and the opensearch name.
+# Note that the field must exist in the document. And if you plan to use the
+# snippet of some field, you must be sure that field is being snippeted (ie
+#  it is listed in 'Searcher.snippetOfFields'
+opensearch.title.from.index.field= snippet_title
+opensearch.link.from.index.field= url
+opensearch.description.from.index.field= snippet_text

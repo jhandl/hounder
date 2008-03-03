@@ -1,0 +1,162 @@
+<!--
+Copyright 2008 Flaptor (flaptor.com) 
+
+Licensed under the Apache License, Version 2.0 (the "License"); 
+you may not use this file except in compliance with the License. 
+You may obtain a copy of the License at 
+
+    http://www.apache.org/licenses/LICENSE-2.0 
+
+Unless required by applicable law or agreed to in writing, software 
+distributed under the License is distributed on an "AS IS" BASIS, 
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
+See the License for the specific language governing permissions and 
+limitations under the License.
+-->
+<project name="search4j" default="test" basedir=".">
+
+    <path id="cp-for-tools">
+		<fileset dir="${tools.dir}">
+			<include name="**/*.jar" />
+		</fileset>
+		<fileset dir="${lib.dir}">
+			<include name="**/*.jar"/>
+		</fileset>
+	</path>
+
+	<path id="cp-to-run">
+		<pathelement path="." />
+		<pathelement location="${build.dir}" />
+		<pathelement path="${conf.dir}" />
+		<dirset dir="${conf.dir}">
+			<include name="**/*" />
+		</dirset>
+		<fileset dir="${basedir}/plugins">
+			<include name="**/*.jar" />
+		</fileset>
+		<path refid="cp-for-tools" />
+	</path>
+
+	<taskdef name="cobertura-instrument" classname="net.sourceforge.cobertura.ant.InstrumentTask">
+		<classpath refid="cp-for-tools" />
+	</taskdef>
+
+	<taskdef name="cobertura-report" classname="net.sourceforge.cobertura.ant.ReportTask">
+		<classpath refid="cp-for-tools" />
+	</taskdef>
+
+	<taskdef name="cobertura-merge" classname="net.sourceforge.cobertura.ant.MergeTask">
+		<classpath refid="cp-for-tools" />
+	</taskdef>
+
+	<taskdef name="junit" classname="org.apache.tools.ant.taskdefs.optional.junit.JUnitTask">
+		<classpath refid="cp-for-tools" />
+	</taskdef>
+
+	<target name="instrument" if="cobertura">
+		<cobertura-instrument datafile="cobertura-${cobertura-sufix}.ser">
+			<fileset dir="${build.dir}">
+				<include name="**/*.class"/>
+			</fileset>
+		</cobertura-instrument>
+	</target>
+
+	<target name="report" if="cobertura">
+		<cobertura-merge>
+			<fileset dir="${basedir}" >
+				<include name="cobertura-*.ser"/>
+			</fileset>
+		</cobertura-merge>
+    	<cobertura-report format="html" destdir="${basedir}/reports/ALL" 
+			srcdir="${src.dir}" datafile="${basedir}/cobertura.ser"/>
+    	<cobertura-report format="html" destdir="${basedir}/reports/UNIT"
+			srcdir="${src.dir}" datafile="${basedir}/cobertura-UNIT.ser"/>
+    	<cobertura-report format="html" destdir="${basedir}/reports/INTEGRATION"
+			srcdir="${src.dir}" datafile="${basedir}/cobertura-INTEGRATION.ser"/>
+    	<cobertura-report format="html" destdir="${basedir}/reports/SYSTEM"
+			srcdir="${src.dir}" datafile="${basedir}/cobertura-SYSTEM.ser"/>
+	</target>
+
+
+    <target name="test-unit" description="Runs all unit tests." >
+    	<antcall target="test-generic">
+        	<param name="cobertura-sufix" value="UNIT"/>
+		</antcall>
+	</target>
+
+	<target name="test-integration" description="Runs all integration tests." >
+    	<antcall target="test-generic">
+	    	<param name="cobertura-sufix" value="INTEGRATION"/>
+		</antcall>
+	</target>
+    
+	<target name="test-system" description="Runs all system tests." >
+       	<antcall target="test-generic">
+    	   	<param name="cobertura-sufix" value="SYSTEM"/>
+       	</antcall>
+    </target>
+
+	<target name="test" description="Runs all tests." >
+       	<antcall target="test-unit"/>
+       	<antcall target="test-integration"/>
+       	<antcall target="test-system"/>
+		<antcall target="report"/>
+    </target>
+	
+    <target name="test-generic">
+		<antcall target="instrument">
+			<param name="cobertura-sufix" value="${cobertura-sufix}" />
+		</antcall>
+    	<junit printsummary="on" showoutput="true" haltonfailure="true" fork="on">
+			<sysproperty key="net.sourceforge.cobertura.datafile" file="${basedir}/cobertura-${cobertura-sufix}.ser" />
+            <jvmarg value="-Xms256M"/>
+            <jvmarg value="-Xmx256M"/>
+			<classpath refid="cp-to-run"/>
+            <formatter type="plain" />
+			
+			<sysproperty key="TestsToRun" value="${cobertura-sufix}" />
+            <batchtest fork="yes" haltonfailure="false" haltonerror="false" failureproperty="ERROR">
+                <fileset dir="${src.dir}">
+                    <include name="**/*Test.java"/>
+				</fileset>
+                <fileset dir="${test.dir}">
+                    <include name="**/*Test.java"/>
+                </fileset>
+            </batchtest>
+    	</junit>
+		<antcall target="clean-after-tests"/>
+    	<fail message="Some tests have failed" if="ERROR"/>
+    </target>
+
+    <target name="clean-after-tests" unless="ERROR">
+            <delete dir="${basedir}/directoryTestOrigin.tmp" />
+            <delete dir="${basedir}/directoryTestDestination.tmp" />
+            <delete dir="${basedir}/tmp.test.directory" />
+            <delete dir="${basedir}/tmp" />
+            <delete file="${basedir}/fileTest.tmp" />
+            <delete file="${basedir}/test_category*" />
+			<delete file="${basedir}/cobertura-*.ser"/>
+	</target>    		
+    		
+    <target name="onetest" description="runs one JUnit test, specified by -Dtestfile= parameter" >
+        <junit printsummary="on" showoutput="true" haltonerror="false" haltonfailure="false" fork="true" dir="${basedir}">
+			<classpath refid="cp-to-run"/>
+            <formatter type="plain" />
+            <jvmarg value="-Xms256M"/>
+            <jvmarg value="-Xmx256M"/>
+            <batchtest fork="yes" failureproperty="ERROR">
+                <fileset dir="${src.dir}">
+                    <include name="**/${testfile}.java"/>
+                </fileset>
+                <fileset dir="${test.dir}">
+                    <include name="**/${testfile}.java"/>
+                </fileset>
+            </batchtest>
+        </junit>
+		<fail message="Test failed." if="ERROR"/>
+		<antcall target="clean-after-tests"/>
+    </target>
+</project>
+
+	
+	

@@ -1,0 +1,14 @@
+#!/bin/sh
+
+CONF=./conf
+LIBS=../lib
+S4J=$LIBS/search4j-trunk.jar
+DEPS=$LIBS/search4j-trunk-deps.jar
+
+CP=${CONF}:.:${S4J}:${DEPS}
+MAIN=com.flaptor.search4j.util.Idx
+
+CMND="java -cp ${CP} $MAIN $*"
+echo $CMND
+$CMND
+ 

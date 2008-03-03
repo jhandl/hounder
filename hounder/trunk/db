@@ -1,0 +1,1 @@
+java -Dfile.encoding=utf-8 -cp conf:conf/crawler:output/search4j-trunk.jar com.flaptor.search4j.crawler.pagedb.PageDB $*

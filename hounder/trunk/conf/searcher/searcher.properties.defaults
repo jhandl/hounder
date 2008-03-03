@@ -1,0 +1,103 @@
+#default index dir
+searcher.dir=searcher
+
+searcher.isMultiSearcher=false
+
+#Configuration for QueryParser.
+#nonTokenizedFields is a comma-separated list of field names, that will not be tokenized when
+#resolving queries.
+QueryParser.nonTokenizedFields=
+#synonymFields is a comma-separated list of field names, that will be expanded with synonyms.
+QueryParser.synonymFields=
+#synonymFile is the name of a file, containing the synonym definitions.
+QueryParser.synonymFile=
+
+
+#Configuration  for ReloadableIndexHandler
+#The max offset (firstResult) that can be asked for to the searcher. For example, if this
+#value is 200, any query where 200 < offset will be discarded.
+ReloadableIndexSearcher.maxOffset=200
+#The max count of results to ask on a query. No query will return more results than this 
+#parameter, no matter what value is specified when querying.
+ReloadableIndexSearcher.maxHitsPerPage=20
+#Limit of results per group to check. For example, if the query asks for 10 groups, and 
+#this value is 5, no more than 50 (5*10) results of the query will be checked to generate
+#the returned groups. This value is useful because if every document on the index matches
+#the query, and belong to the first and only group, not setting a limit would mean checking 
+#every single index document, and would kill performance.
+ReloadableIndexSearcher.lookupLimit=10
+
+# The size of the AFilter cache. This is how many query filters to keep in cache.
+Filter.cacheSize=20
+# The size of the ASort cache. This is how many query sort objects to keep in cache.
+Sort.cacheSize=20
+
+######
+# Snippet configuration
+######
+## Searcher.snippetOfField was deprecated (use snippetOfFields) to allow snippeting of many fields
+## Now for each field in snippetOfFields there will be a new field called snippet_<snippetOfFields[i]>
+# (ie text --> snippet_text) 
+# snippetOfFields is a comma separated list of fields to snippet. (ie text,title).
+# If empty, no snippet is generated 
+Searcher.snippetOfFields=text,title
+Searcher.snippetLength=180,75
+Searcher.snippetFragmentSeparator=...
+Searcher.emptySnippetsAllowed=true
+# This is a regular expression that matches the fragment (phrases) separation.
+# It is used in:  String regex= "^.*(" + fragmentBoundary+ ")+" + "$";
+# to know if a token is the last token of a phrase.
+# Note that to use a '-' you must escape it: [\\-], else is considered range
+Searcher.snippetFragmentBoundary=[.!?\\n]
+
+
+# Wheter to use payloads or not
+Searcher.usePayloads=no
+# The name of the payload field.
+Searcher.payloadField=
+# The name of the payload scorer. Currently only "date" is supported.
+Searcher.payloadScorer=
+
+
+
+#PhraseMatcher configuration
+QueryParser.phrasesFile=
+
+#TrafficLimitingSearcher
+searcher.trafficLimiting.maxSimultaneousQueries=10
+searcher.trafficLimiting.maxTimeInQueue=1000
+
+#SuggestQuerySearcher
+#The query suggestor will only make a suggestion based on this rule:
+# if a query returns N results, and the suggested query returns M,
+# the suggestion will be made only if N < M * factor.
+# So, if a query returns 2 results and its suggested query returns 4,
+# the suggestion will be made in case factor is at least 0.5
+searcher.suggestQuerySearcher.factor=0.5
+# The directory where the dictionary for spellchecker is located.
+searcher.suggestQuerySearcher.dictionaryDir=
+
+#composite searcher
+compositeSearcher.useSnippetSearcher=true
+compositeSearcher.useTrafficLimiting=true
+compositeSearcher.useQueriesInProgress=true
+compositeSearcher.useCache=true
+compositeSearcher.useSynonymSuggestQuery=false
+compositeSearcher.useSpellCheckSuggestQuery=false
+
+#Index library, that keeps track of used indexes, deletes, etc.
+#Clean directories that are not indexes, or old indexes, when 
+#starting up?
+IndexLibrary.cleanupOnStartup=true
+# How many milliseconds to wait to delete an index, when a new
+# one is being used.
+IndexLibrary.indexDeleteDelay=60000
+
+
+#clustering
+clustering.enable=true
+clustering.node.type=searcher
+
+searcher.cachedVersion.showLink=false
+#host:baseport notation or host (using the same baseport as this installation)
+searcher.cachedVersion.cacheServerHost=

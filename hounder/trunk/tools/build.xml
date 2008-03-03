@@ -1,0 +1,30 @@
+<project default="jar" basedir=".">
+
+    <!--******************************************************************************************************-->
+    <target name="compile" >
+        <javac debug="true" debuglevel="lines,vars,source">
+          <compilerarg value="-Xlint:deprecation" />
+          <compilerarg value="-Xlint:unchecked" />
+		  <classpath>
+		  </classpath>
+            <src path="taglets" />
+        </javac>
+    </target>
+
+    <!--******************************************************************************************************-->
+    <target name="clean">
+        <delete>
+            <fileset dir="taglets" includes="**/*.class" />
+        </delete>
+    </target>
+    
+    <!--******************************************************************************************************-->
+    <target name="jar" depends="compile" description="builds the search4j jar file" >
+		<jar jarfile="taglets.jar" >
+			<fileset dir="taglets">
+				<include name="**/*.class"/>
+			</fileset>
+		</jar>
+    </target>
+
+</project>

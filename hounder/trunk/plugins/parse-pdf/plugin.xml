@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<plugin
+   id="parse-pdf"
+   name="Pdf Parse Plug-in"
+   version="1.0.0"
+   provider-name="nutch.org">
+
+
+   <runtime>
+      <library name="parse-pdf.jar">
+         <export name="*"/>
+      </library>
+      <library name="PDFBox-0.7.2-log4j.jar"/>
+      <library name="log4j-1.2.9.jar"/>
+   </runtime>
+
+   <extension id="org.apache.nutch.parse.pdf"
+              name="PdfParse"
+              point="org.apache.nutch.parse.Parser">
+
+      <implementation id="org.apache.nutch.parse.pdf.PdfParser"
+                      class="org.apache.nutch.parse.pdf.PdfParser"
+                      contentType="application/pdf"
+                      pathSuffix=""/>
+
+   </extension>
+
+</plugin>
