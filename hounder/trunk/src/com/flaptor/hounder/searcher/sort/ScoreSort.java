@@ -13,14 +13,14 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and 
 limitations under the License.
 */
-package com.flaptor.search4j.searcher.sort;
+package com.flaptor.hounder.searcher.sort;
 
+import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Comparator;
 
-import org.apache.lucene.search.SortField;
 import org.apache.lucene.document.Document;
+import org.apache.lucene.search.SortField;
 
 /**
  * Sort that sorts by the searche's score.

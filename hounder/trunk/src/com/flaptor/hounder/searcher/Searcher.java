@@ -13,26 +13,23 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and 
 limitations under the License.
 */
-package com.flaptor.search4j.searcher;
+package com.flaptor.hounder.searcher;
 
 import java.io.IOException;
 
 import org.apache.log4j.Logger;
-
-
 import org.apache.lucene.index.Term;
-import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.BooleanClause;
-import org.apache.lucene.search.payloads.BoostingTermQuery;
+import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.Query;
+import org.apache.lucene.search.payloads.BoostingTermQuery;
 
-import com.flaptor.search4j.searcher.filter.AFilter;
-import com.flaptor.search4j.searcher.group.AGroup;
-import com.flaptor.search4j.searcher.group.NoGroup;
-import com.flaptor.search4j.searcher.query.AQuery;
-import com.flaptor.search4j.searcher.query.LazyParsedQuery;
-import com.flaptor.search4j.searcher.sort.ASort;
-
+import com.flaptor.hounder.searcher.filter.AFilter;
+import com.flaptor.hounder.searcher.group.AGroup;
+import com.flaptor.hounder.searcher.group.NoGroup;
+import com.flaptor.hounder.searcher.query.AQuery;
+import com.flaptor.hounder.searcher.query.LazyParsedQuery;
+import com.flaptor.hounder.searcher.sort.ASort;
 import com.flaptor.util.Cache;
 import com.flaptor.util.Config;
 import com.flaptor.util.Execute;
@@ -108,7 +105,7 @@ public class Searcher implements ISearcher {
      * @param firstResult which result to start from, used for pagination (0 is the first)
      * @param count how many results to retrieve
      * @param filter the filter to use @see Filter
-     * @param sort a s4j  Sort. If null, the default relevance sort will be used.
+     * @param sort a Hounder Sort. If null, the default relevance sort will be used.
      * @throws NullPointerException if the queryStr is null.
      * @throws IllegalArgumentException if the queryStr cannot be parsed correctly.
      */
@@ -124,7 +121,7 @@ public class Searcher implements ISearcher {
      * @param query the query
      * @param firstResult which result to start from, used for pagination (0 is the first)
      * @param count how many results to retrieve
-     * @param filter the seach4j filter to filter the resultSet for.
+     * @param filter the hounder filter to filter the resultSet for.
      * @param sort the lucene's sort to use. May be null for default solt (relevance)
      * @throws NullPointerException if the queryStr is null.
      * @throws IllegalArgumentException if the queryStr cannot be parsed correctly.

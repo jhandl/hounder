@@ -13,7 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and 
 limitations under the License.
 */
-package com.flaptor.search4j.searcher;
+package com.flaptor.hounder.searcher;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -26,12 +26,12 @@ import org.apache.lucene.search.Query;
 import org.apache.lucene.search.Sort;
 import org.apache.lucene.search.TopDocs;
 
-import com.flaptor.search4j.Index;
-import com.flaptor.search4j.searcher.group.AGroup;
-import com.flaptor.search4j.searcher.group.AResultsGrouper;
-import com.flaptor.search4j.searcher.group.NoGroup;
-import com.flaptor.search4j.searcher.group.TopDocsDocumentProvider;
-import com.flaptor.search4j.searcher.payload.DatePayloadScorer;
+import com.flaptor.hounder.Index;
+import com.flaptor.hounder.searcher.group.AGroup;
+import com.flaptor.hounder.searcher.group.AResultsGrouper;
+import com.flaptor.hounder.searcher.group.NoGroup;
+import com.flaptor.hounder.searcher.group.TopDocsDocumentProvider;
+import com.flaptor.hounder.searcher.payload.DatePayloadScorer;
 import com.flaptor.util.Cache;
 import com.flaptor.util.Config;
 import com.flaptor.util.Execute;

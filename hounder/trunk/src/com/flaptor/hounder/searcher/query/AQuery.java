@@ -13,14 +13,14 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and 
 limitations under the License.
 */
-package com.flaptor.search4j.searcher.query;
+package com.flaptor.hounder.searcher.query;
 
 import java.io.Serializable;
 
 /**
- * The base for all s4j queries.
- * Simply states that a s4j query can return a lucene query, although this is of no concern for
- * the application that use s4j.
+ * The base for all Hounder queries.
+ * Simply states that a Hounder query can return a lucene query, although this is of no concern for
+ * the application that use Hounder.
  * NOTE: all class derived from AQuery should be immutable. (convention to simplify things later)
  * @author Flaptor Development Team
  */
@@ -50,7 +50,7 @@ public abstract class AQuery implements Serializable {
     }
     
     /**
-     * Abstract method that returns a lucene query that represents this s4j query.
+     * Abstract method that returns a lucene query that represents this Hounder query.
      * @return a lucene query.
      * @see org.apache.lucene.search.Query
      */

@@ -13,13 +13,13 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and 
 limitations under the License.
 */
-package com.flaptor.search4j.searcher.sort;
+package com.flaptor.hounder.searcher.sort;
 
-import java.util.List;
 import java.util.Comparator;
+import java.util.List;
 
-import org.apache.lucene.search.SortField;
 import org.apache.lucene.document.Document;
+import org.apache.lucene.search.SortField;
 
 import com.flaptor.util.Cache;
 import com.flaptor.util.Config;
@@ -64,10 +64,10 @@ public abstract class ASort implements java.io.Serializable {
 
 
 	/**
-	 * Returns a lucene's sort representing this s4j filter.
+	 * Returns a lucene's sort representing this Hounder filter.
 	 * It will first try to find an equivalent lucene sort already cached in the SortCache. If
 	 * none is found, a new one is created and cached.
-	 * @return a lucene sort for this s4j sort.
+	 * @return a lucene sort for this Hounder sort.
 	 */
 	final public org.apache.lucene.search.Sort getLuceneSort() {
 		org.apache.lucene.search.Sort sort = cache.get(this);
@@ -81,8 +81,8 @@ public abstract class ASort implements java.io.Serializable {
 	}
 
 	/**
-	 * Returns a newly generated lucene sort that represents this s4j sort.
-	 * @return a new lucene sort representing a this s4j sort.
+	 * Returns a newly generated lucene sort that represents this Hounder sort.
+	 * @return a new lucene sort representing a this Hounder sort.
 	 */
 	final org.apache.lucene.search.Sort generateNewLuceneSort() {
         return new org.apache.lucene.search.Sort(getSortFields().toArray(new SortField[0]));

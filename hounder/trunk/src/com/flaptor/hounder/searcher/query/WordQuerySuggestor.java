@@ -13,7 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and 
 limitations under the License.
 */
-package com.flaptor.search4j.searcher.query;
+package com.flaptor.hounder.searcher.query;
 
 import java.io.File;
 import java.io.IOException;
@@ -21,7 +21,7 @@ import java.io.IOException;
 import org.apache.log4j.Logger;
 import org.apache.lucene.store.FSDirectory;
 
-import com.flaptor.search4j.searcher.spell.SpellChecker;
+import com.flaptor.hounder.searcher.spell.SpellChecker;
 
 
 /**
