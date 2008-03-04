@@ -13,14 +13,14 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and 
 limitations under the License.
 */
-package com.flaptor.search4j.crawler.modules;
+package com.flaptor.hounder.crawler.modules;
 
 import java.util.Map;
 
 import org.apache.log4j.Logger;
 import org.dom4j.Element;
 
-import com.flaptor.search4j.crawler.pagedb.Page;
+import com.flaptor.hounder.crawler.pagedb.Page;
 import com.flaptor.util.Config;
 import com.flaptor.util.Execute;
 

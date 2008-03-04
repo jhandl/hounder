@@ -13,7 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and 
 limitations under the License.
 */
-package com.flaptor.search4j.crawler.modules;
+package com.flaptor.hounder.crawler.modules;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -29,12 +29,12 @@ import org.apache.log4j.Logger;
 import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
 
-import com.flaptor.search4j.crawler.pagedb.Page;
-import com.flaptor.search4j.crawler.pagedb.PageDB;
-import com.flaptor.search4j.indexer.IRemoteIndexer;
-import com.flaptor.search4j.indexer.Indexer;
-import com.flaptor.search4j.indexer.MockIndexer;
-import com.flaptor.search4j.indexer.RmiIndexerStub;
+import com.flaptor.hounder.crawler.pagedb.Page;
+import com.flaptor.hounder.crawler.pagedb.PageDB;
+import com.flaptor.hounder.indexer.IRemoteIndexer;
+import com.flaptor.hounder.indexer.Indexer;
+import com.flaptor.hounder.indexer.MockIndexer;
+import com.flaptor.hounder.indexer.RmiIndexerStub;
 import com.flaptor.util.Config;
 import com.flaptor.util.DomUtil;
 import com.flaptor.util.Execute;
@@ -61,7 +61,7 @@ public class IndexerModule extends AProcessorModule {
     private int logBoostDamp; // the amount of damping for the log value in the boost formula.
     private int freshnessBoostDamp; // the amount of damping for the freshnessBoost value in the boost formula.
     private QuadCurve freshnessCurve; // the curve that describes the amount of boost for any given freshness.
-    private IRemoteIndexer indexer; // the search4j indexer.
+    private IRemoteIndexer indexer; // the Hounder indexer.
     private String crawlName; // the name of the crawl, added to the index so searches can be restricted to the results of this crawler.
     private float[] scoreThreshold; // the values for the (0 to 100 step 10) percentiles in the page score histogram.
     private HashSet hostStopWords; // the parts of web host names that are not interesting, like www.

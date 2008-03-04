@@ -13,7 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and 
 limitations under the License.
 */
-package com.flaptor.search4j.crawler.modules;
+package com.flaptor.hounder.crawler.modules;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -21,7 +21,7 @@ import java.util.HashSet;
 
 import org.apache.log4j.Logger;
 
-import com.flaptor.search4j.crawler.pagedb.Link;
+import com.flaptor.hounder.crawler.pagedb.Link;
 import com.flaptor.util.Config;
 import com.flaptor.util.Execute;
 import com.flaptor.util.FileUtil;

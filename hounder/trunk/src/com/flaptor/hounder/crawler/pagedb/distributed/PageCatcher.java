@@ -13,17 +13,17 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and 
 limitations under the License.
 */
-package com.flaptor.search4j.crawler.pagedb.distributed;
+package com.flaptor.hounder.crawler.pagedb.distributed;
 
 import java.io.IOException;
 
 import org.apache.log4j.Logger;
 
-import com.flaptor.search4j.crawler.pagedb.Page;
-import com.flaptor.search4j.crawler.pagedb.PageDB;
+import com.flaptor.hounder.crawler.pagedb.Page;
+import com.flaptor.hounder.crawler.pagedb.PageDB;
 import com.flaptor.util.Execute;
-import com.flaptor.util.remote.RmiServer;
 import com.flaptor.util.remote.ConnectionException;
+import com.flaptor.util.remote.RmiServer;
 
 
 

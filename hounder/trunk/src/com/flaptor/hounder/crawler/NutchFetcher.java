@@ -13,41 +13,36 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and 
 limitations under the License.
 */
-package com.flaptor.search4j.crawler;
+package com.flaptor.hounder.crawler;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.Map;
 import java.util.HashMap;
-import java.util.Properties;
-import java.util.Enumeration;
+import java.util.Map;
 
 import org.apache.log4j.Logger;
 import org.apache.nutch.db.Page;
+import org.apache.nutch.fetcher.FetcherOutput;
 import org.apache.nutch.fs.NutchFileSystem;
 import org.apache.nutch.io.ArrayFile;
+import org.apache.nutch.net.BasicUrlNormalizer;
 import org.apache.nutch.pagedb.FetchListEntry;
-import org.apache.nutch.fetcher.FetcherOutput;
-import org.apache.nutch.parse.Outlink;
 import org.apache.nutch.parse.ParseData;
 import org.apache.nutch.parse.ParseStatus;
-import org.apache.nutch.parse.ParseText;
 import org.apache.nutch.protocol.Content;
 import org.apache.nutch.protocol.ProtocolStatus;
-import org.apache.nutch.net.BasicUrlNormalizer;
 
-import com.flaptor.search4j.crawler.modules.FetchDocument;
-import com.flaptor.search4j.crawler.pagedb.Link;
+import com.flaptor.hounder.crawler.modules.FetchDocument;
 import com.flaptor.util.Config;
 import com.flaptor.util.Execute;
 import com.flaptor.util.FileUtil;
 
 /**
  * This class implements a wrapper around the Nutch fetcher, 
- * to be used as a plugin in the Search4j Crawler.
+ * to be used as a plugin in the Hounder Crawler.
  * @author Flaptor Development Team
  */
 public class NutchFetcher implements IFetcher {
@@ -119,7 +114,7 @@ public class NutchFetcher implements IFetcher {
         ArrayFile.Writer af = new ArrayFile.Writer(lfs, file.getPath(), FetchListEntry.class);
         // Write the pages to the segment, saving the url in the anchors list for redirect following.
         // This trick is needed because nutch does not report redirect linkbacks.
-        for (com.flaptor.search4j.crawler.pagedb.Page page : fetchlist) {
+        for (com.flaptor.hounder.crawler.pagedb.Page page : fetchlist) {
             try {
                 Page pg = new Page(page.getUrl(), page.getScore());
                 FetchListEntry fle = new FetchListEntry(true, pg, new String[]{page.getUrl()});
@@ -209,7 +204,7 @@ public class NutchFetcher implements IFetcher {
     private FetchData buildFetchData(String segmentDir, FetchList fetchlist) {
         FetchData fetchdata = new FetchData();
         SegmentRecord sr = new SegmentRecord(segmentDir);
-        HashMap<String,com.flaptor.search4j.crawler.pagedb.Page> redirs = new HashMap<String,com.flaptor.search4j.crawler.pagedb.Page>();
+        HashMap<String,com.flaptor.hounder.crawler.pagedb.Page> redirs = new HashMap<String,com.flaptor.hounder.crawler.pagedb.Page>();
         while (sr.next()) {
             FetcherOutput fo = sr.getFetcherOutput();
             ParseData pd = sr.getParseData();
@@ -221,7 +216,7 @@ public class NutchFetcher implements IFetcher {
                 continue;
             }
 
-            com.flaptor.search4j.crawler.pagedb.Page page = null;
+            com.flaptor.hounder.crawler.pagedb.Page page = null;
             boolean emitPage = true;
 
             // reconstruct old page url form the anchors data array

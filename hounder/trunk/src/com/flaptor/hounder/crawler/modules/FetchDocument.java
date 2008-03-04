@@ -13,23 +13,23 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and 
 limitations under the License.
 */
-package com.flaptor.search4j.crawler.modules;
+package com.flaptor.hounder.crawler.modules;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.List;
 
 import org.apache.log4j.Logger;
 
-import com.flaptor.search4j.crawler.pagedb.Link;
-import com.flaptor.search4j.crawler.pagedb.Page;
-import com.flaptor.search4j.util.HtmlParser;
+import com.flaptor.hounder.crawler.pagedb.Link;
+import com.flaptor.hounder.crawler.pagedb.Page;
+import com.flaptor.hounder.util.HtmlParser;
 import com.flaptor.util.Config;
-import com.flaptor.util.TextSignature;
 import com.flaptor.util.Execute;
 import com.flaptor.util.Pair;
+import com.flaptor.util.TextSignature;
 
 /**
  * 
@@ -49,7 +49,7 @@ public class FetchDocument {
         Config conf = Config.getConfig("crawler.properties");
         String removedXPathElements = conf.getString("HtmlParser.removedXPath");
         String[] separatorTags = conf.getStringArray("HtmlParser.separatorTags");
-        parser = new com.flaptor.search4j.util.HtmlParser(removedXPathElements,separatorTags);
+        parser = new com.flaptor.hounder.util.HtmlParser(removedXPathElements,separatorTags);
     }
 
     private String origUrl;
