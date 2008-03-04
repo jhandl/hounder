@@ -13,7 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and 
 limitations under the License.
 */
-package com.flaptor.search4j.indexer;
+package com.flaptor.hounder.indexer;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -114,7 +114,7 @@ public abstract class AModule implements Stoppable{
      */
     public void mainHelper(String[] args) throws Exception {
         if (args.length != 1) {
-            System.err.println("Usage: com.flaptor.search4j.indexer.AModule <file>");
+            System.err.println("Usage: com.flaptor.hounder.indexer.AModule <file>");
             System.exit(1);
         }
         File ifile = new File(args[0]);

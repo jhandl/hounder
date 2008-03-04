@@ -13,11 +13,11 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and 
 limitations under the License.
 */
-package com.flaptor.search4j.indexer;
+package com.flaptor.hounder.indexer;
 
 /**
- * A module that requires access to s4j's internal structure.
- * Some modules provided with search4j require access to some of the search4j internal classes. 
+ * A module that requires access to Hounder's internal structure.
+ * Some modules provided with Hounder require access to some of the Hounder internal classes. 
  * This package protected class allows to implement such modules.
  * 
  * @author Flaptor Development Team

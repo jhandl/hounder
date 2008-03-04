@@ -13,16 +13,15 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and 
 limitations under the License.
 */
-package com.flaptor.search4j.crawler;
+package com.flaptor.hounder.crawler;
 
 import java.io.File;
 
 import org.apache.log4j.Logger;
-import org.apache.nutch.io.ArrayFile;
 import org.apache.nutch.fetcher.FetcherOutput;
-import org.apache.nutch.protocol.Content;
+import org.apache.nutch.io.ArrayFile;
 import org.apache.nutch.parse.ParseData;
-
+import org.apache.nutch.protocol.Content;
 
 import com.flaptor.util.Execute;
 

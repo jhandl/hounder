@@ -13,7 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and 
 limitations under the License.
 */
-package com.flaptor.search4j.indexer;
+package com.flaptor.hounder.indexer;
 
 import java.lang.reflect.Constructor;
 
@@ -36,7 +36,7 @@ import com.flaptor.util.Stoppable;
 
 
 /**
- * This class implements the search4j indexer. It parses the supplied String
+ * This class implements the Hounder indexer. It parses the supplied String
  * into a DOM Document and sequentially processes it through a list of modules
  * supplied in the configuration file. Requests are received asynchronously and
  * sent to a queue for sequential indexing. If journaling is turned on, a 

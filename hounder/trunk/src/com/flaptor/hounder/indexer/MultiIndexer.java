@@ -13,7 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and 
 limitations under the License.
 */
-package com.flaptor.search4j.indexer;
+package com.flaptor.hounder.indexer;
 
 import java.util.ArrayList;
 
@@ -21,7 +21,7 @@ import org.apache.log4j.Logger;
 import org.dom4j.Document;
 import org.dom4j.Node;
 
-import com.flaptor.search4j.indexer.util.Hash;
+import com.flaptor.hounder.indexer.util.Hash;
 import com.flaptor.util.Config;
 import com.flaptor.util.DocumentParser;
 import com.flaptor.util.DomUtil;
@@ -32,7 +32,7 @@ import com.flaptor.util.RunningState;
 
 
 /**
- * This class implements the search4j multi indexer. It recieves documents
+ * This class implements the Hounder multi indexer. It recieves documents
  * to index and relays them to one of a number of indexers according to a 
  * pluggable function of the received document, for example the hash of the
  * url. It is important that this hash function splits the incomming stream

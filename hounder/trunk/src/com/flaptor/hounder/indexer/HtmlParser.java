@@ -13,13 +13,13 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and 
 limitations under the License.
 */
-package com.flaptor.search4j.indexer;
+package com.flaptor.hounder.indexer;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
@@ -45,7 +45,7 @@ public class HtmlParser extends AModule {
     private final Set<Pair<String,String>> tags;
     private final boolean STORED;
     private final boolean INDEXED;
-    private com.flaptor.search4j.util.HtmlParser parser;
+    private com.flaptor.hounder.util.HtmlParser parser;
     // List of extra fields to extract. useful to extract META tags, and such.
     private final List<String> extraFields;
 
@@ -82,7 +82,7 @@ public class HtmlParser extends AModule {
             extraFields.add(pair.first());
         }
         
-        parser = new com.flaptor.search4j.util.HtmlParser(removedXPathElements, separatorTags,mapping);
+        parser = new com.flaptor.hounder.util.HtmlParser(removedXPathElements, separatorTags,mapping);
 
         STORED = conf.getBoolean("HtmlParser.stored");
         INDEXED = conf.getBoolean("HtmlParser.indexed");
@@ -131,7 +131,7 @@ public class HtmlParser extends AModule {
             return;
         }
 
-        com.flaptor.search4j.util.HtmlParser.Output out = parser.parse("",bodyElement.getText());
+        com.flaptor.hounder.util.HtmlParser.Output out = parser.parse("",bodyElement.getText());
         
 
         for (String field: extraFields) {

@@ -1,9 +1,9 @@
-package com.flaptor.search4j.indexer;
+package com.flaptor.hounder.indexer;
 
-import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.Token;
+import org.apache.lucene.analysis.TokenStream;
 
-import com.flaptor.search4j.searcher.payload.LongPayload;
+import com.flaptor.hounder.searcher.payload.LongPayload;
 
 
 

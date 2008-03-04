@@ -13,19 +13,18 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and 
 limitations under the License.
 */
-package com.flaptor.search4j.crawler.pagedb;
+package com.flaptor.hounder.crawler.pagedb;
 
-import java.io.Serializable;
+import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.io.IOException;
+import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.security.MessageDigest;
-import java.util.HashSet;
 import java.util.Arrays;
+import java.util.HashSet;
 
 import com.flaptor.util.Config;
-import com.flaptor.util.Execute;
 import com.flaptor.util.TextSignature;
 import com.flaptor.util.TranscodeUtil;
 

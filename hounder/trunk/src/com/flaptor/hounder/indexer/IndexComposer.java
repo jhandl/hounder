@@ -13,7 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and 
 limitations under the License.
 */
-package com.flaptor.search4j.indexer;
+package com.flaptor.hounder.indexer;
 
 import java.io.File;
 import java.util.HashMap;
@@ -23,10 +23,10 @@ import java.util.Set;
 
 import org.apache.log4j.Logger;
 
-import com.flaptor.search4j.Index;
-import com.flaptor.search4j.IndexDescriptor;
-import com.flaptor.search4j.MultiIndex;
-import com.flaptor.search4j.searcher.LocalIndexUpdater;
+import com.flaptor.hounder.Index;
+import com.flaptor.hounder.IndexDescriptor;
+import com.flaptor.hounder.MultiIndex;
+import com.flaptor.hounder.searcher.LocalIndexUpdater;
 import com.flaptor.util.Config;
 import com.flaptor.util.Execute;
 
