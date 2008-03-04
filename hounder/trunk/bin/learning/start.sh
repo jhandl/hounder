@@ -9,17 +9,17 @@ LOUT=${LOG_DIR}/learning-web.out
 CONF=./conf
 NUTCH_PLUGIN_BASE=..
 LIBS=../lib
-S4J=$LIBS/search4j-trunk.jar
-DEPS=$LIBS/search4j-trunk-deps.jar
+HOUNDER=$LIBS/hounder-trunk.jar
+DEPS=$LIBS/hounder-trunk-deps.jar
 
-CP=${CONF}:.:${NUTCH_PLUGIN_BASE}:${S4J}:${DEPS}:${MYSQL}
-MAIN=com.flaptor.search4j.classifier.HTTPLearningServer
+CP=${CONF}:.:${NUTCH_PLUGIN_BASE}:${HOUNDER}:${DEPS}:${MYSQL}
+MAIN=com.flaptor.hounder.classifier.HTTPLearningServer
 
 if [ ! -d ${LOG_DIR} ]; then
     mkdir -p ${LOG_DIR}
 fi
 
-GET_PORT="java -cp ${CONF_DIR}:${S4J}:${DEPS} com.flaptor.util.PortUtil"
+GET_PORT="java -cp ${CONF_DIR}:${HOUNDER}:${DEPS} com.flaptor.util.PortUtil"
 PORT=`${GET_PORT} getPort learning.web`
 
 echo Starting the learning web...

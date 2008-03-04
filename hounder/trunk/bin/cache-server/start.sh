@@ -15,11 +15,11 @@ LOUT=${LOG_DIR}/cache-server.out
 
 CONF=./conf
 LIBS=../lib
-S4J=$LIBS/search4j-trunk.jar
-DEPS=$LIBS/search4j-trunk-deps.jar
+S4J=$LIBS/hounder-trunk.jar
+DEPS=$LIBS/hounder-trunk-deps.jar
 
 CP=${CONF}:.:${S4J}:${DEPS}
-MAIN=com.flaptor.search4j.cache.HttpCacheServer 
+MAIN=com.flaptor.hounder.cache.HttpCacheServer 
 
 
 if [ ! -d ${LOG_DIR} ]; then

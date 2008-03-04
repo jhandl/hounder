@@ -11,11 +11,11 @@
 CONF=./conf
 NUTCH_PLUGIN_BASE=..
 LIBS=../lib
-S4J=$LIBS/search4j-trunk.jar
-DEPS=$LIBS/search4j-trunk-deps.jar
+HOUNDER=$LIBS/hounder-trunk.jar
+DEPS=$LIBS/hounder-trunk-deps.jar
 
-CP=${CONF}:.:${S4J}:${DEPS}
-MAIN=com.flaptor.search4j.classifier.UrlsBean
+CP=${CONF}:.:${HOUNDER}:${DEPS}
+MAIN=com.flaptor.hounder.classifier.UrlsBean
 
 
 CATEGORY=$1

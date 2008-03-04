@@ -13,7 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and 
 limitations under the License.
 */
-package com.flaptor.search4j.util;
+package com.flaptor.hounder.util;
 
 
 import java.io.BufferedReader;
@@ -24,17 +24,17 @@ import java.util.Random;
 import java.util.Vector;
 import java.util.regex.Pattern;
 
-import com.flaptor.search4j.indexer.RmiIndexerStub;
+import com.flaptor.hounder.indexer.RmiIndexerStub;
 
 /**
  * @author Flaptor Development Team
  */
-public class S4JDocumentGenerator {
+public class HounderDocumentGenerator {
 
     private Vector<String> words = new Vector<String>();
     private Random random = new Random();
 
-    public S4JDocumentGenerator(String dictionaryPath) {
+    public HounderDocumentGenerator(String dictionaryPath) {
         try {
             BufferedReader in = new BufferedReader(new FileReader(dictionaryPath));
             String str;
@@ -75,7 +75,7 @@ public class S4JDocumentGenerator {
     }
 
     public static void main(String args[]) {
-        S4JDocumentGenerator dg = new S4JDocumentGenerator(args[0]);
+        HounderDocumentGenerator dg = new HounderDocumentGenerator(args[0]);
         try {
             RmiIndexerStub indexerStub = new RmiIndexerStub(9003, "localhost");
 
@@ -84,7 +84,7 @@ public class S4JDocumentGenerator {
                 //System.out.println(dg.getDocument() + "\n\n");
                 String doc = dg.getDocument();
                 int result = indexerStub.index(doc);
-                while (result == com.flaptor.search4j.indexer.Indexer.RETRY_QUEUE_FULL) {
+                while (result == com.flaptor.hounder.indexer.Indexer.RETRY_QUEUE_FULL) {
                     System.out.println("queue full " + new Date());
                     try {
                         Thread.sleep(1000);

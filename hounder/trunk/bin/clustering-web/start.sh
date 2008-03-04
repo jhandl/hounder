@@ -13,10 +13,10 @@ LOUT=${LOG_DIR}/clustering-web.out
 CONF=./conf
 NUTCH_PLUGIN_BASE=..
 LIBS=../lib
-S4J=$LIBS/search4j-trunk.jar
-DEPS=$LIBS/search4j-trunk-deps.jar
+HOUNDER=$LIBS/hounder-trunk.jar
+DEPS=$LIBS/hounder-trunk-deps.jar
 
-CP=${CONF}:.:${S4J}:${DEPS}
+CP=${CONF}:.:${HOUNDER}:${DEPS}
 MAIN=com.flaptor.clustering.HTTPClusteringServer
 
 if [ ! -d ${LOG_DIR} ]; then

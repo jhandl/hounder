@@ -1,5 +1,5 @@
 LIB_DIR=../lib
 CONF_DIR=conf
-PROJECT_JAR=search4j-trunk.jar
+PROJECT_JAR=hounder-trunk.jar
 
-java -cp ${CONF_DIR}:${LIB_DIR}/${PROJECT_JAR} com.flaptor.search4j.installer.CrawlerConfigurationWizard .
+java -cp ${CONF_DIR}:${LIB_DIR}/${PROJECT_JAR} com.flaptor.hounder.installer.CrawlerConfigurationWizard .

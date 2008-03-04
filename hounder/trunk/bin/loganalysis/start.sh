@@ -13,15 +13,15 @@ LOUT=${LOG_DIR}/loganalysis.out
 
 CONF=./conf
 LIBS=../lib
-S4J=$LIBS/search4j-trunk.jar
-DEPS=$LIBS/search4j-trunk-deps.jar
+HOUNDER=$LIBS/hounder-trunk.jar
+DEPS=$LIBS/hounder-trunk-deps.jar
 
 if [ ! -d ${LOG_DIR} ]; then
     mkdir -p ${LOG_DIR}
 fi
 
-CP=${CONF}:.:${S4J}:${DEPS}
-MAIN=com.flaptor.search4j.loganalysis.HTTPLogAnalysisServer
+CP=${CONF}:.:${HOUNDER}:${DEPS}
+MAIN=com.flaptor.hounder.loganalysis.HTTPLogAnalysisServer
 
 echo Starting the log analysis web...
 

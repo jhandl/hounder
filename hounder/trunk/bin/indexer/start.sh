@@ -15,18 +15,18 @@ LOUT=${LOG_DIR}/indexer.out
 
 CONF=./conf
 LIBS=../lib
-S4J=$LIBS/search4j-trunk.jar
-DEPS=$LIBS/search4j-trunk-deps.jar
+HOUNDER=$LIBS/hounder-trunk.jar
+DEPS=$LIBS/hounder-trunk-deps.jar
 
-CP=${CONF}:.:${S4J}:${DEPS}
-MAIN=com.flaptor.search4j.indexer.MultipleRpcIndexer
+CP=${CONF}:.:${HOUNDER}:${DEPS}
+MAIN=com.flaptor.hounder.indexer.MultipleRpcIndexer
 
 if [ ! -d ${LOG_DIR} ]; then
     mkdir -p ${LOG_DIR}
 fi
 
 GET_CONF="java -cp ${CP} com.flaptor.util.Config"
-# Read search4j.properties. If imported files appear, will be ignored. Use com.flaptor.util.Config to read files with imported properties instead.
+# Read common.properties. If imported files appear, will be ignored. Use com.flaptor.util.Config to read files with imported properties instead.
 HOST=`${GET_CONF} common.properties rmiServer.host`
 
 echo Starting the indexer...

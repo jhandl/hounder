@@ -14,21 +14,20 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package com.flaptor.search4j;
+package com.flaptor.hounder;
 
 import org.apache.log4j.Logger;
 
-import com.flaptor.search4j.indexer.IIndexer;
-import com.flaptor.search4j.indexer.Indexer;
-import com.flaptor.search4j.searcher.CompositeSearcher;
-import com.flaptor.search4j.searcher.ISearcher;
+import com.flaptor.hounder.indexer.Indexer;
+import com.flaptor.hounder.searcher.CompositeSearcher;
 import com.flaptor.util.Execute;
 import com.flaptor.util.remote.XmlrpcServer;
 
 /**
  * @author Flaptor Development Team
+ * @deprecated start searcher, indexer and crawler separately
  */
-public class Search4jServer {
+public class HounderServer {
 
     private static final Logger logger = Logger.getLogger(Execute.whoAmI());
 
@@ -91,7 +90,7 @@ public class Search4jServer {
     }
 
     private static void printUsage() {
-        logger.error("Usage: Search4jServer [ <indexer port> <searcher port> ]");
+        logger.error("Usage: HounderServer [ <indexer port> <searcher port> ]");
     }
 
 }
