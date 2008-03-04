@@ -13,20 +13,20 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and 
 limitations under the License.
 */
-package com.flaptor.search4j.searcher.query;
+package com.flaptor.hounder.searcher.query;
 
 import java.io.File;
 import java.util.Vector;
 
 import org.apache.lucene.document.Document;
 
-import com.flaptor.search4j.searcher.GroupedSearchResults;
-import com.flaptor.search4j.searcher.ISearcher;
-import com.flaptor.search4j.searcher.SuggestQuerySearcher;
-import com.flaptor.search4j.searcher.filter.AFilter;
-import com.flaptor.search4j.searcher.group.AGroup;
-import com.flaptor.search4j.searcher.group.NoGroup;
-import com.flaptor.search4j.searcher.sort.ASort;
+import com.flaptor.hounder.searcher.GroupedSearchResults;
+import com.flaptor.hounder.searcher.ISearcher;
+import com.flaptor.hounder.searcher.SuggestQuerySearcher;
+import com.flaptor.hounder.searcher.filter.AFilter;
+import com.flaptor.hounder.searcher.group.AGroup;
+import com.flaptor.hounder.searcher.group.NoGroup;
+import com.flaptor.hounder.searcher.sort.ASort;
 import com.flaptor.util.Config;
 import com.flaptor.util.FileUtil;
 import com.flaptor.util.Pair;
@@ -89,7 +89,7 @@ public class SynonymQuerySuggestorTest extends TestCase {
     
 
         // every query, that does not contain "bar", will return empty
-        public GroupedSearchResults search(AQuery query, int firstResult, int groupCount, AGroup groupBy, int groupSize,AFilter filter, ASort sort) throws com.flaptor.search4j.searcher.SearcherException {
+        public GroupedSearchResults search(AQuery query, int firstResult, int groupCount, AGroup groupBy, int groupSize,AFilter filter, ASort sort) throws com.flaptor.hounder.searcher.SearcherException {
        
             if (!query.toString().contains("bar")) {
                 return new GroupedSearchResults();

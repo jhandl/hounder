@@ -1,4 +1,4 @@
-package com.flaptor.search4j.searcher.payload;
+package com.flaptor.hounder.searcher.payload;
 
 import org.apache.lucene.index.Payload;
 

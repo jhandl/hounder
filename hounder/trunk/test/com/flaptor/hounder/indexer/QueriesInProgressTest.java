@@ -13,16 +13,16 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and 
 limitations under the License.
 */
-package com.flaptor.search4j.indexer;
+package com.flaptor.hounder.indexer;
 
-import com.flaptor.search4j.searcher.GroupedSearchResults;
-import com.flaptor.search4j.searcher.ISearcher;
-import com.flaptor.search4j.searcher.QueriesInProgressSearcher;
-import com.flaptor.search4j.searcher.SearcherException;
-import com.flaptor.search4j.searcher.filter.AFilter;
-import com.flaptor.search4j.searcher.group.AGroup;
-import com.flaptor.search4j.searcher.query.AQuery;
-import com.flaptor.search4j.searcher.sort.ASort;
+import com.flaptor.hounder.searcher.GroupedSearchResults;
+import com.flaptor.hounder.searcher.ISearcher;
+import com.flaptor.hounder.searcher.QueriesInProgressSearcher;
+import com.flaptor.hounder.searcher.SearcherException;
+import com.flaptor.hounder.searcher.filter.AFilter;
+import com.flaptor.hounder.searcher.group.AGroup;
+import com.flaptor.hounder.searcher.query.AQuery;
+import com.flaptor.hounder.searcher.sort.ASort;
 import com.flaptor.util.TestCase;
 import com.flaptor.util.TestInfo;
 /**

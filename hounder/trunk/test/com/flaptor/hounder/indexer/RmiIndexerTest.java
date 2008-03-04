@@ -13,16 +13,14 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and 
 limitations under the License.
 */
-package com.flaptor.search4j.indexer;
+package com.flaptor.hounder.indexer;
 
 import java.rmi.registry.LocateRegistry;
-
 
 import com.flaptor.util.Config;
 import com.flaptor.util.PortUtil;
 import com.flaptor.util.TestCase;
 import com.flaptor.util.TestInfo;
-import com.flaptor.util.TestUtils;
 import com.flaptor.util.remote.RmiServer;
 
 /**
@@ -40,7 +38,7 @@ public class RmiIndexerTest extends TestCase {
         commonConfig.set("baseDir", tmpDir);
 
         Config config = Config.getConfig("indexer.properties");
-        config.set("Indexer.modules", "com.flaptor.search4j.indexer.Writer");
+        config.set("Indexer.modules", "com.flaptor.hounder.indexer.Writer");
         config.set("IndexManager.updateInterval", "1000");
         config.set("Indexer.maxQueueSize", "100");
         config.set("IndexLibrary.remoteIndexUpdaters", "");

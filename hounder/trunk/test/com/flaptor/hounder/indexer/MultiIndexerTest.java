@@ -13,7 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and 
 limitations under the License.
 */
-package com.flaptor.search4j.indexer;
+package com.flaptor.hounder.indexer;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -73,7 +73,7 @@ public class MultiIndexerTest extends TestCase {
         config.set("IndexLibrary.remoteIndexUpdaters","");
         config.set("IndexLibrary.rsyncAccessString","");
         config.set("IndexManager.indexDescriptor",i+"of"+numIndexers+"@defaultCluster");
-        config.set("Indexer.modules","com.flaptor.search4j.indexer.CommandsModule,com.flaptor.search4j.indexer.LoggerModule,com.flaptor.search4j.indexer.Writer");
+        config.set("Indexer.modules","com.flaptor.hounder.indexer.CommandsModule,com.flaptor.hounder.indexer.LoggerModule,com.flaptor.hounder.indexer.Writer");
        
         IIndexer baseIndexer = new Indexer();
         IIndexer indexer = new MultipleRpcIndexer(baseIndexer,true/*rmi*/,false/*xmlrpc*/);

@@ -13,7 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and 
 limitations under the License.
 */
-package com.flaptor.search4j.searcher;
+package com.flaptor.hounder.searcher;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -27,9 +27,9 @@ import org.dom4j.Element;
 import org.junit.After;
 import org.junit.Before;
 
-import com.flaptor.search4j.indexer.Indexer;
-import com.flaptor.search4j.searcher.group.NoGroup;
-import com.flaptor.search4j.searcher.query.LazyParsedQuery;
+import com.flaptor.hounder.indexer.Indexer;
+import com.flaptor.hounder.searcher.group.NoGroup;
+import com.flaptor.hounder.searcher.query.LazyParsedQuery;
 import com.flaptor.util.Config;
 import com.flaptor.util.Execute;
 import com.flaptor.util.FileUtil;
@@ -100,14 +100,14 @@ public class SnippetSearcherTest extends TestCase{
         // indexer:
         indexerConfig.set("IndexManager.updateInterval", "2000");
         indexerConfig.set("IndexLibrary.remoteIndexUpdaters","127.0.0.1:"+String.valueOf(startPort));
-        indexerConfig.set("Indexer.modules", "com.flaptor.search4j.indexer.Writer");
+        indexerConfig.set("Indexer.modules", "com.flaptor.hounder.indexer.Writer");
         indexerConfig.set("Indexer.fields", "text");
         indexerConfig.set("docIdName", "docId");
         indexerConfig.set("Indexer.maxQueueSize", "100");
         indexerConfig.set("IndexLibrary.rsyncAccessString","");
         indexerConfig.set("Writer.fields", "");
         indexerConfig.set("clustering.enable", "false");
-        indexerConfig.set("Indexer.modules","com.flaptor.search4j.indexer.LoggerModule,com.flaptor.search4j.indexer.HtmlParser,com.flaptor.search4j.indexer.Writer");
+        indexerConfig.set("Indexer.modules","com.flaptor.hounder.indexer.LoggerModule,com.flaptor.hounder.indexer.HtmlParser,com.flaptor.hounder.indexer.Writer");
         // searcher:
         searcherConfig.set("QueryParser.searchFields", "text");
         searcherConfig.set("QueryParser.searchFieldWeights", "1.0f");
@@ -287,7 +287,7 @@ public class SnippetSearcherTest extends TestCase{
     public void testMercuryLifeDocument() throws SearcherException {
     
         // Index problematic document
-        File docFile = new File("test/com/flaptor/search4j/searcher/mercurylife.html");
+        File docFile = new File("test/com/flaptor/hounder/searcher/mercurylife.html");
         
         String buf = "";
         try {

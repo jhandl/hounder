@@ -13,20 +13,20 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and 
 limitations under the License.
 */
-package com.flaptor.search4j.searcher;
+package com.flaptor.hounder.searcher;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import org.antlr.stringtemplate.StringTemplate;
 
-import com.flaptor.search4j.cluster.CompositeMultiSearcher;
-import com.flaptor.search4j.cluster.MultiSearcher;
-import com.flaptor.search4j.indexer.Indexer;
-import com.flaptor.search4j.searcher.group.NoGroup;
-import com.flaptor.search4j.searcher.group.StoredFieldGroup;
-import com.flaptor.search4j.searcher.query.LazyParsedQuery;
-import com.flaptor.search4j.searcher.query.MatchAllQuery;
+import com.flaptor.hounder.cluster.CompositeMultiSearcher;
+import com.flaptor.hounder.cluster.MultiSearcher;
+import com.flaptor.hounder.indexer.Indexer;
+import com.flaptor.hounder.searcher.group.NoGroup;
+import com.flaptor.hounder.searcher.group.StoredFieldGroup;
+import com.flaptor.hounder.searcher.query.LazyParsedQuery;
+import com.flaptor.hounder.searcher.query.MatchAllQuery;
 import com.flaptor.util.Config;
 import com.flaptor.util.Execute;
 import com.flaptor.util.FileUtil;
@@ -64,7 +64,7 @@ public class MultiSearcherTest extends TestCase {
         // indexer:
         indexerConfig.set("IndexManager.updateInterval", "1000");
         indexerConfig.set("IndexLibrary.remoteIndexUpdaters","127.0.0.1:"+String.valueOf(basePort));
-        indexerConfig.set("Indexer.modules", "com.flaptor.search4j.indexer.Writer");
+        indexerConfig.set("Indexer.modules", "com.flaptor.hounder.indexer.Writer");
         indexerConfig.set("Indexer.fields", "content");
         indexerConfig.set("docIdName", "docId");
         indexerConfig.set("Indexer.maxQueueSize", "100");

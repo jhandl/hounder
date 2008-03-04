@@ -13,21 +13,21 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and 
 limitations under the License.
 */
-package com.flaptor.search4j.searcher.group;
+package com.flaptor.hounder.searcher.group;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
 
-import com.flaptor.search4j.searcher.GroupedSearchResults;
-import com.flaptor.search4j.searcher.sort.ASort;
-import com.flaptor.search4j.searcher.sort.FieldSort;
+import org.apache.lucene.document.Document;
+import org.apache.lucene.document.Field;
+
+import com.flaptor.hounder.searcher.GroupedSearchResults;
+import com.flaptor.hounder.searcher.sort.ASort;
+import com.flaptor.hounder.searcher.sort.FieldSort;
 import com.flaptor.util.Pair;
 import com.flaptor.util.TestCase;
 import com.flaptor.util.TestInfo;
-
-import org.apache.lucene.document.Document;
-import org.apache.lucene.document.Field;
 
 /**
  * @author Flaptor Development Team
@@ -47,7 +47,7 @@ public class GroupedSearchResultsDocumentProviderTest extends TestCase {
         list.add(gsr1);
         list.add(gsr2);
 
-        GroupedSearchResultsDocumentProvider provider = new GroupedSearchResultsDocumentProvider(list,new com.flaptor.search4j.searcher.sort.ScoreSort());
+        GroupedSearchResultsDocumentProvider provider = new GroupedSearchResultsDocumentProvider(list,new com.flaptor.hounder.searcher.sort.ScoreSort());
 
         assertEquals(provider.length(),0);
         assertEquals(provider.totalHits(),0);

@@ -19,7 +19,7 @@
     </target>
     
     <!--******************************************************************************************************-->
-    <target name="jar" depends="compile" description="builds the search4j jar file" >
+    <target name="jar" depends="compile" description="builds the jar file" >
 		<jar jarfile="taglets.jar" >
 			<fileset dir="taglets">
 				<include name="**/*.class"/>

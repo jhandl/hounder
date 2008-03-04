@@ -13,13 +13,12 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and 
 limitations under the License.
 */
-package com.flaptor.search4j.indexer;
+package com.flaptor.hounder.indexer;
 
 import com.flaptor.util.Config;
 import com.flaptor.util.Execute;
 import com.flaptor.util.TestCase;
 import com.flaptor.util.TestInfo;
-import com.flaptor.util.remote.RmiServer;
 
 /**
  * Tests the rmi client-side (stub).
@@ -40,7 +39,7 @@ public class RmiIndexerStubTest extends TestCase {
         Config config = Config.getConfig("indexer.properties");
         config.set("IndexManager.updateInterval", "10000");
         config.set("Indexer.maxQueueSize", "100");
-        config.set("Indexer.modules", "com.flaptor.search4j.indexer.Writer");
+        config.set("Indexer.modules", "com.flaptor.hounder.indexer.Writer");
         config.set("IndexLibrary.remoteIndexUpdaters", "");
         config.set("IndexLibrary.rsyncAccessString", "");
         config.set("clustering.enable","no"); //We are not testing clusterfest here.
