@@ -13,12 +13,10 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and 
 limitations under the License.
 */
-package com.flaptor.search4j.cache;
+package com.flaptor.hounder.cache;
 
 import com.flaptor.clustering.monitoring.nodes.MonitoreableImplementation;
-import com.flaptor.search4j.cache.HttpCacheServer.CacheHandler;
-import com.flaptor.util.Statistics;
-import com.flaptor.util.ThreadUtil;
+import com.flaptor.hounder.cache.HttpCacheServer.CacheHandler;
 
 /**
  * implementation of MonitoredNode for monitoring a searcher

@@ -13,7 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and 
 limitations under the License.
 */
-package com.flaptor.search4j.cache;
+package com.flaptor.hounder.cache;
 
 import java.io.IOException;
 import java.net.URLDecoder;
@@ -34,13 +34,12 @@ import com.flaptor.clustering.ClusterableListener;
 import com.flaptor.clustering.controlling.controller.Controller;
 import com.flaptor.clustering.controlling.nodes.ControllableImplementation;
 import com.flaptor.clustering.monitoring.monitor.Monitor;
-import com.flaptor.search4j.crawler.modules.DocumentCacheItem;
+import com.flaptor.hounder.crawler.modules.DocumentCacheItem;
 import com.flaptor.util.Config;
 import com.flaptor.util.Execute;
 import com.flaptor.util.Pair;
 import com.flaptor.util.PortUtil;
 import com.flaptor.util.cache.MultiCache;
-import com.flaptor.util.cache.RmiCacheStub;
 
 /**
  * HTTP server for the content system, that uses a multiCache 

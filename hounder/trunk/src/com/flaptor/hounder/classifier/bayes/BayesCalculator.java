@@ -13,7 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and 
 limitations under the License.
 */
-package com.flaptor.search4j.classifier.bayes;
+package com.flaptor.hounder.classifier.bayes;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -26,8 +26,8 @@ import java.util.Set;
 
 import org.apache.log4j.Logger;
 
-import com.flaptor.search4j.classifier.util.DocumentParser;
-import com.flaptor.search4j.classifier.util.TokenCounterPersistence;
+import com.flaptor.hounder.classifier.util.DocumentParser;
+import com.flaptor.hounder.classifier.util.TokenCounterPersistence;
 import com.flaptor.util.Config;
 import com.flaptor.util.Execute;
 import com.flaptor.util.FileUtil;
@@ -329,7 +329,7 @@ public class BayesCalculator {
         		" and add the MAX_TUPLE_SIZE value (=1) to avoid getting a " +
         		"warning with old files.");
         System.err.println("You can use the PersistenceManager " +
-        		"(com.flaptor.search4j.classifier.bayes.PersistenceManager)" +
+        		"(com.flaptor.hounder.classifier.bayes.PersistenceManager)" +
         		" to print the contents of a .probabilities file");
         System.exit(-1);
     }

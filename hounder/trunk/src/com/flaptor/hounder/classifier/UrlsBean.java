@@ -13,7 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and 
 limitations under the License.
 */
-package com.flaptor.search4j.classifier;
+package com.flaptor.hounder.classifier;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -23,7 +23,7 @@ import java.util.Set;
 
 import org.apache.log4j.Logger;
 
-import com.flaptor.search4j.crawler.CacheBean;
+import com.flaptor.hounder.crawler.CacheBean;
 import com.flaptor.util.Execute;
 import com.flaptor.util.FileUtil;
 
