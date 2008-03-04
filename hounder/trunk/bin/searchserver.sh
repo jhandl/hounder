@@ -16,7 +16,7 @@
 #fi
 
 #Now that we have the syncer running we may run the main process.
-$JAVA_HOME/bin/java -Xmx256m -cp lib/search4j.jar com.flaptor.util.XmlrpcServer com.flaptor.search4j.searcher.XmlSearcher 9013
+$JAVA_HOME/bin/java -Xmx256m -cp lib/hounder-trunk.jar com.flaptor.util.XmlrpcServer com.flaptor.hounder.searcher.XmlSearcher 9013
 
 #The main process has ended. There is no need for the syncer process to keep running.
 echo "Killing the syncer process..."

@@ -9,7 +9,7 @@ crawler.mode.cycles=2
 workers.per.cpu = 0.8
 
 # The fetcher plugin. By default it is the Nutch Fetcher, but any fetcher that implements the IFetcher interface will work.
-fetcher.plugin = com.flaptor.search4j.crawler.NutchFetcher
+fetcher.plugin = com.flaptor.hounder.crawler.NutchFetcher
 
 # The directory of the pagedb.
 pagedb.dir = pagedb
@@ -60,7 +60,7 @@ record.parents = false
 
 # if true, the underlying pagedb will be distributed, and the crawler.properties file must define the pagedb.node.list property, which is a comma-separated list of the IP address of each node, including the local node. This list has to be exactly the same in each node, and in the same order.
 pagedb.is.distributed = false
-pagedb.node.mapper = com.flaptor.search4j.crawler.pagedb.distributed.UrlHashMapper
+pagedb.node.mapper = com.flaptor.hounder.crawler.pagedb.distributed.UrlHashMapper
 
 clustering.enable=yes
 clustering.node.type=crawler

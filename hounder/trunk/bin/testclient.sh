@@ -1,2 +1,2 @@
 #!/bin/bash
-java -cp lib/search4j.jar com.flaptor.search4j.test.TestClient localhost:9003 $*
+java -cp lib/hounder-trunk.jar com.flaptor.hounder.test.TestClient localhost:9003 $*

@@ -1,8 +1,8 @@
 
-# this is a comma-separated list of search4j fields that should be shown in the search results.
+# this is a comma-separated list of hounder fields that should be shown in the search results.
 # Note that the 3 opensearch standard field (title, link, description) are allways shown
 #Dont forget to add also the snippet of that field ('snippet_<field>') if you need so
-opensearch.show.search4j.fields=
+opensearch.show.hounder.fields=
 
 # OpenSearch standard, forces to have 3 fields: title, link, description
 # The name in the index of those fields might be different so we have to

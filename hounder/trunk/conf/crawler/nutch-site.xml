@@ -57,17 +57,17 @@
 
   <property>
     <name>http.agent.name</name>
-    <value>S4JCrawl</value>
+    <value>HounderCrawl</value>
   </property>
 
   <property>
     <name>http.robots.agents</name>
-    <value>S4JCrawl,*</value>
+    <value>HounderCrawl,*</value>
   </property>
 
   <property>
     <name>http.agent.description</name>
-    <value>S4J Search Bot</value>
+    <value>Hounder Search Bot</value>
   </property>
 
   <property>

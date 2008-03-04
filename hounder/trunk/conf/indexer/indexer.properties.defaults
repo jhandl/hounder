@@ -12,7 +12,7 @@ docIdName=documentId
 
 
 #The size of the queues in-between modules. This parameter may be important when the multithreaded version of the ModulePipe is implemented.
-# Never make this value smaller than the maximum number of document any module returns, as it may cause deadlock. (In search4j, no module return more than 1 document)
+# Never make this value smaller than the maximum number of document any module returns, as it may cause deadlock. (In Hounder, no module return more than 1 document)
 ModulePipe.inter_module_queue_size=20
 
 #There is a queue before the first module where all the request can be stored while waiting to be processed. When this queue get full,
@@ -31,7 +31,7 @@ IndexManager.updateInterval=300000
 # the end of the pipe, and needs not to be specified. The first module in the list will be the first to process the input data.
 # While specifying the modules, use their full name. The "LoggerModule is useful while debugging, and may be present in several
 # places of the pipe.
-Indexer.modules=com.flaptor.search4j.indexer.LoggerModule,com.flaptor.search4j.indexer.Writer
+Indexer.modules=com.flaptor.hounder.indexer.LoggerModule,com.flaptor.hounder.indexer.Writer
 
 
 clustering.enable=yes
@@ -54,7 +54,7 @@ HtmlParser.removedXPath=//SCRIPT|//SELECT|//STYLE
 HtmlParser.separatorTags=TD,TR,BR,P,LI,UL,OL,DIV,A,H1,H2,H3,H4,H5
 
 
-### This config variable is only read by com.flaptor.search4j.indexer.HtmlParser, and so
+### This config variable is only read by com.flaptor.hounder.indexer.HtmlParser, and so
 ### it is used when the HtmlParser is constructed as an Indexer Module.
 #
 # Pair List of fields and its xpath location. It is used to create a field on the output

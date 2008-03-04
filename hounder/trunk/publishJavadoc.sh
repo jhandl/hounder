@@ -1,2 +1,2 @@
 ant clean doc
-scp -r docs/javadoc root@bonoki.com:/var/www/lighttpd/opensource.flaptor.com/htdocs/search4j
+scp -r docs/javadoc root@bonoki.com:/var/www/lighttpd/opensource.flaptor.com/htdocs/hounder

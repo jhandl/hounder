@@ -13,8 +13,8 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and 
 limitations under the License.
 -->
-<project name="search4j" default="jar" basedir=".">
-	<property name="project" value="search4j"/>
+<project name="hounder" default="jar" basedir=".">
+	<property name="project" value="hounder"/>
 	<property name="version" value="trunk"/>
 
     <property name="src.dir" value="${basedir}/src"/>
@@ -51,7 +51,7 @@ limitations under the License.
         </fileset>
     </path>
 
-    <path id="classpath.jars.s4j">
+    <path id="classpath.jars.hounder">
         <fileset dir="${lib.dir}">
             <include name="flaptor-util-*.jar" />
             <include name="clusterfest-*.jar" />
@@ -125,7 +125,7 @@ limitations under the License.
 	  <compilerarg value="5" />
 
 		  <classpath>
-		    <path refid="classpath.jars.s4j" />
+		    <path refid="classpath.jars.hounder" />
 			<path refid="classpath.jars.tools" />
 			<path refid="classpath.nutch.plugins" />
 		  </classpath>
@@ -188,20 +188,20 @@ limitations under the License.
 
 
     <!--******************************************************************************************************-->
-    <target name="jar-for-servlets" depends="compile" description="builds a search4j jar containing the bare minimum to run a searcher on tomcat." >
+    <target name="jar-for-servlets" depends="compile" description="builds a hounder jar containing the bare minimum to run a searcher on tomcat." >
 		<jar jarfile="${output.dir}/${project}-forTomcat-${version}.jar" >
 			<manifest>
 				<attribute name="Built-By" value="${user.name}"/>
 				<attribute name="Version" value="${version}"/>
 			</manifest>
 			<fileset dir="${build.dir}/" >
-				<include name="com/flaptor/search4j/**/*.class" />
+				<include name="com/flaptor/hounder/**/*.class" />
 				<include name="com/flaptor/util/**/*.class" />
-				<exclude name="com/flaptor/search4j/crawler/**/*" />
-				<exclude name="com/flaptor/search4j/indexer/**/*" />
+				<exclude name="com/flaptor/hounder/crawler/**/*" />
+				<exclude name="com/flaptor/hounder/indexer/**/*" />
 			</fileset>
 			<fileset dir="${build.dir}/" >
-                <include name="com/flaptor/search4j/crawler/bean/**/*.class"/>
+                <include name="com/flaptor/hounder/crawler/bean/**/*.class"/>
 			</fileset>
 			<fileset dir="${conf.dir}" >
 				<include name="common.properties" />
@@ -219,14 +219,14 @@ limitations under the License.
 	<!--******************************************************************************************************-->
 
     <target name="installer-jar" depends="compile" description="builds a jar for the installer." >
-		<jar jarfile="${output.dir}/search4j-installer.jar" >
+		<jar jarfile="${output.dir}/hounder-installer.jar" >
 			<manifest>
 				<attribute name="Built-By" value="${user.name}"/>
 				<attribute name="Version" value="${version}"/>
 			</manifest>
 			<fileset dir="${build.dir}/" >
 				<include name="com/flaptor/util/**/*.class" />
-				<include name="com/flaptor/search4j/installer/**/*.class" />
+				<include name="com/flaptor/hounder/installer/**/*.class" />
 			</fileset>
 			<fileset dir="${conf.dir}" >
 				<include name="common.properties" />
@@ -262,7 +262,7 @@ limitations under the License.
 	
 	
     <!--******************************************************************************************************-->
-    <target name="jar" depends="compile" description="builds the search4j jar file" >
+    <target name="jar" depends="compile" description="builds the Hounder jar file" >
 		<jar jarfile="${output.dir}/${project}-${version}.jar" >
 			<manifest>
 				<attribute name="Built-By" value="${user.name}"/>
@@ -298,7 +298,7 @@ limitations under the License.
     </target>
 
 	<!--******************************************************************************************************-->
-    <target name="fatjar" depends="compile" description="builds the search4j jar file" >
+    <target name="fatjar" depends="compile" description="builds the Hounder jar file" >
 		<jar jarfile="${output.dir}/${project}-${version}-fat.jar" >
 			<manifest>
 				<attribute name="Built-By" value="${user.name}"/>
@@ -337,7 +337,7 @@ limitations under the License.
     </target>
 
 	<!--******************************************************************************************************-->
-    <target name="depjar" depends="prepare" description="builds the search4j jar file" >
+    <target name="depjar" depends="prepare" description="builds the Hounder jar file" >
 		<jar jarfile="${output.dir}/${project}-${version}-deps.jar" >
 			<manifest>
 				<attribute name="Built-By" value="${user.name}"/>
@@ -352,7 +352,7 @@ limitations under the License.
 
 
     <!--******************************************************************************************************-->
-    <target name="doc" description="creates the search4j javadoc" >
+    <target name="doc" description="creates the Hounder javadoc" >
         <delete dir="${javadoc.dir}" />
         <mkdir dir="${javadoc.dir}" />
         <javadoc    sourcepath="${src.dir}"
@@ -366,10 +366,10 @@ limitations under the License.
             <fileset dir="${test.dir}" defaultexcludes="yes">
                 <include name="com/flaptor/**/*.java" />
             </fileset>
-            <doctitle><![CDATA[<h1>Search4J Documentation</h1>]]></doctitle>
+            <doctitle><![CDATA[<h1>Hounder Documentation</h1>]]></doctitle>
 		    <classpath>
 			  <path refid="classpath.jars.tools" />
-		      <path refid="classpath.jars.s4j" />
+		      <path refid="classpath.jars.hounder" />
 		    </classpath>
 			<link href="http://lucene.zones.apache.org:8080/hudson/job/Lucene-Nightly/javadoc/" />
 			<link href="http://s1/javadocs/log4j/1.2.11/" />
@@ -406,7 +406,7 @@ limitations under the License.
 
     <!--******************************************************************************************************-->
 
-    <target name="openSearcher-war" description="Creates a war file to access the s4j searcher via OpenSearch" depends="jar-for-servlets">
+    <target name="openSearcher-war" description="Creates a war file to access the hounder searcher via OpenSearch" depends="jar-for-servlets">
         <property name="webapp.dir" value="${src.dir}/web-searcher/"/>
         <antcall target="check-jsp"/>
         <war warfile="output/searcher.war" webxml="${src.dir}/web-searcher/web.xml">
@@ -441,7 +441,7 @@ limitations under the License.
             <classes dir="${tmp.conf.dir}" />
             <lib dir="${basedir}/lib" >
                 <include name="log4j*.jar" />
-                <include name="search4j-*.jar" />
+                <include name="hounder-*.jar" />
             </lib>
         </war>
     </target>
@@ -455,11 +455,11 @@ limitations under the License.
         <war warfile="output/admin.war" webxml="${src.dir}/web-admin/web.xml">
 		
             <classes dir="${build.dir}">
-                <include name="com/flaptor/search4j/crawler/bean/*.class"/>
-                <include name="com/flaptor/search4j/crawler/pagedb/*.class"/>
-                <include name="com/flaptor/search4j/crawler/pagedb/*.class"/>
-                <include name="com/flaptor/search4j/crawler/UrlPatterns*.class"/>
-                <include name="com/flaptor/search4j/crawler/PageRank*.class"/>
+                <include name="com/flaptor/hounder/crawler/bean/*.class"/>
+                <include name="com/flaptor/hounder/crawler/pagedb/*.class"/>
+                <include name="com/flaptor/hounder/crawler/pagedb/*.class"/>
+                <include name="com/flaptor/hounder/crawler/UrlPatterns*.class"/>
+                <include name="com/flaptor/hounder/crawler/PageRank*.class"/>
             </classes>
         	
             <fileset dir="${src.dir}/web-admin/">
@@ -485,7 +485,7 @@ limitations under the License.
             <classes dir="${build.dir}">
                 <include name="com/flaptor/util/**/*.class"/>
                 <include name="com/flaptor/clustering/**/*.class"/>
-                <include name="com/flaptor/search4j/**/*.class"/>
+                <include name="com/flaptor/hounder/**/*.class"/>
             </classes>
 
         	<classes dir="${conf.dir}" >
@@ -758,7 +758,7 @@ limitations under the License.
     </target>
 
     <!--******************************************************************************************************-->
-   	<target name="product" depends="dist, installer-jar" description="Compiles and pakages s4j's distribution." >
+   	<target name="product" depends="dist, installer-jar" description="Compiles and pakages hounder's distribution." >
 		<antcall target="prepare-dist"/>
         <copy todir="${tmp.dir}">
             <fileset dir="${product.dir}"/>
@@ -772,7 +772,7 @@ limitations under the License.
 
    		<!-- installer -->
 		<mkdir dir="${tmp.dir}/installer"/>
-   		<copy todir="${tmp.dir}/installer" file="${output.dir}/search4j-installer.jar"/>
+   		<copy todir="${tmp.dir}/installer" file="${output.dir}/hounder-installer.jar"/>
    		<copy todir="${tmp.dir}/installer/conf">
             <fileset dir="${conf.dir}">
                 <include name="*.properties"/>

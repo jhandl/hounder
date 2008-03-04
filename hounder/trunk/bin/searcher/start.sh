@@ -16,10 +16,10 @@ LOUT=${LOG_DIR}/searcher.out
 CONF=./conf
 NUTCH_PLUGIN_BASE=..
 LIBS=../lib
-S4J=$LIBS/search4j-trunk.jar
-DEPS=$LIBS/search4j-trunk-deps.jar
-CP=${CONF}:.:${S4J}:${DEPS}:${NUTCH_PLUGIN_BASE}
-MAIN=com.flaptor.search4j.searcher.MultipleRpcSearcher
+HOUNDER=$LIBS/hounder-trunk.jar
+DEPS=$LIBS/hounder-trunk-deps.jar
+CP=${CONF}:.:${HOUNDER}:${DEPS}:${NUTCH_PLUGIN_BASE}
+MAIN=com.flaptor.hounder.searcher.MultipleRpcSearcher
 
 if [ ! -d ${LOG_DIR} ]; then
     mkdir -p ${LOG_DIR}

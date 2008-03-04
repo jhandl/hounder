@@ -1,1 +1,1 @@
-java -cp search4j-installer.jar:conf com.flaptor.search4j.installer.InstallationWizard ../dist
+java -cp hounder-installer.jar:conf com.flaptor.hounder.installer.InstallationWizard ../dist
