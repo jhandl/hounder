@@ -6,9 +6,9 @@
 
 <web-app>
 
-<display-name>S4J Learning System</display-name>
+<display-name>Hounder Learning System</display-name>
 <description>
-Search4J Bayes Learning System
+Hounder's Bayes Learning System
 </description>
 		    
 <welcome-file-list>

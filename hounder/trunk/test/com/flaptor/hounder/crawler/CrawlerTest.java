@@ -13,7 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and 
 limitations under the License.
 */
-package com.flaptor.search4j.crawler;
+package com.flaptor.hounder.crawler;
 
 import java.io.File;
 import java.io.IOException;
@@ -31,9 +31,9 @@ import org.mortbay.jetty.handler.DefaultHandler;
 import org.mortbay.jetty.handler.HandlerList;
 import org.mortbay.jetty.handler.ResourceHandler;
 
-import com.flaptor.search4j.crawler.pagedb.Page;
-import com.flaptor.search4j.crawler.pagedb.PageDB;
-import com.flaptor.search4j.crawler.pagedb.PageTest;
+import com.flaptor.hounder.crawler.pagedb.Page;
+import com.flaptor.hounder.crawler.pagedb.PageDB;
+import com.flaptor.hounder.crawler.pagedb.PageTest;
 import com.flaptor.util.Config;
 import com.flaptor.util.Execute;
 import com.flaptor.util.FileUtil;
@@ -92,7 +92,7 @@ public class CrawlerTest extends TestCase {
         config.set("priority.percentile.to.fetch", "100");
         config.set("max.retries", "5");
         config.set("categories", "");
-        config.set("modules", "com.flaptor.search4j.crawler.modules.WhiteListModule,whitelist|com.flaptor.search4j.crawler.modules.IndexerModule,indexer");
+        config.set("modules", "com.flaptor.hounder.crawler.modules.WhiteListModule,whitelist|com.flaptor.hounder.crawler.modules.IndexerModule,indexer");
         config.set("hotspot.tag","TAG_IS_HOTSPOT");
         config.set("emitdoc.tag","TAG_IS_INDEXABLE");
         config.set("page.similarity.threshold","1");

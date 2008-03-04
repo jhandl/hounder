@@ -13,14 +13,15 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and 
 limitations under the License.
 */
-package com.flaptor.search4j.indexer;
+package com.flaptor.hounder.indexer;
 
 import java.util.ArrayList;
+
 import org.antlr.stringtemplate.StringTemplate;
 
-import com.flaptor.search4j.Index;
-import com.flaptor.search4j.MultiIndex;
-import com.flaptor.search4j.searcher.IndexUpdatesListener;
+import com.flaptor.hounder.Index;
+import com.flaptor.hounder.MultiIndex;
+import com.flaptor.hounder.searcher.IndexUpdatesListener;
 import com.flaptor.util.Config;
 import com.flaptor.util.Execute;
 import com.flaptor.util.FileUtil;
@@ -71,7 +72,7 @@ public class IndexComposerTest extends TestCase {
         indexerConfig.set("IndexManager.updateInterval", "1000");
         indexerConfig.set("IndexManager.indexDescriptor", "0of1@cluster"+numServer);
         indexerConfig.set("IndexLibrary.remoteIndexUpdaters","127.0.0.1:10000");
-        indexerConfig.set("Indexer.modules", "com.flaptor.search4j.indexer.Writer");
+        indexerConfig.set("Indexer.modules", "com.flaptor.hounder.indexer.Writer");
         indexerConfig.set("Indexer.fields", "content");
         indexerConfig.set("docIdName", "docId");
         indexerConfig.set("Indexer.maxQueueSize", "100");

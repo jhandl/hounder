@@ -13,7 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and 
 limitations under the License.
 */
-package com.flaptor.search4j.indexer;
+package com.flaptor.hounder.indexer;
 
 import java.io.File;
 
@@ -55,7 +55,7 @@ public class HtmlParserTest extends TestCase {
         // The parser throws an exception, caused by an stack overflow.
         // ignore it.
         filterOutput("processTag:null");
-        File docFile = new File("test/com/flaptor/search4j/indexer/killerDoc.xml");
+        File docFile = new File("test/com/flaptor/hounder/indexer/killerDoc.xml");
         
         Config conf = Config.getConfig("indexer.properties");
         String[] inputTagNames = conf.getStringArray("HtmlParser.inputTagNames");

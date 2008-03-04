@@ -13,7 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and 
 limitations under the License.
 */
-package com.flaptor.search4j.crawler.pagedb.distributed;
+package com.flaptor.hounder.crawler.pagedb.distributed;
 
 import java.io.IOException;
 import java.io.PrintStream;
@@ -23,18 +23,14 @@ import java.util.Random;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
 
-import com.flaptor.search4j.crawler.pagedb.Page;
-import com.flaptor.search4j.crawler.pagedb.PageDB;
-import com.flaptor.search4j.crawler.pagedb.PageTest;
+import com.flaptor.hounder.crawler.pagedb.Page;
+import com.flaptor.hounder.crawler.pagedb.PageDB;
+import com.flaptor.hounder.crawler.pagedb.PageTest;
 import com.flaptor.util.Config;
 import com.flaptor.util.Execute;
 import com.flaptor.util.FileUtil;
 import com.flaptor.util.TestCase;
 import com.flaptor.util.TestInfo;
-
-
-import java.rmi.registry.LocateRegistry;
-import java.rmi.server.UnicastRemoteObject;
 
 /**
  * @author Flaptor Development Team
@@ -118,7 +114,7 @@ public class DPageDBTest extends TestCase {
 
     private void runTwoDPageDBs (PageCatcher[] catchers) throws Exception {
         for (int tst=0; tst<2; tst++) {
-            config.set("pagedb.node.mapper", "com.flaptor.search4j.crawler.pagedb.distributed.TestMapper");
+            config.set("pagedb.node.mapper", "com.flaptor.hounder.crawler.pagedb.distributed.TestMapper");
             config.set("pagedb.node.list", "127.0.0.1:1090, 127.0.0.1:1091");
             dbs[0] = null;
             dbs[1] = null;

@@ -13,7 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and 
 limitations under the License.
 */
-package com.flaptor.search4j.indexer;
+package com.flaptor.hounder.indexer;
 
 import java.io.File;
 import java.io.IOException;
@@ -25,24 +25,24 @@ import org.apache.log4j.PropertyConfigurator;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.store.FSDirectory;
 
-import com.flaptor.search4j.searcher.CacheSearcher;
-import com.flaptor.search4j.searcher.CompositeSearcher;
-import com.flaptor.search4j.searcher.GroupedSearchResults;
-import com.flaptor.search4j.searcher.ISearcher;
-import com.flaptor.search4j.searcher.NoIndexActiveException;
-import com.flaptor.search4j.searcher.QueryParams;
-import com.flaptor.search4j.searcher.Searcher;
-import com.flaptor.search4j.searcher.SearcherException;
-import com.flaptor.search4j.searcher.filter.AFilter;
-import com.flaptor.search4j.searcher.filter.ValueFilter;
-import com.flaptor.search4j.searcher.group.NoGroup;
-import com.flaptor.search4j.searcher.group.StoredFieldGroup;
-import com.flaptor.search4j.searcher.query.LazyParsedQuery;
-import com.flaptor.search4j.searcher.query.MatchAllQuery;
-import com.flaptor.search4j.searcher.query.TermQuery;
-import com.flaptor.search4j.searcher.query.WordQuerySuggestor;
-import com.flaptor.search4j.searcher.sort.FieldSort;
-import com.flaptor.search4j.searcher.spell.DidYouMeanIndexer;
+import com.flaptor.hounder.searcher.CacheSearcher;
+import com.flaptor.hounder.searcher.CompositeSearcher;
+import com.flaptor.hounder.searcher.GroupedSearchResults;
+import com.flaptor.hounder.searcher.ISearcher;
+import com.flaptor.hounder.searcher.NoIndexActiveException;
+import com.flaptor.hounder.searcher.QueryParams;
+import com.flaptor.hounder.searcher.Searcher;
+import com.flaptor.hounder.searcher.SearcherException;
+import com.flaptor.hounder.searcher.filter.AFilter;
+import com.flaptor.hounder.searcher.filter.ValueFilter;
+import com.flaptor.hounder.searcher.group.NoGroup;
+import com.flaptor.hounder.searcher.group.StoredFieldGroup;
+import com.flaptor.hounder.searcher.query.LazyParsedQuery;
+import com.flaptor.hounder.searcher.query.MatchAllQuery;
+import com.flaptor.hounder.searcher.query.TermQuery;
+import com.flaptor.hounder.searcher.query.WordQuerySuggestor;
+import com.flaptor.hounder.searcher.sort.FieldSort;
+import com.flaptor.hounder.searcher.spell.DidYouMeanIndexer;
 import com.flaptor.util.Cache;
 import com.flaptor.util.CommandUtil;
 import com.flaptor.util.Config;
@@ -119,7 +119,7 @@ public class IndexerSearcherTest extends TestCase {
 		indexerConfig.set("IndexManager.updateInterval", "2000");
         indexerConfig.set("IndexLibrary.remoteIndexUpdaters","localhost:10000");
         indexerConfig.set("IndexLibrary.rsyncAccessString","");
-		indexerConfig.set("Indexer.modules", "com.flaptor.search4j.indexer.Writer");
+		indexerConfig.set("Indexer.modules", "com.flaptor.hounder.indexer.Writer");
 		indexerConfig.set("Indexer.fields", "content");
 		indexerConfig.set("docIdName", "docId");
 		indexerConfig.set("Indexer.maxQueueSize", "100");

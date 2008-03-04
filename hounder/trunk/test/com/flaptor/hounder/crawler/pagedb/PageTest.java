@@ -13,7 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and 
 limitations under the License.
 */
-package com.flaptor.search4j.crawler.pagedb;
+package com.flaptor.hounder.crawler.pagedb;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -22,8 +22,8 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.util.Random;
 import java.util.Arrays;
+import java.util.Random;
 
 import org.apache.log4j.PropertyConfigurator;
 

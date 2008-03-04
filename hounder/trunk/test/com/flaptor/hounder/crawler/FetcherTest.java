@@ -13,21 +13,19 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and 
 limitations under the License.
 */
-package com.flaptor.search4j.crawler;
+package com.flaptor.hounder.crawler;
 
-import java.util.Random;
-import java.util.HashMap;
+import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
-import java.io.File;
+import java.util.HashMap;
+import java.util.Random;
+
 import org.apache.log4j.PropertyConfigurator;
 
-import com.flaptor.search4j.crawler.FetchList;
-import com.flaptor.search4j.crawler.FetchData;
-import com.flaptor.search4j.crawler.pagedb.Page;
-import com.flaptor.search4j.crawler.pagedb.PageTest;
-import com.flaptor.search4j.crawler.modules.FetchDocument;
-
+import com.flaptor.hounder.crawler.modules.FetchDocument;
+import com.flaptor.hounder.crawler.pagedb.Page;
+import com.flaptor.hounder.crawler.pagedb.PageTest;
 import com.flaptor.util.Config;
 import com.flaptor.util.FileUtil;
 import com.flaptor.util.TestCase;
