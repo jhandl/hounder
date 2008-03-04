@@ -13,7 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and 
 limitations under the License.
 */
-package com.flaptor.search4j.searcher;
+package com.flaptor.hounder.searcher;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -30,7 +30,7 @@ import org.dom4j.Element;
 import org.dom4j.Namespace;
 import org.dom4j.QName;
 
-import com.flaptor.search4j.searcher.query.AQuery;
+import com.flaptor.hounder.searcher.query.AQuery;
 import com.flaptor.util.Config;
 import com.flaptor.util.DomUtil;
 import com.flaptor.util.StringUtil;
@@ -41,7 +41,7 @@ import com.flaptor.util.StringUtil;
 public class OpenSearch {
 
     private static final String XMLNS_A9_OPENSEARCH_1_0 = "http://a9.com/-/spec/opensearchrss/1.0/";
-    private static final String XMLNS_SEARCH4J_OPENSEARCH_1_0 = "http://www.flaptor.com/opensearchrss/1.0/";
+    private static final String XMLNS_HOUNDER_OPENSEARCH_1_0 = "http://www.flaptor.com/opensearchrss/1.0/";
 
     private static final Set<String> fieldsToShow = new HashSet<String>();
 
@@ -57,7 +57,7 @@ public class OpenSearch {
 
     static {
         Config config = Config.getConfig("opensearch.properties");
-        String[] fieldList = config.getStringArray("opensearch.show.search4j.fields");
+        String[] fieldList = config.getStringArray("opensearch.show.hounder.fields");
         titleField = config.getString("opensearch.title.from.index.field");
         linkField = config.getString("opensearch.link.from.index.field");
         descriptionField = config.getString("opensearch.description.from.index.field");    	
@@ -95,28 +95,28 @@ public class OpenSearch {
         }
         Document dom = DocumentHelper.createDocument();
         Namespace opensearchNs = DocumentHelper.createNamespace("opensearch", XMLNS_A9_OPENSEARCH_1_0);
-        Namespace search4jNs = DocumentHelper.createNamespace("search4j", XMLNS_SEARCH4J_OPENSEARCH_1_0);
+        Namespace hounderNs = DocumentHelper.createNamespace("hounder", XMLNS_HOUNDER_OPENSEARCH_1_0);
         Element root = dom.addElement("rss").
         addAttribute("version", "2.0");
         root.add(opensearchNs);
-        root.add(search4jNs);
+        root.add(hounderNs);
         Element channel = root.addElement("channel");
-        channel.addElement("title").addText("Search4j: " +DomUtil.filterXml(queryString));
+        channel.addElement("title").addText("Hounder: " +DomUtil.filterXml(queryString));
         channel.addElement("link").addText(baseUrl + "/" + htmlSearcher +
                 "?query=" +encodedQuery + "&start=" + start + extraParams);
-        channel.addElement("description").addText("Search4j search results for query: " + DomUtil.filterXml(queryString));
+        channel.addElement("description").addText("Hounder search results for query: " + DomUtil.filterXml(queryString));
         channel.addElement(QName.get("totalResults", opensearchNs)).addText(Integer.toString(sr.totalGroupsEstimation()));
         channel.addElement(QName.get("startIndex", opensearchNs)).addText(Integer.toString(start));
         channel.addElement(QName.get("itemsPerPage", opensearchNs)).addText(Integer.toString(count));
-        channel.addElement(QName.get("query",search4jNs)).addText(DomUtil.filterXml(queryString));
+        channel.addElement(QName.get("query",hounderNs)).addText(DomUtil.filterXml(queryString));
         AQuery suggestedQuery = sr.getSuggestedQuery();
         if (null != suggestedQuery) {
-            channel.addElement(QName.get("suggestedQuery",search4jNs)).addText(DomUtil.filterXml(suggestedQuery.toString()));
+            channel.addElement(QName.get("suggestedQuery",hounderNs)).addText(DomUtil.filterXml(suggestedQuery.toString()));
         }
-        channel.addElement(QName.get("status",search4jNs)).addText(Integer.toString(status));
-        channel.addElement(QName.get("statusDesc",search4jNs)).addText(statusMessage);
+        channel.addElement(QName.get("status",hounderNs)).addText(Integer.toString(status));
+        channel.addElement(QName.get("statusDesc",hounderNs)).addText(statusMessage);
         if (sr.lastDocumentOffset() > 0) {
-            channel.addElement(QName.get("nextPage",search4jNs)).addText(baseUrl + "/" + opensearchSearcher + 
+            channel.addElement(QName.get("nextPage",hounderNs)).addText(baseUrl + "/" + opensearchSearcher + 
                     "?query=" + encodedQuery + "&start=" + (sr.lastDocumentOffset()) + extraParams);
         }
 
@@ -126,9 +126,9 @@ public class OpenSearch {
             for (int j = 0; j < docs.size(); j++) {
                 org.apache.lucene.document.Document doc = sr.getGroup(i).last().get(j);                
                 if (0 == j) {// j=0 is head of group. j>0 is tail
-                    parent= createAndAddElement(doc, channel, search4jNs);
+                    parent= createAndAddElement(doc, channel, hounderNs);
                 } else {
-                    createAndAddElement(doc, parent, search4jNs);
+                    createAndAddElement(doc, parent, hounderNs);
                 }
 
             }
@@ -137,7 +137,7 @@ public class OpenSearch {
     }
 
     private static Element createAndAddElement( org.apache.lucene.document.Document doc, 
-            Element parent, Namespace search4jNs){
+            Element parent, Namespace hounderNs){
         String url= StringUtil.nullToEmpty(doc.get(linkField)).trim();
         String description= StringUtil.nullToEmpty(doc.get(descriptionField)).trim();
         String title= StringUtil.nullToEmpty(doc.get(titleField)).trim();           
@@ -154,7 +154,7 @@ public class OpenSearch {
         for (Iterator iter = doc.getFields().iterator(); iter.hasNext(); ) {
             Field f = (Field) iter.next();
             if (fieldsToShow.contains(f.name())) {
-                item.addElement(QName.get(f.name(),search4jNs)).addText(DomUtil.filterXml(f.stringValue()));
+                item.addElement(QName.get(f.name(),hounderNs)).addText(DomUtil.filterXml(f.stringValue()));
             }
         }
         return item;

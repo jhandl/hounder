@@ -13,7 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and 
 limitations under the License.
 */
-package com.flaptor.search4j.searcher;
+package com.flaptor.hounder.searcher;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -28,16 +28,16 @@ import org.apache.log4j.Logger;
 import org.dom4j.Document;
 import org.mortbay.jetty.handler.AbstractHandler;
 
-import com.flaptor.search4j.searcher.filter.BooleanFilter;
-import com.flaptor.search4j.searcher.filter.ValueFilter;
-import com.flaptor.search4j.searcher.group.AGroup;
-import com.flaptor.search4j.searcher.group.NoGroup;
-import com.flaptor.search4j.searcher.group.StoredFieldGroup;
-import com.flaptor.search4j.searcher.group.TextSignatureGroup;
-import com.flaptor.search4j.searcher.query.LazyParsedQuery;
-import com.flaptor.search4j.searcher.sort.ASort;
-import com.flaptor.search4j.searcher.sort.FieldSort;
-import com.flaptor.search4j.searcher.sort.ScoreSort;
+import com.flaptor.hounder.searcher.filter.BooleanFilter;
+import com.flaptor.hounder.searcher.filter.ValueFilter;
+import com.flaptor.hounder.searcher.group.AGroup;
+import com.flaptor.hounder.searcher.group.NoGroup;
+import com.flaptor.hounder.searcher.group.StoredFieldGroup;
+import com.flaptor.hounder.searcher.group.TextSignatureGroup;
+import com.flaptor.hounder.searcher.query.LazyParsedQuery;
+import com.flaptor.hounder.searcher.sort.ASort;
+import com.flaptor.hounder.searcher.sort.FieldSort;
+import com.flaptor.hounder.searcher.sort.ScoreSort;
 import com.flaptor.util.DomUtil;
 import com.flaptor.util.Execute;
 

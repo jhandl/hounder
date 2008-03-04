@@ -13,15 +13,14 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and 
 limitations under the License.
 */
-package com.flaptor.search4j.searcher.payload;
+package com.flaptor.hounder.searcher.payload;
 
 import java.util.HashMap;
-import java.util.Map;
 import java.util.List;
+import java.util.Map;
 
-import org.apache.lucene.search.DefaultSimilarity;
 import org.apache.log4j.Logger;
-
+import org.apache.lucene.search.DefaultSimilarity;
 
 import com.flaptor.util.Config;
 import com.flaptor.util.Pair;

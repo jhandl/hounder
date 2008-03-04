@@ -13,9 +13,9 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and 
 limitations under the License.
 */
-package com.flaptor.search4j.searcher;
+package com.flaptor.hounder.searcher;
 
-import com.flaptor.search4j.Index;
+import com.flaptor.hounder.Index;
 
 /**
  * @author Flaptor Development Team
