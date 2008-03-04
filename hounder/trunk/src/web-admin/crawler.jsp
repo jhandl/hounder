@@ -14,16 +14,16 @@ See the License for the specific language governing permissions and
 limitations under the License.
 --%>
 <%@ page 
-import="com.flaptor.search4j.crawler.bean.CrawlerBean"
-import="com.flaptor.search4j.crawler.bean.PatternFileBean"
-import="com.flaptor.search4j.crawler.bean.CrawlerStatusBean"
-import="com.flaptor.search4j.crawler.bean.PageDBExportBean"
+import="com.flaptor.hounder.crawler.bean.CrawlerBean"
+import="com.flaptor.hounder.crawler.bean.PatternFileBean"
+import="com.flaptor.hounder.crawler.bean.CrawlerStatusBean"
+import="com.flaptor.hounder.crawler.bean.PageDBExportBean"
 import="com.flaptor.util.Config"
 import="java.util.Map"
 import="java.util.Map.Entry"
 %>
 
-<jsp:useBean id="configBean" class="com.flaptor.search4j.crawler.bean.ConfigBean" scope="session"/>
+<jsp:useBean id="configBean" class="com.flaptor.hounder.crawler.bean.ConfigBean" scope="session"/>
 
 <%
 //set the character encoding to use when interpreting request values 

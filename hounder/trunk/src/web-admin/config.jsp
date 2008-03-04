@@ -13,7 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and 
 limitations under the License.
 --%>
-<jsp:useBean id="configBean" class="com.flaptor.search4j.crawler.bean.ConfigBean" scope="session"/>
+<jsp:useBean id="configBean" class="com.flaptor.hounder.crawler.bean.ConfigBean" scope="session"/>
 
 <%
 //set the character encoding to use when interpreting request values 

@@ -13,7 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and 
 limitations under the License.
 */
-package com.flaptor.search4j.searcher;
+package com.flaptor.hounder.searcher;
 
 import java.util.Hashtable;
 import java.util.Iterator;
@@ -24,19 +24,19 @@ import org.apache.log4j.Logger;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
 
-import com.flaptor.search4j.searcher.filter.AFilter;
-import com.flaptor.search4j.searcher.filter.BooleanFilter;
-import com.flaptor.search4j.searcher.filter.RangeFilter;
-import com.flaptor.search4j.searcher.filter.ValueFilter;
-import com.flaptor.search4j.searcher.group.AGroup;
-import com.flaptor.search4j.searcher.group.NoGroup;
-import com.flaptor.search4j.searcher.group.StoredFieldGroup;
-import com.flaptor.search4j.searcher.group.TextSignatureGroup;
-import com.flaptor.search4j.searcher.query.AQuery;
-import com.flaptor.search4j.searcher.query.LazyParsedQuery;
-import com.flaptor.search4j.searcher.sort.ASort;
-import com.flaptor.search4j.searcher.sort.FieldSort;
-import com.flaptor.search4j.searcher.sort.ScoreSort;
+import com.flaptor.hounder.searcher.filter.AFilter;
+import com.flaptor.hounder.searcher.filter.BooleanFilter;
+import com.flaptor.hounder.searcher.filter.RangeFilter;
+import com.flaptor.hounder.searcher.filter.ValueFilter;
+import com.flaptor.hounder.searcher.group.AGroup;
+import com.flaptor.hounder.searcher.group.NoGroup;
+import com.flaptor.hounder.searcher.group.StoredFieldGroup;
+import com.flaptor.hounder.searcher.group.TextSignatureGroup;
+import com.flaptor.hounder.searcher.query.AQuery;
+import com.flaptor.hounder.searcher.query.LazyParsedQuery;
+import com.flaptor.hounder.searcher.sort.ASort;
+import com.flaptor.hounder.searcher.sort.FieldSort;
+import com.flaptor.hounder.searcher.sort.ScoreSort;
 import com.flaptor.util.Execute;
 import com.flaptor.util.Pair;
 
@@ -187,7 +187,7 @@ public class XmlSearcher {
 
 
 	/**
-	 * Returns a s4j sort from the Vector representation of filters.
+	 * Returns a Hounder sort from the Vector representation of filters.
 	 * @param sortVec a vector of vectors of Strings. The inner vectors all have to have exacltly 3 integers. The
 	 * 		the first one is the name of the field. The reserved string "SORT-BY-RELEVANCE" means that the search
 	 *		relevance will be used for the sort. The second either "true" or "false" and is meant to reverse
@@ -240,7 +240,7 @@ public class XmlSearcher {
 
 
     /**
-     * Returns a s4j group from a vector representation of a group.
+     * Returns a Hounder group from a vector representation of a group.
      *
      * The valid formats are 
      *
@@ -279,13 +279,13 @@ public class XmlSearcher {
 
 
 	/**
-	 * Returns a s4j filter from the Vector representation of filters.
+	 * Returns a Hounder filter from the Vector representation of filters.
 	 * @param filters a Vector of Vector of string representing the filters. The outer Vector represents the
 	 * several filters to be 'and'ed to build the final flter. The inner lists may contain 2 or 3 Strings.
 	 * If the Vector contains 2 Strings, it represents a value filter, where the field is the first String
 	 * and the value the 2nd. If it contains 3 Strings, it's interpreted as a RangeFilter as (Field, from,
 	 * to). Both a null parameter and a zero length list are valid and mean no filtering.
-	 * @return A s4j filter, or null.
+	 * @return A Hounder filter, or null.
 	 */
 	protected AFilter generateFilters(final Vector filters) {
 		if (null == filters) {

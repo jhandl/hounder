@@ -13,22 +13,21 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and 
 limitations under the License.
 */
-package com.flaptor.search4j.test;
+package com.flaptor.hounder.test;
 
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-import com.flaptor.search4j.indexer.IIndexer;
 import com.flaptor.util.remote.XmlrpcClient;
 
 /**
  * A client to an xml rpc Indexer.
  * Useful for testing, and as a starting point for custom Xmlrpc searcher clients. 
  * It's also a convenient way to send commands to the indexer using the main method.
- * @see com.flaptor.search4j.indexer.Indexer#index(String)
- * @see com.flaptor.search4j.indexer.Writer
- * @see com.flaptor.search4j.indexer.CommandsModule
+ * @see com.flaptor.hounder.indexer.Indexer#index(String)
+ * @see com.flaptor.hounder.indexer.Writer
+ * @see com.flaptor.hounder.indexer.CommandsModule
  * @author Flaptor Development Team
  */
 public class XmlIndexerClient {

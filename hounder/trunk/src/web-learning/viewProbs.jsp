@@ -16,10 +16,10 @@ limitations under the License.
 <%@ page
         contentType="text/html; charset=utf-8"
         pageEncoding="UTF-8"
-        import="com.flaptor.search4j.classifier.LearningBean"
-        import="com.flaptor.search4j.classifier.util.StateEnum"
-        import="com.flaptor.search4j.crawler.CacheBean"
-        import="com.flaptor.search4j.classifier.bayes.PersistenceManager"
+        import="com.flaptor.hounder.classifier.LearningBean"
+        import="com.flaptor.hounder.classifier.util.StateEnum"
+        import="com.flaptor.hounder.crawler.CacheBean"
+        import="com.flaptor.hounder.classifier.bayes.PersistenceManager"
         import="com.flaptor.util.Pair"	
         import="java.util.HashMap"
         import="java.util.HashSet"
@@ -27,8 +27,8 @@ limitations under the License.
         import="java.util.List"
 %>
 
-<jsp:useBean id="cacheCalculatorBean" class="com.flaptor.search4j.classifier.CacheCalculatorBean" scope="session"/>
-<jsp:useBean id="whoHasBean" class="com.flaptor.search4j.classifier.WhoHasBean" scope="session"/>
+<jsp:useBean id="cacheCalculatorBean" class="com.flaptor.hounder.classifier.CacheCalculatorBean" scope="session"/>
+<jsp:useBean id="whoHasBean" class="com.flaptor.hounder.classifier.WhoHasBean" scope="session"/>
 
 <% if (!cacheCalculatorBean.isInited()) {
 %>
@@ -88,7 +88,7 @@ function commitChanges() {
 	}
 	
 	Map<String,Double> unsortedMap= cacheCalculatorBean.readProbabilities(categoryName);
-	List<Pair<Double,String>> probs= com.flaptor.search4j.classifier.util.ProbsUtils.getSortedMapByVal(unsortedMap);	
+	List<Pair<Double,String>> probs= com.flaptor.hounder.classifier.util.ProbsUtils.getSortedMapByVal(unsortedMap);	
 	Map<String,Double> myProbsMap= cacheCalculatorBean.getMyProbabilities(categoryName);
 %>
 	<br></br>
@@ -154,7 +154,7 @@ function commitChanges() {
         </tr>
 
 <%
-	List<Pair<Double,String>> myProbs= com.flaptor.search4j.classifier.util.ProbsUtils.getSortedMapByVal(myProbsMap);
+	List<Pair<Double,String>> myProbs= com.flaptor.hounder.classifier.util.ProbsUtils.getSortedMapByVal(myProbsMap);
 	for (Pair<Double,String> pair : myProbs) {
 		String token= pair.last();
 		Double value= pair.first();

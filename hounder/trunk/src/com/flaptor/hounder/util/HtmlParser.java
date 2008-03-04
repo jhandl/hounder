@@ -13,17 +13,17 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and 
 limitations under the License.
 */
-package com.flaptor.search4j.util;
+package com.flaptor.hounder.util;
 
 import java.io.File;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.regex.Pattern;
 import java.util.Map;
-import java.util.HashMap;
+import java.util.regex.Pattern;
 
 import org.apache.log4j.Logger;
 import org.cyberneko.html.parsers.DOMParser;

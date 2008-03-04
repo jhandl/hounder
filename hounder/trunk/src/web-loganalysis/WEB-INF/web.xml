@@ -6,9 +6,9 @@
 
 <web-app>
 
-<display-name>Crawler Administration System</display-name>
+<display-name>Hounder's Log Analysis System</display-name>
 <description>
-Search4J Log Analysis System
+Hounder's Log Analysis System
 </description>
 		    
 <welcome-file-list>

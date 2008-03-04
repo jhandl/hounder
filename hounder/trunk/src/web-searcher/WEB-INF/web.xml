@@ -6,9 +6,9 @@
 
 <web-app>
 
-<display-name>Search4j</display-name>
+<display-name>Hounder</display-name>
 <description>
-Search4j frontend
+Hounder frontend
 </description>
 		    
 <welcome-file-list>

@@ -18,7 +18,7 @@ limitations under the License.
 <%@page import="com.flaptor.clustering.monitoring.SystemProperties"%>
 <%@page import="com.flaptor.clustering.Node"%>
 <%@page import="com.flaptor.clustering.Cluster"%>
-<%@page import="com.flaptor.search4j.crawler.clustering.*"%>
+<%@page import="com.flaptor.hounder.crawler.clustering.*"%>
 <%@page import="java.util.Date"%>
 <%@page import="java.util.Map"%>
 

@@ -13,7 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and 
 limitations under the License.
 --%>
-<%@page import="com.flaptor.search4j.cache.CachedVersionUtil"%>
+<%@page import="com.flaptor.hounder.cache.CachedVersionUtil"%>
 <%@page import="java.util.List"%>
 <%@page import="org.dom4j.Element"%>
 <%@page import="com.flaptor.util.DomUtil"%>

@@ -17,18 +17,18 @@ limitations under the License.
 	contentType="text/html; charset=utf-8"
 	pageEncoding="UTF-8"
 	
-	import="com.flaptor.search4j.classifier.LearningBean"
-	import="com.flaptor.search4j.classifier.util.StateEnum"
-	import="com.flaptor.search4j.crawler.CacheBean"
+	import="com.flaptor.hounder.classifier.LearningBean"
+	import="com.flaptor.hounder.classifier.util.StateEnum"
+	import="com.flaptor.hounder.crawler.CacheBean"
     import="com.flaptor.util.Pair"	
 	import="java.util.HashMap"
 	import="java.util.Map"
 	import="java.util.Set"
     import="java.util.List"
 %>
-<jsp:useBean id="learningBean" class="com.flaptor.search4j.classifier.LearningBean" scope="session"/>
-<jsp:useBean id="whyBean" class="com.flaptor.search4j.classifier.WhyBean" scope="session"/>
-<jsp:useBean id="cacheCalculatorBean" class="com.flaptor.search4j.classifier.CacheCalculatorBean" scope="session"/>
+<jsp:useBean id="learningBean" class="com.flaptor.hounder.classifier.LearningBean" scope="session"/>
+<jsp:useBean id="whyBean" class="com.flaptor.hounder.classifier.WhyBean" scope="session"/>
+<jsp:useBean id="cacheCalculatorBean" class="com.flaptor.hounder.classifier.CacheCalculatorBean" scope="session"/>
 
 <% if (!whyBean.isInited() || !learningBean.isInited() ||
 		!cacheCalculatorBean.isInited()) { %>
@@ -107,7 +107,7 @@ function commitChanges() {
 		// The getProbabilitiesMap() returns the map with the real values 
 		// ie: the computed values overriden by 'my.probabilities' values
 		Map<String,Double> unsortedMap= whyBean.getProbabilitiesMap(categoryName,url);			
-		List<Pair<Double,String>> probs= com.flaptor.search4j.classifier.util.ProbsUtils.getSortedMapByVal(unsortedMap);
+		List<Pair<Double,String>> probs= com.flaptor.hounder.classifier.util.ProbsUtils.getSortedMapByVal(unsortedMap);
 			
 		for (Pair<Double,String> pair : probs) {
 			String token= pair.last();

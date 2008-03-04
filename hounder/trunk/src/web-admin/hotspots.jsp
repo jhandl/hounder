@@ -15,15 +15,15 @@ limitations under the License.
 --%>
 <%@ page 
 
-import="com.flaptor.search4j.crawler.bean.CrawlerBean"
-import="com.flaptor.search4j.crawler.bean.PatternFileBean"
-import="com.flaptor.search4j.crawler.bean.PatternFileBean.PatternFileBeanException"
+import="com.flaptor.hounder.crawler.bean.CrawlerBean"
+import="com.flaptor.hounder.crawler.bean.PatternFileBean"
+import="com.flaptor.hounder.crawler.bean.PatternFileBean.PatternFileBeanException"
 import="java.util.List"
 import="java.util.ArrayList"
 
 %>
 
-<jsp:useBean id="configBean" class="com.flaptor.search4j.crawler.bean.ConfigBean" scope="session"/>
+<jsp:useBean id="configBean" class="com.flaptor.hounder.crawler.bean.ConfigBean" scope="session"/>
 
 <%
 // set the character encoding to use when interpreting request values 

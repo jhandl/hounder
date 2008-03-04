@@ -15,24 +15,22 @@
  *
  * Changes made by Flaptor, under the same license.
  */
-package com.flaptor.search4j.util;
+package com.flaptor.hounder.util;
 
-import java.io.Reader;
-import java.io.FileReader;
 import java.io.BufferedReader;
-import java.io.InputStreamReader;
+import java.io.FileReader;
 import java.io.IOException;
-
-import java.util.List;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.logging.Logger;
+import java.util.List;
 
+import org.apache.oro.text.regex.MalformedPatternException;
+import org.apache.oro.text.regex.PatternMatcher;
 import org.apache.oro.text.regex.Perl5Compiler;
 import org.apache.oro.text.regex.Perl5Matcher;
 import org.apache.oro.text.regex.Perl5Pattern;
-import org.apache.oro.text.regex.PatternMatcher;
-import org.apache.oro.text.regex.MalformedPatternException;
 
 /**
  * Filters URLs based on a file of regular expressions. The file is named by

@@ -13,7 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and 
 limitations under the License.
 */
-package com.flaptor.search4j.test;
+package com.flaptor.hounder.test;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -21,7 +21,6 @@ import java.util.Vector;
 
 import org.apache.xmlrpc.XmlRpcException;
 
-import com.flaptor.search4j.searcher.ISearcher;
 import com.flaptor.util.remote.XmlrpcClient;
 
 /**
@@ -29,7 +28,7 @@ import com.flaptor.util.remote.XmlrpcClient;
  * custom Xmlrpc searcher clients. It "main" method allows to issue queries from
  * the console.
  * 
- * @see com.flaptor.search4j.searcher.XmlSearcher
+ * @see com.flaptor.hounder.searcher.XmlSearcher
  * @author Flaptor Development Team
  */
 public final class XmlSearcherClient {
@@ -57,7 +56,7 @@ public final class XmlSearcherClient {
      * 
      * @param query
      *            the string of the query.
-     * @see com.flaptor.search4j.searcher.query.QueryParser for the format of
+     * @see com.flaptor.hounder.searcher.query.QueryParser for the format of
      *      the input string.
      * @param start
      *            the first document of the resultset to return.
@@ -67,7 +66,7 @@ public final class XmlSearcherClient {
      * @throws XmlRpcException 
      * @throws UnsupportedOperationException 
      * @throws XmlRpcFault 
-     * @see com.flaptor.search4j.searcher.XmlSearcher for the format of the
+     * @see com.flaptor.hounder.searcher.XmlSearcher for the format of the
      *      returned data.
      */
     public Vector<?> search(final String query, final int start, final int count) throws XmlRpcException {

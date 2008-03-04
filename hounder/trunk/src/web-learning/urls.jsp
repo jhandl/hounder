@@ -17,16 +17,16 @@ limitations under the License.
 	contentType="text/html; charset=utf-8"
 	pageEncoding="UTF-8"
 	
-	import="com.flaptor.search4j.classifier.LearningBean"
-	import="com.flaptor.search4j.classifier.util.StateEnum"
-	import="com.flaptor.search4j.classifier.UrlsBean.BGFetcherStatus"
-	import="com.flaptor.search4j.crawler.CacheBean"
+	import="com.flaptor.hounder.classifier.LearningBean"
+	import="com.flaptor.hounder.classifier.util.StateEnum"
+	import="com.flaptor.hounder.classifier.UrlsBean.BGFetcherStatus"
+	import="com.flaptor.hounder.crawler.CacheBean"
 	import="java.util.HashMap"
 	import="java.util.Map"
 	import="java.util.List"
 %>
 
-<jsp:useBean id="urlsBean" class="com.flaptor.search4j.classifier.UrlsBean" scope="session"/>
+<jsp:useBean id="urlsBean" class="com.flaptor.hounder.classifier.UrlsBean" scope="session"/>
 
 <% if (!urlsBean.isInited()) { %>
     <jsp:forward page="config.jsp"/>

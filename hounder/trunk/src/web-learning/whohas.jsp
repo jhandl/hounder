@@ -16,10 +16,10 @@ limitations under the License.
 <%@ page
         contentType="text/html; charset=utf-8"
         pageEncoding="UTF-8"
-        import="com.flaptor.search4j.classifier.LearningBean"
-        import="com.flaptor.search4j.classifier.util.StateEnum"
-        import="com.flaptor.search4j.crawler.CacheBean"
-        import="com.flaptor.search4j.classifier.bayes.PersistenceManager"
+        import="com.flaptor.hounder.classifier.LearningBean"
+        import="com.flaptor.hounder.classifier.util.StateEnum"
+        import="com.flaptor.hounder.crawler.CacheBean"
+        import="com.flaptor.hounder.classifier.bayes.PersistenceManager"
         import="java.util.HashMap"
         import="java.util.HashSet"
         import="java.util.Set"
@@ -28,7 +28,7 @@ limitations under the License.
         import="java.util.Iterator"
 %>
 
-<jsp:useBean id="whoHasBean" class="com.flaptor.search4j.classifier.WhoHasBean" scope="session"/>
+<jsp:useBean id="whoHasBean" class="com.flaptor.hounder.classifier.WhoHasBean" scope="session"/>
 
 <% if (!whoHasBean.isInited()) {
 %>

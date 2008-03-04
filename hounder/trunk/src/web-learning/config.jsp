@@ -17,18 +17,18 @@ limitations under the License.
 contentType="text/html; charset=utf-8"
 pageEncoding="UTF-8"
 
-import="com.flaptor.search4j.classifier.LearningBean"
-import="com.flaptor.search4j.crawler.CacheBean"
+import="com.flaptor.hounder.classifier.LearningBean"
+import="com.flaptor.hounder.crawler.CacheBean"
 
 %>
 
-<jsp:useBean id="configBean" class="com.flaptor.search4j.classifier.ConfigBean" scope="session"/>
-<jsp:useBean id="cacheBean" class="com.flaptor.search4j.crawler.CacheBean" scope="session"/>
-<jsp:useBean id="learningBean" class="com.flaptor.search4j.classifier.LearningBean" scope="session"/>
-<jsp:useBean id="cacheCalculatorBean" class="com.flaptor.search4j.classifier.CacheCalculatorBean" scope="session"/>
-<jsp:useBean id="whoHasBean" class="com.flaptor.search4j.classifier.WhoHasBean" scope="session"/>
-<jsp:useBean id="whyBean" class="com.flaptor.search4j.classifier.WhyBean" scope="session"/>
-<jsp:useBean id="urlsBean" class="com.flaptor.search4j.classifier.UrlsBean" scope="session"/>
+<jsp:useBean id="configBean" class="com.flaptor.hounder.classifier.ConfigBean" scope="session"/>
+<jsp:useBean id="cacheBean" class="com.flaptor.hounder.crawler.CacheBean" scope="session"/>
+<jsp:useBean id="learningBean" class="com.flaptor.hounder.classifier.LearningBean" scope="session"/>
+<jsp:useBean id="cacheCalculatorBean" class="com.flaptor.hounder.classifier.CacheCalculatorBean" scope="session"/>
+<jsp:useBean id="whoHasBean" class="com.flaptor.hounder.classifier.WhoHasBean" scope="session"/>
+<jsp:useBean id="whyBean" class="com.flaptor.hounder.classifier.WhyBean" scope="session"/>
+<jsp:useBean id="urlsBean" class="com.flaptor.hounder.classifier.UrlsBean" scope="session"/>
 
 <%
 

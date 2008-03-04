@@ -6,9 +6,9 @@
 
 <web-app>
 
-<display-name>Crawler Administration System</display-name>
+<display-name>Hounder Administration System</display-name>
 <description>
-Search4J Crawler Administration System
+Hounder's Crawler Administration System
 </description>
 		    
 <welcome-file-list>

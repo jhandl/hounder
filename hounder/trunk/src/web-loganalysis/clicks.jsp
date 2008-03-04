@@ -1,10 +1,10 @@
 <%@page import="com.flaptor.util.*"%>
 <%@page import="java.util.*"%>
-<%@page import="com.flaptor.search4j.loganalysis.*"%>
+<%@page import="com.flaptor.hounder.loganalysis.*"%>
 
 <%@page import="java.text.SimpleDateFormat"%>
-<jsp:useBean id="reportBean" class="com.flaptor.search4j.loganalysis.ReportFrontend" scope="session"/>
-<%request.setAttribute("pageTitle", "Search4j Log Analysis");%>
+<jsp:useBean id="reportBean" class="com.flaptor.hounder.loganalysis.ReportFrontend" scope="session"/>
+<%request.setAttribute("pageTitle", "Hounder Log Analysis");%>
 <%@include file="include.top.jsp"%>
 
 <%
