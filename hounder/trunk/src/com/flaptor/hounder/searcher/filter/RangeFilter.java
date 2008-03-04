@@ -13,7 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and 
 limitations under the License.
 */
-package com.flaptor.search4j.searcher.filter;
+package com.flaptor.hounder.searcher.filter;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -61,7 +61,7 @@ public class RangeFilter extends AFilter implements Serializable {
 
 	/**
 	  Generates a new lucene filter.
-	  @return a new lucene filter matching this search4j filter.
+	  @return a new lucene filter matching this Hounder filter.
 	 */
 	private org.apache.lucene.search.Filter generateNewLuceneFilter() {
 		return new org.apache.lucene.search.CachingWrapperFilter(new org.apache.lucene.search.RangeFilter(field, from, to, true, true));

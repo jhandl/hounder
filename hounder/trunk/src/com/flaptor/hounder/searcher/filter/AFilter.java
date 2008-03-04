@@ -13,7 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and 
 limitations under the License.
 */
-package com.flaptor.search4j.searcher.filter;
+package com.flaptor.hounder.searcher.filter;
 
 import java.io.Serializable;
 
@@ -29,9 +29,9 @@ import com.flaptor.util.LRUCache;
 public abstract class AFilter implements Serializable {
 	/**
 	 * Cache for LUCENE filters.
-	 * The s4j filters that return a auto-cached, expensive to calculate, lucene filter,
+	 * The Hounder filters that return a auto-cached, expensive to calculate, lucene filter,
 	 * should search the cache for an existing equivalent filter before generating a new one.
-	 * LRUCache is thread-safe (@see com.flaptor.search4j.utils.LRUCache)
+	 * LRUCache is thread-safe (@see com.flaptor.hounder.utils.LRUCache)
 	 * IMPORTANT: note that the static field in java are not serialized, so in an rmi transfer
 	 * the cache won't travel with the object.
 	 */

@@ -13,7 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and 
 limitations under the License.
 */
-package com.flaptor.search4j.indexer;
+package com.flaptor.hounder.indexer;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
@@ -39,7 +39,6 @@ import com.flaptor.util.Config;
 import com.flaptor.util.DocumentParser;
 import com.flaptor.util.DomUtil;
 import com.flaptor.util.Execute;
-import com.flaptor.util.TestInfo;
 import com.flaptor.util.TestUtils;
 
 /**

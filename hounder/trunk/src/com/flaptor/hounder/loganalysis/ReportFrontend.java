@@ -13,7 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and 
 limitations under the License.
 */
-package com.flaptor.search4j.loganalysis;
+package com.flaptor.hounder.loganalysis;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -22,8 +22,8 @@ import java.util.ArrayList;
 
 import org.apache.log4j.Logger;
 
-import com.flaptor.util.JdbcConnectionFactory;
 import com.flaptor.util.Execute;
+import com.flaptor.util.JdbcConnectionFactory;
 
 /**
  * @author Flaptor Development Team

@@ -13,28 +13,26 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and 
 limitations under the License.
 */
-package com.flaptor.search4j.indexer;
+package com.flaptor.hounder.indexer;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 
-
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.Options;
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PatternOptionBuilder;
 import org.apache.commons.cli.PosixParser;
-import org.apache.commons.cli.HelpFormatter;
-import org.apache.commons.cli.ParseException;
 import org.apache.log4j.Logger;
 import org.dom4j.Document;
 import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
-import org.junit.Ignore;
 
 import com.flaptor.util.PortUtil;
 import com.flaptor.util.remote.ARmiClientStub;
@@ -52,7 +50,7 @@ public class RmiIndexerStub extends ARmiClientStub implements IRemoteIndexer {
     
     /**
      * Constructor.
-     * @param basePort the base port where the remote instance of s4j is running.
+     * @param basePort the base port where the remote instance of Hounder is running.
      * @param host
      */
     public RmiIndexerStub(final int basePort, final String host) {

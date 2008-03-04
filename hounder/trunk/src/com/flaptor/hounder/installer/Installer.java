@@ -13,7 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and 
 limitations under the License.
 */
-package com.flaptor.search4j.installer;
+package com.flaptor.hounder.installer;
 
 import java.io.File;
 import java.io.IOException;
@@ -24,13 +24,13 @@ import java.util.Set;
 
 import org.apache.log4j.Logger;
 
-import com.flaptor.search4j.installer.configs.CacheServerConfig;
-import com.flaptor.search4j.installer.configs.ClusteringWebConfig;
-import com.flaptor.search4j.installer.configs.CommonConfig;
-import com.flaptor.search4j.installer.configs.ComponentConfig;
-import com.flaptor.search4j.installer.configs.CrawlerConfig;
-import com.flaptor.search4j.installer.configs.IndexerConfig;
-import com.flaptor.search4j.installer.configs.SearcherConfig;
+import com.flaptor.hounder.installer.configs.CacheServerConfig;
+import com.flaptor.hounder.installer.configs.ClusteringWebConfig;
+import com.flaptor.hounder.installer.configs.CommonConfig;
+import com.flaptor.hounder.installer.configs.ComponentConfig;
+import com.flaptor.hounder.installer.configs.CrawlerConfig;
+import com.flaptor.hounder.installer.configs.IndexerConfig;
+import com.flaptor.hounder.installer.configs.SearcherConfig;
 import com.flaptor.util.CommandUtil;
 import com.flaptor.util.Config;
 import com.flaptor.util.Execute;
@@ -42,7 +42,7 @@ import com.flaptor.wizard.ProgressPageElement;
 import com.flaptor.wizard.ui.UI;
 
 /**
- * This class has the code to install or upgrade search4j
+ * This class has the code to install or upgrade Hounder
  * 
  * if installing in multimachine, you should call install and then makeDist to copy or create the tgz distribution files
  * 
@@ -64,7 +64,7 @@ public class Installer {
 
     private Set<String> hosts; //localhost, otherhost, etc 
     private Map<String, File> hostDirs; //localhost -> tmpdir/localhost, otherhost -> tmpdir/localhost, etc
-    private Map<File, String> componentDirs; //tmpdir/localhost/var/local/search4j->localhost, tmpdir/otherhost/var/local/search4j ->otherhost, etc
+    private Map<File, String> componentDirs; //tmpdir/localhost/var/local/hounder->localhost, tmpdir/otherhost/var/local/hounder ->otherhost, etc
 	private File crawlerBaseDir;
 	
 	/*
@@ -101,7 +101,7 @@ public class Installer {
 	
 	
 	/**
-	 * Installs Search4j
+	 * Installs Hounder
 	 * 
 	 * @param distDir the directory that contains the TGZ files to be installed
 	 * @param commonConfig the common configuration
@@ -120,14 +120,14 @@ public class Installer {
         
 		//create a temp dir
 		//inside it there will be hosts:
-		//    /tmp/tempdir/localhost/search4j
-		//    /tmp/tempdir/otherhost/search4j
-		File tempDestDir = FileUtil.createTempDir("search4j-installation", "");
+		//    /tmp/tempdir/localhost/hounder
+		//    /tmp/tempdir/otherhost/hounder
+		File tempDestDir = FileUtil.createTempDir("hounder-installation", "");
 		
 
         hosts = new HashSet<String>(); //localhost, otherhost, etc 
         hostDirs = new HashMap<String, File>(); //localhost -> tmpdir/localhost, otherhost -> tmpdir/localhost, etc
-        componentDirs = new HashMap<File, String>(); //tmpdir/localhost/var/local/search4j->localhost, tmpdir/otherhost/var/local/search4j ->otherhost, etc
+        componentDirs = new HashMap<File, String>(); //tmpdir/localhost/var/local/hounder->localhost, tmpdir/otherhost/var/local/hounder ->otherhost, etc
 
 		if (commonConfig.installOnBaseDir != null) {
 	        File installBasePath = FileUtil.createOrGetDir(commonConfig.installOnBaseDir.getPath(), true, true); 

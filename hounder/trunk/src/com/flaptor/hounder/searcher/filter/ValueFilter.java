@@ -13,7 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and 
 limitations under the License.
 */
-package com.flaptor.search4j.searcher.filter;
+package com.flaptor.hounder.searcher.filter;
 
 import java.io.Serializable;
 import java.util.Vector;
@@ -51,7 +51,7 @@ public class ValueFilter extends AFilter implements Serializable {
 	}
 
 	/**
-	 Generates the underlying lucene filter for this search4j filter.
+	 Generates the underlying lucene filter for this Hounder filter.
 	*/
 	private org.apache.lucene.search.Filter generateNewLuceneFilter() {
 		return new org.apache.lucene.search.CachingWrapperFilter(new org.apache.lucene.search.QueryWrapperFilter(new org.apache.lucene.search.TermQuery(new org.apache.lucene.index.Term(field, value))));

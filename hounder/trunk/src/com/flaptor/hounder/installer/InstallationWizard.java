@@ -13,20 +13,20 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and 
 limitations under the License.
 */
-package com.flaptor.search4j.installer;
+package com.flaptor.hounder.installer;
 
 import java.io.File;
 import java.io.IOException;
 
 import org.apache.log4j.Logger;
 
-import com.flaptor.search4j.installer.configs.CacheServerConfig;
-import com.flaptor.search4j.installer.configs.ClusteringWebConfig;
-import com.flaptor.search4j.installer.configs.CommonConfig;
-import com.flaptor.search4j.installer.configs.ComponentConfig;
-import com.flaptor.search4j.installer.configs.CrawlerConfig;
-import com.flaptor.search4j.installer.configs.IndexerConfig;
-import com.flaptor.search4j.installer.configs.SearcherConfig;
+import com.flaptor.hounder.installer.configs.CacheServerConfig;
+import com.flaptor.hounder.installer.configs.ClusteringWebConfig;
+import com.flaptor.hounder.installer.configs.CommonConfig;
+import com.flaptor.hounder.installer.configs.ComponentConfig;
+import com.flaptor.hounder.installer.configs.CrawlerConfig;
+import com.flaptor.hounder.installer.configs.IndexerConfig;
+import com.flaptor.hounder.installer.configs.SearcherConfig;
 import com.flaptor.util.Config;
 import com.flaptor.util.Execute;
 import com.flaptor.util.FileUtil;
@@ -46,7 +46,7 @@ import com.flaptor.wizard.ui.UI;
 
 
 /**
- * Installer for Search4j product, that can be run in graphic mode or command line mode
+ * Installer for Hounder product, that can be run in graphic mode or command line mode
  * 
  * @author Martin Massera
  */
@@ -101,35 +101,38 @@ public class InstallationWizard {
     private ClusteringWebConfig clusteringWebConfig = new ClusteringWebConfig();
 	//////////////////////////////////
 
+    private final String DEFAULT_INSTALLATION_DIR = "/var/local/hounder";
+    
     public InstallationWizard(boolean graphicMode, String distDir) {
+        
     	this.graphicMode = graphicMode;
-        ui = graphicMode ? new GUI("Search4j Installation Wizard") : new CLI();
+        ui = graphicMode ? new GUI("Hounder Installation Wizard") : new CLI();
         this.distDir =  distDir;
         
         Config searcherProperties = Config.getConfig("searcher.properties");
     
-//        try {installDir = FileUtil.getDir(".") + "/search4j/";} catch (IOException e) {installDir = "/var/local/search4j";}
-        installDir = "/var/local/search4j";
+//        try {installDir = FileUtil.getDir(".") + "/hounder/";} catch (IOException e) {installDir = DEFAULT_INSTALLATION_DIR;}
+        installDir = DEFAULT_INSTALLATION_DIR;
 
 //create the pages
         initial
-            .add(new PageElement("Welcome to Search4j installation Wizard"));
+            .add(new PageElement("Welcome to Hounder installation Wizard"));
         installationMethod
             .add(new OptionPageElement(
             		"Choose installation type",
-            		"Search4j can run in one machine or distributed in several machines.",
+            		"Hounder can run in one machine or distributed in several machines.",
             "method",
             "0",
             new String[] {"Install all components in this machine", "Install some components in this machine", "Multimachine install"}
             ));
         
         thisMachineAllInstall
-            .add(new PageElement("You have selected a complete installation of Search4j in this machine."));
+            .add(new PageElement("You have selected a complete installation of Hounder in this machine."));
         thisMachineSomeInstall
-	        .add(new PageElement("You have selected to install Search4j in this machine, but only some components."))
+	        .add(new PageElement("You have selected to install Hounder in this machine, but only some components."))
 	        .add(new PageElement("You will select which components to install"));       
         multiMachineInstall
-            .add(new PageElement("You have selected to install Search4j in several machines."))
+            .add(new PageElement("You have selected to install Hounder in several machines."))
             .add(new PageElement("You will select which components to install on this machine.", "also, you will enter the hosts where you will install other components."))
             .add(new PageElement("After you install on this machine, you have to run the installer on the other hosts"));
 		selectComponents            
@@ -150,27 +153,27 @@ public class InstallationWizard {
 			.add(new PageElement("Searcher remote configuration", "Please tell us where you will install the searcher."))
         	.add(new InputPageElement("host", null, "host", "localhost"))
         	.add(new InputPageElement("base port", null, "basePort", String.valueOf(PortUtil.getBasePort())))
-			.add(new InputPageElement("base dir", null, "baseDir", "/var/local/search4j"));
+			.add(new InputPageElement("base dir", null, "baseDir", DEFAULT_INSTALLATION_DIR));
 		indexerInstallRemote
 			.add(new PageElement("Indexer remote configuration", "Please tell us where you will install the indexer."))
         	.add(new InputPageElement("host", null, "host", "localhost"))
         	.add(new InputPageElement("base port", null, "basePort", String.valueOf(PortUtil.getBasePort())))
-			.add(new InputPageElement("base dir", null, "baseDir", "/var/local/search4j"));        	
+			.add(new InputPageElement("base dir", null, "baseDir", DEFAULT_INSTALLATION_DIR));        	
 		crawlerInstallRemote
 			.add(new PageElement("Crawler remote configuration", "Please tell us where you will install the crawler."))
         	.add(new InputPageElement("host", null, "host", "localhost"))
         	.add(new InputPageElement("base port", null, "basePort", String.valueOf(PortUtil.getBasePort())))
-			.add(new InputPageElement("base dir", null, "baseDir", "/var/local/search4j"));
+			.add(new InputPageElement("base dir", null, "baseDir", DEFAULT_INSTALLATION_DIR));
 		cacheServerInstallRemote
 			.add(new PageElement("Cache Server remote configuration", "Please tell us where you will install the crawler."))
 	    	.add(new InputPageElement("host", null, "host", "localhost"))
 	    	.add(new InputPageElement("base port", null, "basePort", String.valueOf(PortUtil.getBasePort())))
-			.add(new InputPageElement("base dir", null, "baseDir", "/var/local/search4j"));
+			.add(new InputPageElement("base dir", null, "baseDir", DEFAULT_INSTALLATION_DIR));
 		clusteringWebInstallRemote
 			.add(new PageElement("Monitor Web remote configuration", "Please tell us where you will install the monitor web."))
         	.add(new InputPageElement("host", null, "host", "localhost"))
         	.add(new InputPageElement("base port", null, "basePort", String.valueOf(PortUtil.getBasePort())))
-			.add(new InputPageElement("base dir", null, "baseDir", "/var/local/search4j"));
+			.add(new InputPageElement("base dir", null, "baseDir", DEFAULT_INSTALLATION_DIR));
 //        searcherInstall
 //        	.add(new PageElement("Searcher configuration"));
 //        indexerInstall
@@ -191,10 +194,10 @@ public class InstallationWizard {
 				new String[]{"let the installer copy them via SSH", "give me some .tgz that I'll copy and decompress myself"}));
     	dirPortOptions
     		.add(new PageElement("Local installation port and path"))
-        	.add(new InputPageElement("Base port", "Search4j uses a range of ports starting in one base port", "basePort", String.valueOf(PortUtil.getBasePort())))
-        	.add(new InputPageElement("Base dir", "This is where search4j will be installed in this machine. If it exists, it will be overwritten.", "path",  installDir));    
+        	.add(new InputPageElement("Base port", "Hounder uses a range of ports starting in one base port", "basePort", String.valueOf(PortUtil.getBasePort())))
+        	.add(new InputPageElement("Base dir", "This is where Hounder will be installed in this machine. If it exists, it will be overwritten.", "path",  installDir));    
 //        installBaseOptions
-//            .add(new InputPageElement("Local installation path", "This is where search4j will be installed in this machine. If it exists, it will be overwritten.", "path",  installDir));
+//            .add(new InputPageElement("Local installation path", "This is where Hounder will be installed in this machine. If it exists, it will be overwritten.", "path",  installDir));
             
 
         thisMachineAllInstall.setPreNextCallback(new Runnable() {
@@ -333,9 +336,9 @@ public class InstallationWizard {
         confirmOverwrite.addNextPage(installing).addNextPage(dirPortOptions);
         
         installing
-            .add(new PageElement("Installing Search4j"));
+            .add(new PageElement("Installing Hounder"));
         summary
-        	.add(new PageElement("Search4j installation summary"))
+        	.add(new PageElement("Hounder installation summary"))
         	.setCanCancelOrBack(false);
 
         installing.setCanCancelOrBack(false);
@@ -426,7 +429,7 @@ public class InstallationWizard {
         	if (crawlerConfig.install) new CrawlerConfigurationWizard(graphicMode, crawlerDir).start();
         	if (multiMachine) installer.makeDist();
         	
-        	finishReport.setText("Search4j installed correctly!");
+        	finishReport.setText("Hounder installed correctly!");
         	installprogress.setExplanation("");
         	installprogress.setProgress(100);
         	ui.elementUpdated(installprogress);
@@ -442,7 +445,7 @@ public class InstallationWizard {
             	else summary.add(new PageElement(".TGZ files have been written to " + commonConfig.outputDir, "copy these files to the host:dir indicated and uncompress them there"));
             }
             summary
-            	.add(new PageElement("To start search4j, go to the base dir and run start.sh"));
+            	.add(new PageElement("To start Hounder, go to the base dir and run start.sh"));
             
         } catch (Throwable e) {
             errorReport.setText("There has been an error");
@@ -454,7 +457,7 @@ public class InstallationWizard {
             e.printStackTrace();
 
             summary
-        		.add(new PageElement("Search4j installation didnt finish correctly."));
+        		.add(new PageElement("Hounder installation didnt finish correctly."));
         }
         installing.setReadyToAdvance(true);
         
