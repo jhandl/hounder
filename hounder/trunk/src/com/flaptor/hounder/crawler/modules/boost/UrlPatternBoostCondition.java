@@ -13,15 +13,15 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and 
 limitations under the License.
 */
-package com.flaptor.search4j.crawler.modules.boost;
+package com.flaptor.hounder.crawler.modules.boost;
 
 import java.io.IOException;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
 
-import com.flaptor.search4j.crawler.UrlPatterns;
-import com.flaptor.search4j.crawler.modules.FetchDocument;
+import com.flaptor.hounder.crawler.UrlPatterns;
+import com.flaptor.hounder.crawler.modules.FetchDocument;
 import com.flaptor.util.Config;
 import com.flaptor.util.Execute;
 import com.flaptor.util.FileUtil;

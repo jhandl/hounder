@@ -13,11 +13,9 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and 
 limitations under the License.
 */
-package com.flaptor.search4j.crawler;
+package com.flaptor.hounder.crawler;
 
 import com.flaptor.clustering.monitoring.nodes.MonitoreableImplementation;
-import com.flaptor.util.Statistics;
-import com.flaptor.util.ThreadUtil;
 
 /**
  * implementation of MonitoredNode for monitoring a searcher

@@ -13,13 +13,12 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and 
 limitations under the License.
 */
-package com.flaptor.search4j.crawler;
+package com.flaptor.hounder.crawler;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.Iterator;
 import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -27,12 +26,12 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.log4j.Logger;
 
-import com.flaptor.search4j.crawler.modules.CommandWithDoc;
-import com.flaptor.search4j.crawler.modules.FetchDocument;
-import com.flaptor.search4j.crawler.modules.ModulesManager;
-import com.flaptor.search4j.crawler.pagedb.Link;
-import com.flaptor.search4j.crawler.pagedb.Page;
-import com.flaptor.search4j.crawler.pagedb.PageDB;
+import com.flaptor.hounder.crawler.modules.CommandWithDoc;
+import com.flaptor.hounder.crawler.modules.FetchDocument;
+import com.flaptor.hounder.crawler.modules.ModulesManager;
+import com.flaptor.hounder.crawler.pagedb.Link;
+import com.flaptor.hounder.crawler.pagedb.Page;
+import com.flaptor.hounder.crawler.pagedb.PageDB;
 import com.flaptor.util.Config;
 import com.flaptor.util.Execute;
 

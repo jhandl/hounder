@@ -13,14 +13,14 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and 
 limitations under the License.
 */
-package com.flaptor.search4j.crawler.modules;
+package com.flaptor.hounder.crawler.modules;
 
 import org.apache.log4j.Logger;
 
-import com.flaptor.search4j.crawler.modules.boost.ABoostCondition;
-import com.flaptor.search4j.crawler.modules.boost.ABoostMethod;
-import com.flaptor.search4j.crawler.modules.boost.ABoostValue;
-import com.flaptor.search4j.crawler.modules.boost.Booster;
+import com.flaptor.hounder.crawler.modules.boost.ABoostCondition;
+import com.flaptor.hounder.crawler.modules.boost.ABoostMethod;
+import com.flaptor.hounder.crawler.modules.boost.ABoostValue;
+import com.flaptor.hounder.crawler.modules.boost.Booster;
 import com.flaptor.util.Config;
 import com.flaptor.util.Execute;
 
