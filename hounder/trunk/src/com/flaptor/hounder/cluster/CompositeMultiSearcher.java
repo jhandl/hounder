@@ -13,25 +13,25 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and 
 limitations under the License.
 */
-package com.flaptor.search4j.cluster;
+package com.flaptor.hounder.cluster;
 
 import java.io.File;
 
 import org.apache.log4j.Logger;
 
-import com.flaptor.search4j.searcher.CacheSearcher;
-import com.flaptor.search4j.searcher.GroupedSearchResults;
-import com.flaptor.search4j.searcher.ISearcher;
-import com.flaptor.search4j.searcher.QueriesInProgressSearcher;
-import com.flaptor.search4j.searcher.QueryParams;
-import com.flaptor.search4j.searcher.SearcherException;
-import com.flaptor.search4j.searcher.SuggestQuerySearcher;
-import com.flaptor.search4j.searcher.TrafficLimitingSearcher;
-import com.flaptor.search4j.searcher.filter.AFilter;
-import com.flaptor.search4j.searcher.group.AGroup;
-import com.flaptor.search4j.searcher.query.AQuery;
-import com.flaptor.search4j.searcher.query.WordQuerySuggestor;
-import com.flaptor.search4j.searcher.sort.ASort;
+import com.flaptor.hounder.searcher.CacheSearcher;
+import com.flaptor.hounder.searcher.GroupedSearchResults;
+import com.flaptor.hounder.searcher.ISearcher;
+import com.flaptor.hounder.searcher.QueriesInProgressSearcher;
+import com.flaptor.hounder.searcher.QueryParams;
+import com.flaptor.hounder.searcher.SearcherException;
+import com.flaptor.hounder.searcher.SuggestQuerySearcher;
+import com.flaptor.hounder.searcher.TrafficLimitingSearcher;
+import com.flaptor.hounder.searcher.filter.AFilter;
+import com.flaptor.hounder.searcher.group.AGroup;
+import com.flaptor.hounder.searcher.query.AQuery;
+import com.flaptor.hounder.searcher.query.WordQuerySuggestor;
+import com.flaptor.hounder.searcher.sort.ASort;
 import com.flaptor.util.Cache;
 import com.flaptor.util.Config;
 import com.flaptor.util.TimeoutLRUCache;

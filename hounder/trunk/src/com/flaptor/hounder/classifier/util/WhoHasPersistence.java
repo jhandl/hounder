@@ -13,7 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and 
 limitations under the License.
 */
-package com.flaptor.search4j.classifier.util;
+package com.flaptor.hounder.classifier.util;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -28,7 +28,7 @@ import java.io.Writer;
 import java.util.HashSet;
 import java.util.Set;
 
-import com.flaptor.search4j.classifier.bayes.BayesCalculator;
+import com.flaptor.hounder.classifier.bayes.BayesCalculator;
 import com.flaptor.util.sort.Comparator;
 import com.flaptor.util.sort.Record;
 import com.flaptor.util.sort.RecordInformation;

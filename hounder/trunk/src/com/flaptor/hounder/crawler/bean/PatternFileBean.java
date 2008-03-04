@@ -13,7 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and 
 limitations under the License.
 */
-package com.flaptor.search4j.crawler.bean;
+package com.flaptor.hounder.crawler.bean;
 
 
 import java.io.BufferedReader;
@@ -27,7 +27,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
 
-import com.flaptor.search4j.crawler.UrlPatterns;
+import com.flaptor.hounder.crawler.UrlPatterns;
 
 /**
  * @author Flaptor Development Team

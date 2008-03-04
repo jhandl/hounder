@@ -13,7 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and 
 limitations under the License.
 */
-package com.flaptor.search4j.crawler.bean;
+package com.flaptor.hounder.crawler.bean;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -23,7 +23,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.List;
 
-import com.flaptor.search4j.crawler.pagedb.PageDB;
+import com.flaptor.hounder.crawler.pagedb.PageDB;
 
 /**
  * Bean to inject urls for a crawler

@@ -13,7 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and 
 limitations under the License.
 */
-package com.flaptor.search4j.classifier;
+package com.flaptor.hounder.classifier;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -27,10 +27,10 @@ import java.util.Set;
 
 import org.apache.log4j.Logger;
 
-import com.flaptor.search4j.classifier.util.DocumentParser;
-import com.flaptor.search4j.classifier.util.ProbsUtils;
-import com.flaptor.search4j.classifier.util.TextFileBinarySearch;
-import com.flaptor.search4j.classifier.util.WhoHasPersistence;
+import com.flaptor.hounder.classifier.util.DocumentParser;
+import com.flaptor.hounder.classifier.util.ProbsUtils;
+import com.flaptor.hounder.classifier.util.TextFileBinarySearch;
+import com.flaptor.hounder.classifier.util.WhoHasPersistence;
 import com.flaptor.util.Config;
 import com.flaptor.util.Execute;
 import com.flaptor.util.FileUtil;

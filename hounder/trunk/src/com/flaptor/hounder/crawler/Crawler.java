@@ -13,7 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and 
 limitations under the License.
 */
-package com.flaptor.search4j.crawler;
+package com.flaptor.hounder.crawler;
 
 import java.io.File;
 import java.io.IOException;
@@ -27,17 +27,17 @@ import com.flaptor.clustering.ClusterableListener;
 import com.flaptor.clustering.controlling.controller.Controller;
 import com.flaptor.clustering.controlling.nodes.ControllableImplementation;
 import com.flaptor.clustering.monitoring.monitor.Monitor;
-import com.flaptor.search4j.crawler.clustering.CrawlerControllableImplementation;
-import com.flaptor.search4j.crawler.modules.CacheModule;
-import com.flaptor.search4j.crawler.modules.CommandWithPageDB;
-import com.flaptor.search4j.crawler.modules.DocumentCacheItem;
-import com.flaptor.search4j.crawler.modules.IProcessorModule;
-import com.flaptor.search4j.crawler.modules.ModulesManager;
-import com.flaptor.search4j.crawler.pagedb.Page;
-import com.flaptor.search4j.crawler.pagedb.PageDB;
-import com.flaptor.search4j.crawler.pagedb.distributed.DPageDB;
-import com.flaptor.search4j.crawler.pagedb.distributed.PageCatcher;
-import com.flaptor.search4j.util.UrlFilter;
+import com.flaptor.hounder.crawler.clustering.CrawlerControllableImplementation;
+import com.flaptor.hounder.crawler.modules.CacheModule;
+import com.flaptor.hounder.crawler.modules.CommandWithPageDB;
+import com.flaptor.hounder.crawler.modules.DocumentCacheItem;
+import com.flaptor.hounder.crawler.modules.IProcessorModule;
+import com.flaptor.hounder.crawler.modules.ModulesManager;
+import com.flaptor.hounder.crawler.pagedb.Page;
+import com.flaptor.hounder.crawler.pagedb.PageDB;
+import com.flaptor.hounder.crawler.pagedb.distributed.DPageDB;
+import com.flaptor.hounder.crawler.pagedb.distributed.PageCatcher;
+import com.flaptor.hounder.util.UrlFilter;
 import com.flaptor.util.CloseableQueue;
 import com.flaptor.util.Config;
 import com.flaptor.util.Execute;
@@ -45,7 +45,7 @@ import com.flaptor.util.PortUtil;
 import com.flaptor.util.cache.FileCache;
 
 /**
- * This class implements S4J's web crawler.
+ * This class implements Hounder's web crawler.
  * @author Flaptor Development Team
  */
 public class Crawler {
@@ -402,7 +402,7 @@ public class Crawler {
      */
     public void refresh (long skip) {
         boolean hasCache = false;
-        IProcessorModule[] caches = modules.getModuleInstances("com.flaptor.search4j.crawler.modules.CacheModule");
+        IProcessorModule[] caches = modules.getModuleInstances("com.flaptor.hounder.crawler.modules.CacheModule");
         if (caches.length > 0) {
             CacheModule cacheModule = null;
             FileCache<DocumentCacheItem> fileCache = null;
@@ -516,7 +516,7 @@ public class Crawler {
                     stopCrawler();
                 }
 
-                // TODO: this should be done by the s4j indexer, not the crawler.
+                // TODO: this should be done by the Hounder indexer, not the crawler.
                 if (running()) {
                     if (shouldOptimizeAfterCycle(newPageDB.getCycles())) {
                         processor.optimizeIndex();

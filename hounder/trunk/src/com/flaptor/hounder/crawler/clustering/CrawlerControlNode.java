@@ -13,14 +13,11 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and 
 limitations under the License.
 */
-package com.flaptor.search4j.crawler.clustering;
+package com.flaptor.hounder.crawler.clustering;
 
 import com.flaptor.clustering.Node;
 import com.flaptor.clustering.NodeUnreachableException;
-import com.flaptor.clustering.controlling.controller.Controller;
-import com.flaptor.clustering.controlling.nodes.Controllable;
 import com.flaptor.clustering.modules.ModuleNode;
-import com.flaptor.util.remote.XmlrpcClient;
 
 /**
  * Node for crawler control module

@@ -13,7 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and 
 limitations under the License.
 */
-package com.flaptor.search4j.cluster;
+package com.flaptor.hounder.cluster;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,17 +23,17 @@ import java.util.concurrent.Callable;
 
 import org.apache.log4j.Logger;
 
-import com.flaptor.search4j.searcher.GroupedSearchResults;
-import com.flaptor.search4j.searcher.IRemoteSearcher;
-import com.flaptor.search4j.searcher.ISearcher;
-import com.flaptor.search4j.searcher.QueryParams;
-import com.flaptor.search4j.searcher.RmiSearcherStub;
-import com.flaptor.search4j.searcher.filter.AFilter;
-import com.flaptor.search4j.searcher.group.AGroup;
-import com.flaptor.search4j.searcher.group.AResultsGrouper;
-import com.flaptor.search4j.searcher.group.GroupedSearchResultsDocumentProvider;
-import com.flaptor.search4j.searcher.query.AQuery;
-import com.flaptor.search4j.searcher.sort.ASort;
+import com.flaptor.hounder.searcher.GroupedSearchResults;
+import com.flaptor.hounder.searcher.IRemoteSearcher;
+import com.flaptor.hounder.searcher.ISearcher;
+import com.flaptor.hounder.searcher.QueryParams;
+import com.flaptor.hounder.searcher.RmiSearcherStub;
+import com.flaptor.hounder.searcher.filter.AFilter;
+import com.flaptor.hounder.searcher.group.AGroup;
+import com.flaptor.hounder.searcher.group.AResultsGrouper;
+import com.flaptor.hounder.searcher.group.GroupedSearchResultsDocumentProvider;
+import com.flaptor.hounder.searcher.query.AQuery;
+import com.flaptor.hounder.searcher.sort.ASort;
 import com.flaptor.util.Config;
 import com.flaptor.util.Execute;
 import com.flaptor.util.Execution;

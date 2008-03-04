@@ -13,15 +13,15 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and 
 limitations under the License.
 */
-package com.flaptor.search4j.classifier;
+package com.flaptor.hounder.classifier;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
 
-import com.flaptor.search4j.classifier.bayes.BayesClassifier;
-import com.flaptor.search4j.classifier.util.DocumentParser;
+import com.flaptor.hounder.classifier.bayes.BayesClassifier;
+import com.flaptor.hounder.classifier.util.DocumentParser;
 import com.flaptor.util.Config;
 import com.flaptor.util.Execute;
 import com.flaptor.util.cache.FileCache;

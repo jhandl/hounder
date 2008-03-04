@@ -13,7 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and 
 limitations under the License.
 */
-package com.flaptor.search4j.crawler.bean;
+package com.flaptor.hounder.crawler.bean;
 
 
 import java.io.File;
@@ -171,7 +171,7 @@ public class CrawlerBean {
 
 
     private void createPatternBean(String className, String moduleName) {
-        String prefix = "com.flaptor.search4j.crawler.modules.";
+        String prefix = "com.flaptor.hounder.crawler.modules.";
         if (!className.startsWith(prefix)) return;
         className = className.substring(prefix.length());
 
