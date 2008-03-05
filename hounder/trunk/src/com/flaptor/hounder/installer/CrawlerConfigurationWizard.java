@@ -84,7 +84,7 @@ public class CrawlerConfigurationWizard {
                 "Pagedb seeds are the URLs where the crawler will start to crawl",
                 "seedsType",
                 "0",
-                new String[] {"Enter seed URLs manually", "Use a pagedb.seeds file"}
+                new String[] {"Use a pagedb.seeds file", "Enter seed URLs manually"}
                 ));
         File seedsFile = new File(crawlerDir, "pagedb.seeds");
         String seeds = "http://www.flaptor.com\nhttp://www.cnn.com";
@@ -100,7 +100,7 @@ public class CrawlerConfigurationWizard {
             "Hotspots determine the documents that will be considered by the crawler. They are defined by regular expressions.",
             "hotspotsType",
             "0",
-            new String[] {"Enter hotspots regular expressions manually", "Use a hotspots.regex file"}
+            new String[] {"Use a hotspots.regex file", "Enter hotspots regular expressions manually"}
             ));
 	    File hotspotsRegexFile = new File(crawlerDir, "conf/hotspots.regex");
 	    String hotspots = "*";
@@ -116,11 +116,11 @@ public class CrawlerConfigurationWizard {
         
 //set ordering of pages
         initial.setNextPage(pageSeedsType);
-        pageSeedsType.addNextPage(pageSeedsManual).addNextPage(pageSeedsFile);
+        pageSeedsType.addNextPage(pageSeedsFile).addNextPage(pageSeedsManual);
         pageSeedsFile.setNextPage(hotspotsType);
         pageSeedsManual.setNextPage(hotspotsType);
 
-        hotspotsType.addNextPage(hotspotsManual).addNextPage(hotspotsFile);
+        hotspotsType.addNextPage(hotspotsFile).addNextPage(hotspotsManual);
         hotspotsFile.setNextPage(configuring);
         hotspotsManual.setNextPage(configuring);
         
