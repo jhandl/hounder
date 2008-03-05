@@ -24,9 +24,9 @@ import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
 
 import com.flaptor.clustering.ClusterableListener;
-import com.flaptor.clustering.controlling.controller.Controller;
+import com.flaptor.clustering.controlling.controller.ControllerModule;
 import com.flaptor.clustering.controlling.nodes.ControllableImplementation;
-import com.flaptor.clustering.monitoring.monitor.Monitor;
+import com.flaptor.clustering.monitoring.monitor.MonitorModule;
 import com.flaptor.hounder.crawler.clustering.CrawlerControllableImplementation;
 import com.flaptor.hounder.crawler.modules.CacheModule;
 import com.flaptor.hounder.crawler.modules.CommandWithPageDB;
@@ -101,8 +101,8 @@ public class Crawler {
     	if (config.getBoolean("clustering.enable")) {
         	int port = PortUtil.getPort("clustering.rpc.crawler");
     		clusteringListener = new ClusterableListener(port, config);
-    		Monitor.addMonitorListener(clusteringListener, new CrawlerMonitoredNode(this));
-    		Controller.addControllerListener(clusteringListener, new ControllableImplementation());
+    		MonitorModule.addMonitorListener(clusteringListener, new CrawlerMonitoredNode(this));
+    		ControllerModule.addControllerListener(clusteringListener, new ControllableImplementation());
     		clusteringListener.addModuleListener("crawlerControl", new CrawlerControllableImplementation());
         }
     }

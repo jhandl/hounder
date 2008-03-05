@@ -20,9 +20,9 @@ import java.io.File;
 import org.apache.log4j.Logger;
 
 import com.flaptor.clustering.ClusterableListener;
-import com.flaptor.clustering.controlling.controller.Controller;
+import com.flaptor.clustering.controlling.controller.ControllerModule;
 import com.flaptor.clustering.controlling.nodes.ControllableImplementation;
-import com.flaptor.clustering.monitoring.monitor.Monitor;
+import com.flaptor.clustering.monitoring.monitor.MonitorModule;
 import com.flaptor.hounder.searcher.filter.AFilter;
 import com.flaptor.hounder.searcher.group.AGroup;
 import com.flaptor.hounder.searcher.query.AQuery;
@@ -108,8 +108,8 @@ public class CompositeSearcher implements ISearcher {
     	if (searcherConfig.getBoolean("clustering.enable")) {
         	int port = PortUtil.getPort("clustering.rpc.searcher");
     		clusteringListener = new ClusterableListener(port, searcherConfig);
-    		Monitor.addMonitorListener(clusteringListener, new SearcherMonitoredNode(this));
-    		Controller.addControllerListener(clusteringListener, new ControllableImplementation());    		
+    		MonitorModule.addMonitorListener(clusteringListener, new SearcherMonitoredNode(this));
+    		ControllerModule.addControllerListener(clusteringListener, new ControllableImplementation());    		
         }
     }
     

@@ -20,11 +20,11 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
-import com.flaptor.clustering.Node;
+import com.flaptor.clustering.AbstractModule;
+import com.flaptor.clustering.ModuleNodeDescriptor;
+import com.flaptor.clustering.NodeDescriptor;
 import com.flaptor.clustering.NodeUnreachableException;
-import com.flaptor.clustering.modules.ModuleNode;
-import com.flaptor.clustering.modules.NodeContainerModule;
-import com.flaptor.clustering.modules.WebModule;
+import com.flaptor.clustering.WebModule;
 import com.flaptor.util.remote.WebServer;
 import com.flaptor.util.remote.XmlrpcClient;
 
@@ -33,15 +33,15 @@ import com.flaptor.util.remote.XmlrpcClient;
  * 
  * @author Martin Massera
  */
-public class CrawlerControl extends NodeContainerModule implements WebModule {
+public class CrawlerControl extends AbstractModule<CrawlerControlNode> implements WebModule {
 
 	@Override
-	protected ModuleNode createModuleNode(Node node) {
+	protected CrawlerControlNode createModuleNode(NodeDescriptor node) {
 		return new CrawlerControlNode(node);
 	}
 
 	@Override
-	public boolean nodeBelongs(Node node) throws NodeUnreachableException {
+	public boolean shouldRegister(NodeDescriptor node) throws NodeUnreachableException {
 		try {
 			boolean ret = getCrawlerControllableProxy(node.getXmlrpcClient()).ping();
 			return ret;
@@ -51,12 +51,11 @@ public class CrawlerControl extends NodeContainerModule implements WebModule {
 			throw new NodeUnreachableException(e);
 		}
 	}
-
-	@Override
-	public boolean updateNode(ModuleNode node) {
-		return true;
-	}
-
+    @Override
+    protected void notifyModuleNode(CrawlerControlNode node) {
+        //do nothing
+    }
+	
 	public String getBoostConfig(CrawlerControlNode node) {
 		try {
 			return node.getBoostConfig();
@@ -81,7 +80,7 @@ public class CrawlerControl extends NodeContainerModule implements WebModule {
 	public String getModuleHTML() {
 		return null;
 	}
-	public String getNodeHTML(Node node, int nodeNum) {
+	public String getNodeHTML(NodeDescriptor node, int nodeNum) {
 		if (isRegistered(node)) return "<a href=\"crawlerControl.jsp?node="+nodeNum+"\">crawler</a>";
 		else return null;
 	}

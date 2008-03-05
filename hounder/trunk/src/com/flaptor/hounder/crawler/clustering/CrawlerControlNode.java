@@ -15,22 +15,20 @@ limitations under the License.
 */
 package com.flaptor.hounder.crawler.clustering;
 
-import com.flaptor.clustering.Node;
+import com.flaptor.clustering.ModuleNodeDescriptor;
+import com.flaptor.clustering.NodeDescriptor;
 import com.flaptor.clustering.NodeUnreachableException;
-import com.flaptor.clustering.modules.ModuleNode;
 
 /**
  * Node for crawler control module
  * 
  * @author Martin Massera
  */
-public class CrawlerControlNode implements ModuleNode {
-	private Node node;
+public class CrawlerControlNode extends ModuleNodeDescriptor {
 	private CrawlerControllable crawlerControllable;
 	
-	public CrawlerControlNode(Node node) {
-		super();
-		this.node = node;
+	public CrawlerControlNode(NodeDescriptor node) {
+		super(node);
 		crawlerControllable = CrawlerControl.getCrawlerControllableProxy(node.getXmlrpcClient());
 	}
 
@@ -39,7 +37,7 @@ public class CrawlerControlNode implements ModuleNode {
 			return crawlerControllable.getBoostConfig();
 		}
 		catch (Exception e) {
-			node.setUnreachable(e); //this throws an exception
+			getNodeDescriptor().setUnreachable(e); //this throws an exception
 			return null;
 		}
 	}

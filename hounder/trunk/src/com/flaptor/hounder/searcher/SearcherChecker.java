@@ -15,7 +15,7 @@ limitations under the License.
 */
 package com.flaptor.hounder.searcher;
 
-import com.flaptor.clustering.monitoring.monitor.MonitorNode;
+import com.flaptor.clustering.monitoring.monitor.MonitorNodeDescriptor;
 import com.flaptor.clustering.monitoring.monitor.NodeChecker;
 import com.flaptor.clustering.monitoring.monitor.NodeState;
 import com.flaptor.clustering.monitoring.monitor.NodeState.Sanity;
@@ -27,7 +27,7 @@ import com.flaptor.clustering.monitoring.monitor.NodeState.Sanity;
  */
 public class SearcherChecker implements NodeChecker{
 
-	public Sanity checkNode(MonitorNode node, NodeState state) {
+	public Sanity checkNode(MonitorNodeDescriptor node, NodeState state) {
 		return Sanity.UNKNOWN;
 	}
 

@@ -21,9 +21,9 @@ import org.apache.log4j.Logger;
 import org.dom4j.Document;
 
 import com.flaptor.clustering.ClusterableListener;
-import com.flaptor.clustering.controlling.controller.Controller;
+import com.flaptor.clustering.controlling.controller.ControllerModule;
 import com.flaptor.clustering.controlling.nodes.ControllableImplementation;
-import com.flaptor.clustering.monitoring.monitor.Monitor;
+import com.flaptor.clustering.monitoring.monitor.MonitorModule;
 import com.flaptor.util.AStoppableThread;
 import com.flaptor.util.Config;
 import com.flaptor.util.DocumentParser;
@@ -118,8 +118,8 @@ public class Indexer implements IRmiIndexer, IIndexer, Stoppable {
     	if (config.getBoolean("clustering.enable")) {
         	int port = PortUtil.getPort("clustering.rpc.indexer");
     		clusteringListener = new ClusterableListener(port, config);
-    		Monitor.addMonitorListener(clusteringListener, IndexerMonitoredNode.getInstance());
-    		Controller.addControllerListener(clusteringListener, new ControllableImplementation());    		
+    		MonitorModule.addMonitorListener(clusteringListener, IndexerMonitoredNode.getInstance());
+    		ControllerModule.addControllerListener(clusteringListener, new ControllableImplementation());    		
         }
 
         queue = new Queue<Document>(maxQueueSize);

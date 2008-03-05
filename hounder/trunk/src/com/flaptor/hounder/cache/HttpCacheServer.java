@@ -31,9 +31,9 @@ import org.mortbay.jetty.Server;
 import org.mortbay.jetty.handler.AbstractHandler;
 
 import com.flaptor.clustering.ClusterableListener;
-import com.flaptor.clustering.controlling.controller.Controller;
+import com.flaptor.clustering.controlling.controller.ControllerModule;
 import com.flaptor.clustering.controlling.nodes.ControllableImplementation;
-import com.flaptor.clustering.monitoring.monitor.Monitor;
+import com.flaptor.clustering.monitoring.monitor.MonitorModule;
 import com.flaptor.hounder.crawler.modules.DocumentCacheItem;
 import com.flaptor.util.Config;
 import com.flaptor.util.Execute;
@@ -80,8 +80,8 @@ class HttpCacheServer {
         	if (config.getBoolean("clustering.enable")) {
             	int port = PortUtil.getPort("clustering.rpc.cacheServer");
         		clusterableListener = new ClusterableListener(port, config);
-        		Monitor.addMonitorListener(clusterableListener, new CacheServerMonitoredNode(this));
-        		Controller.addControllerListener(clusterableListener, new ControllableImplementation());
+        		MonitorModule.addMonitorListener(clusterableListener, new CacheServerMonitoredNode(this));
+        		ControllerModule.addControllerListener(clusterableListener, new ControllableImplementation());
             }
 
         	List<Pair<String, Integer>> caches = new ArrayList<Pair<String, Integer>>();
