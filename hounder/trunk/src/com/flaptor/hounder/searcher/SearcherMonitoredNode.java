@@ -18,7 +18,7 @@ package com.flaptor.hounder.searcher;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.flaptor.clustering.monitoring.nodes.MonitoreableImplementation;
+import com.flaptor.clusterfest.monitoring.node.MonitoreableImplementation;
 import com.flaptor.util.Statistics;
 import com.flaptor.util.ThreadUtil;
 

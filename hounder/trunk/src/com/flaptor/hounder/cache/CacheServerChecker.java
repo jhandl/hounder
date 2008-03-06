@@ -15,10 +15,10 @@ limitations under the License.
 */
 package com.flaptor.hounder.cache;
 
-import com.flaptor.clustering.monitoring.monitor.MonitorNodeDescriptor;
-import com.flaptor.clustering.monitoring.monitor.NodeChecker;
-import com.flaptor.clustering.monitoring.monitor.NodeState;
-import com.flaptor.clustering.monitoring.monitor.NodeState.Sanity;
+import com.flaptor.clusterfest.monitoring.MonitorNodeDescriptor;
+import com.flaptor.clusterfest.monitoring.NodeChecker;
+import com.flaptor.clusterfest.monitoring.NodeState;
+import com.flaptor.clusterfest.monitoring.NodeState.Sanity;
 
 /**
  * Checker for cacheServer node type

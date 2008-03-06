@@ -15,9 +15,9 @@ limitations under the License.
 */
 package com.flaptor.hounder.crawler.clustering;
 
-import com.flaptor.clustering.ModuleNodeDescriptor;
-import com.flaptor.clustering.NodeDescriptor;
-import com.flaptor.clustering.NodeUnreachableException;
+import com.flaptor.clusterfest.ModuleNodeDescriptor;
+import com.flaptor.clusterfest.NodeDescriptor;
+import com.flaptor.clusterfest.NodeUnreachableException;
 
 /**
  * Node for crawler control module

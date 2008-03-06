@@ -15,7 +15,7 @@ limitations under the License.
 */
 package com.flaptor.hounder.cache;
 
-import com.flaptor.clustering.monitoring.nodes.MonitoreableImplementation;
+import com.flaptor.clusterfest.monitoring.node.MonitoreableImplementation;
 import com.flaptor.hounder.cache.HttpCacheServer.CacheHandler;
 
 /**

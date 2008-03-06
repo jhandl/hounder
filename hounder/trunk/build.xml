@@ -478,9 +478,9 @@ limitations under the License.
 	</target>
 	
     <target name="clustering-war" description="creates the clustering webapp" depends="compile">
-        <property name="webapp.dir" value="${src.dir}/web-clustering/"/>
+        <property name="webapp.dir" value="${src.dir}/web-clusterfest/"/>
         <!--antcall target="check-jsp"/-->
-        <war warfile="output/clustering.war" webxml="${src.dir}/web-clustering/WEB-INF/web.xml">
+        <war warfile="output/clustering.war" webxml="${src.dir}/web-clusterfest/WEB-INF/web.xml">
 		
             <classes dir="${build.dir}">
                 <include name="com/flaptor/util/**/*.class"/>
@@ -496,7 +496,7 @@ limitations under the License.
 				<include name="*.properties.defaults" />
 			</classes>
 
-            <fileset dir="${src.dir}/web-clustering/">
+            <fileset dir="${src.dir}/web-clusterfest/">
                 <include name="*jsp"/>
                 <include name="*css"/>
             </fileset>
@@ -667,7 +667,7 @@ limitations under the License.
 			  <include name="clusterfest-*.jar"/>
 			</fileset>
 			<patternset>
-			    <include name="web-clustering/**"/>
+			    <include name="web-clusterfest/**"/>
 			</patternset>
 		</unjar>
 		
@@ -683,7 +683,7 @@ limitations under the License.
         <tar destfile="${dist.dir}/clustering-web.tgz" compression="gzip">
             <tarfileset dir="${tmp.bin.dir}" prefix="clustering-web" mode="755" />
             <tarfileset dir="${tmp.conf.dir}" prefix="clustering-web/conf" />
-            <tarfileset dir="${src.dir}/web-clustering" prefix="clustering-web/web-clustering" />
+            <tarfileset dir="${src.dir}/web-clusterfest" prefix="clustering-web/web-clusterfest" />
         </tar>
     </target>
 

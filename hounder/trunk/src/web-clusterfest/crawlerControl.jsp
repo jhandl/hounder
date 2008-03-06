@@ -15,21 +15,20 @@ limitations under the License.
 --%>
 
 <%@page import="com.flaptor.util.Pair"%>
-<%@page import="com.flaptor.clustering.monitoring.SystemProperties"%>
-<%@page import="com.flaptor.clustering.Node"%>
-<%@page import="com.flaptor.clustering.Cluster"%>
+<%@page import="com.flaptor.clusterfest.*"%>
+<%@page import="com.flaptor.clusterfest.monitoring.*"%>
 <%@page import="com.flaptor.hounder.crawler.clustering.*"%>
 <%@page import="java.util.Date"%>
 <%@page import="java.util.Map"%>
 
 <%
-    Cluster cluster = Cluster.getInstance();
+    ClusterManager cluster = ClusterManager.getInstance();
     int idx = Integer.parseInt(request.getParameter("node"));
-    Node clusterNode = cluster.getNodes().get(idx);
+    NodeDescriptor clusterNode = cluster.getNodes().get(idx);
 
     String action = request.getParameter("action");
-    CrawlerControl crawlerControl = (CrawlerControl)cluster.getModule("crawlerControl");
-    CrawlerControlNode node = (CrawlerControlNode)crawlerControl.getNode(clusterNode);
+    CrawlerControlModule crawlerControl = (CrawlerControlModule)cluster.getModule("crawlerControl");
+    CrawlerControlNode node = (CrawlerControlNode)crawlerControl.getModuleNod(clusterNode);
 
     request.setAttribute("pageTitle", "crawler control - " + clusterNode.getHost()+":"+clusterNode.getPort());
 %>

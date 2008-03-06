@@ -15,7 +15,7 @@ limitations under the License.
 */
 package com.flaptor.hounder.crawler;
 
-import com.flaptor.clustering.monitoring.nodes.MonitoreableImplementation;
+import com.flaptor.clusterfest.monitoring.node.MonitoreableImplementation;
 
 /**
  * implementation of MonitoredNode for monitoring a searcher

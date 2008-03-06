@@ -20,10 +20,10 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
-import com.flaptor.clustering.AbstractModule;
-import com.flaptor.clustering.NodeDescriptor;
-import com.flaptor.clustering.NodeUnreachableException;
-import com.flaptor.clustering.WebModule;
+import com.flaptor.clusterfest.AbstractModule;
+import com.flaptor.clusterfest.NodeDescriptor;
+import com.flaptor.clusterfest.NodeUnreachableException;
+import com.flaptor.clusterfest.WebModule;
 import com.flaptor.util.remote.NoSuchRpcMethodException;
 import com.flaptor.util.remote.WebServer;
 import com.flaptor.util.remote.XmlrpcClient;
