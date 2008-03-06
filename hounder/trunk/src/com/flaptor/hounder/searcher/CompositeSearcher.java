@@ -55,6 +55,16 @@ public class CompositeSearcher implements ISearcher {
     }
     
     public CompositeSearcher(Config searcherConfig) {
+
+        // start clustering first.
+    	if (searcherConfig.getBoolean("clustering.enable")) {
+        	int port = PortUtil.getPort("clustering.rpc.searcher");
+    		clusteringListener = new ClusterableListener(port, searcherConfig);
+    		MonitorModule.addMonitorListener(clusteringListener, new SearcherMonitoredNode(this));
+    		ControllerModule.addControllerListener(clusteringListener, new ControllableImplementation());    		
+        }
+
+
         baseSearcher = new Searcher();
 
         searcher = baseSearcher;
@@ -104,13 +114,6 @@ public class CompositeSearcher implements ISearcher {
             }
         }
     	searcher = new StatisticSearcher(searcher, "searcher");
-
-    	if (searcherConfig.getBoolean("clustering.enable")) {
-        	int port = PortUtil.getPort("clustering.rpc.searcher");
-    		clusteringListener = new ClusterableListener(port, searcherConfig);
-    		MonitorModule.addMonitorListener(clusteringListener, new SearcherMonitoredNode(this));
-    		ControllerModule.addControllerListener(clusteringListener, new ControllableImplementation());    		
-        }
     }
     
     public GroupedSearchResults search(AQuery query, int firstResult, int count, AGroup group, int groupSize, AFilter filter, ASort sort) throws SearcherException{

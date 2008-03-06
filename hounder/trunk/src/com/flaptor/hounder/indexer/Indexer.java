@@ -21,9 +21,9 @@ import org.apache.log4j.Logger;
 import org.dom4j.Document;
 
 import com.flaptor.clustering.ClusterableListener;
-import com.flaptor.clustering.controlling.controller.ControllerModule;
+import com.flaptor.clustering.controlling.controller.Controller;
 import com.flaptor.clustering.controlling.nodes.ControllableImplementation;
-import com.flaptor.clustering.monitoring.monitor.MonitorModule;
+import com.flaptor.clustering.monitoring.monitor.Monitor;
 import com.flaptor.util.AStoppableThread;
 import com.flaptor.util.Config;
 import com.flaptor.util.DocumentParser;
@@ -77,9 +77,17 @@ public class Indexer implements IRmiIndexer, IIndexer, Stoppable {
      * Constructor.
      */
     public Indexer() {
-		indexManager = new IndexManager();
-        // If the config file says so, we override the default queue size
+    	
         Config config = Config.getConfig("indexer.properties");
+        if (config.getBoolean("clustering.enable")) {
+        	int port = PortUtil.getPort("clustering.rpc.indexer");
+    		clusteringListener = new ClusterableListener(port, config);
+    		Monitor.addMonitorListener(clusteringListener, IndexerMonitoredNode.getInstance());
+    		Controller.addControllerListener(clusteringListener, new ControllableImplementation());    		
+        }
+
+
+		indexManager = new IndexManager();
         maxQueueSize = config.getInt("Indexer.maxQueueSize");
         logger.info("Maximum queue size set to " + maxQueueSize);
         // create all the modules requested in the configuration file AND
@@ -115,12 +123,6 @@ public class Indexer implements IRmiIndexer, IIndexer, Stoppable {
         logger.info("Modules ready");
         // Modules created
         
-    	if (config.getBoolean("clustering.enable")) {
-        	int port = PortUtil.getPort("clustering.rpc.indexer");
-    		clusteringListener = new ClusterableListener(port, config);
-    		MonitorModule.addMonitorListener(clusteringListener, IndexerMonitoredNode.getInstance());
-    		ControllerModule.addControllerListener(clusteringListener, new ControllableImplementation());    		
-        }
 
         queue = new Queue<Document>(maxQueueSize);
         qpt = new QueueProcessorThread();
