@@ -102,6 +102,13 @@ public class HtmlParser extends AModule {
      */
     public final Document[] internalProcess(final Document doc) {
         Document[] docs = { doc };
+
+        // check that this is a documentAdd
+        // otherwise, skip.
+        Element root = doc.getRootElement();
+        if (!root.getName().equals("documentAdd")) return docs;
+
+
         try {
             for (Pair<String, String> tag : tags) {
                 processTag(doc, tag.first(), tag.last());
@@ -132,7 +139,7 @@ public class HtmlParser extends AModule {
         }
 
         com.flaptor.hounder.util.HtmlParser.Output out = parser.parse("",bodyElement.getText());
-        
+
 
         for (String field: extraFields) {
             String content = out.getField(field);
