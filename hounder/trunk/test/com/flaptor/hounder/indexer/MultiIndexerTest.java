@@ -51,6 +51,7 @@ public class MultiIndexerTest extends TestCase {
         }
         hosts = hosts.substring(0,hosts.length()-1);
         Config config = Config.getConfig("multiIndexer.properties");
+        config.set("multiIndexer.useXslt","no");
         config.set("indexer.hosts",hosts);
         Config.getConfig("common.properties").set("port.base", String.valueOf(genPort(numIndexers + 1 )));
         Config.getConfig("indexer.properties").set("clustering.enable","false");

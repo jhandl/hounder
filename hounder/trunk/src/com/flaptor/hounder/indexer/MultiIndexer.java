@@ -1,18 +1,20 @@
 /*
-Copyright 2008 Flaptor (flaptor.com) 
+ Copyright 2008 Flaptor (flaptor.com) 
+ 
+ Licensed under the Apache License, Version 2.0 (the "License"); 
+ you may not use this file except in compliance with the License. 
+ You may obtain a copy of the License at 
+ 
+     http://www.apache.org/licenses/LICENSE-2.0 
+ 
+ Unless required by applicable law or agreed to in writing, software 
+ distributed under the License is distributed on an "AS IS" BASIS, 
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
+ See the License for the specific language governing permissions and 
+ limitations under the License.
+ */
 
-Licensed under the Apache License, Version 2.0 (the "License"); 
-you may not use this file except in compliance with the License. 
-You may obtain a copy of the License at 
 
-    http://www.apache.org/licenses/LICENSE-2.0 
-
-Unless required by applicable law or agreed to in writing, software 
-distributed under the License is distributed on an "AS IS" BASIS, 
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
-See the License for the specific language governing permissions and 
-limitations under the License.
-*/
 package com.flaptor.hounder.indexer;
 
 import java.util.ArrayList;
@@ -32,7 +34,7 @@ import com.flaptor.util.RunningState;
 
 
 /**
- * This class implements the Hounder multi indexer. It recieves documents
+ * This class implements the hounder multi indexer. It recieves documents
  * to index and relays them to one of a number of indexers according to a 
  * pluggable function of the received document, for example the hash of the
  * url. It is important that this hash function splits the incomming stream
@@ -43,11 +45,15 @@ import com.flaptor.util.RunningState;
 public class MultiIndexer implements IRmiIndexer, IIndexer {
     
     private static final Logger logger = Logger.getLogger(Execute.whoAmI());
-    private RunningState state = RunningState.RUNNING;
-    private ArrayList<IRemoteIndexer> indexers = new ArrayList<IRemoteIndexer>();
-    private DocumentParser parser = new DocumentParser();
+    protected RunningState state = RunningState.RUNNING;
+    protected ArrayList<IRemoteIndexer> indexers = new ArrayList<IRemoteIndexer>();
+    protected DocumentParser parser = new DocumentParser();
     private Hash hashFunction = null;
-    private static final int RETRY_LIMIT = 30;
+    protected static final int RETRY_LIMIT = 30;
+
+    // xslt related variables
+    private final boolean useXslt;
+    private final XsltModule xsltModule;
 
     
     /**
@@ -65,6 +71,19 @@ public class MultiIndexer implements IRmiIndexer, IIndexer {
 
         hashFunction = new Hash(indexers.size());
 
+        useXslt = config.getBoolean("multiIndexer.useXslt");
+        if (useXslt) {
+            try { 
+                xsltModule = new XsltModule();
+                logger.info("MultiIndexer will be using XsltModule");
+            } catch (Exception e) {
+                logger.error("Constructor: while instantiating XsltModule: " + e,e);
+                throw new RuntimeException(e);
+            }
+        } else {
+            xsltModule = null;
+            logger.info("MultiIndexer will NOT be using XsltModule");
+        }
     }
 
 
@@ -75,11 +94,32 @@ public class MultiIndexer implements IRmiIndexer, IIndexer {
      * @throws IllegalStateException if the state of the indexer is not running.
      * @see com.flaptor.util.remote.XmlrpcServer
      */
-    public int index(final Document doc) {
+    public int index(Document doc) {
         if (state != RunningState.RUNNING) {
             throw new IllegalStateException("index: Trying to index a document but the MultiIndexer is no longer running.");
         }
 
+        if (null == doc) {
+            throw new IllegalArgumentException("Got null Document.");
+        }
+
+        if (useXslt) {
+            Document[] docs = xsltModule.process(doc);
+            if (null == docs || docs.length != 1) {
+                String error = "XsltModule did not return 1 document. It returned " + ((null == docs ) ? "null" : String.valueOf(docs.length)) +". This is wrong and we will not continue";
+                logger.fatal(error);
+                System.exit(-1);
+            }
+            // else
+            doc = docs[0];
+        }
+
+
+
+        if (null == doc) {
+            logger.fatal("got null document after transformation. this should not happen. I can't tell which is the offending document.");
+            System.exit(1);
+        }
 
         // check commands
         Node command = doc.selectSingleNode("/command");
@@ -89,6 +129,7 @@ public class MultiIndexer implements IRmiIndexer, IIndexer {
 
         // else, it may be a document to index / delete
         // get the documentId.
+        
         Node node = doc.selectSingleNode("//documentId");
         if (null == node) {
             logger.error("Document missing documentId. Will not index it.");
@@ -96,8 +137,12 @@ public class MultiIndexer implements IRmiIndexer, IIndexer {
             return Indexer.FAILURE;
         }
         
-        // get the target indexer.
-        int target = hashFunction.hash(node.getText());
+
+        // get the target indexer. 
+        // Make sure that urls begin with http://
+        String url = node.getText();
+        int target = hashFunction.hash(url);
+
         // send the document to the target indexer.
         try {
             IRemoteIndexer indexer = indexers.get(target);
@@ -128,7 +173,7 @@ public class MultiIndexer implements IRmiIndexer, IIndexer {
 
 
 
-    private int processCommand(final Document doc) {
+    protected int processCommand(final Document doc) {
         Node commandNode = doc.selectSingleNode("/command");
         Node attNode = commandNode.selectSingleNode("@node");
         
