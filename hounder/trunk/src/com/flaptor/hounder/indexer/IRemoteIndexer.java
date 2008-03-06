@@ -17,15 +17,15 @@ package com.flaptor.hounder.indexer;
 
 import org.dom4j.Document;
 
-import com.flaptor.util.remote.ConnectionException;
+import com.flaptor.util.remote.RpcException;
 /**
  * An Indexer that may be running on a different machine.
  * @author Flaptor Development Team
  */
 public interface IRemoteIndexer {
     
-    public int index(final Document doc) throws ConnectionException;
+    public int index(final Document doc) throws RpcException;
     
-    public int index(final String text) throws ConnectionException;
+    public int index(final String text) throws RpcException;
     
 }

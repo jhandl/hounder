@@ -19,7 +19,7 @@ import com.flaptor.hounder.searcher.filter.AFilter;
 import com.flaptor.hounder.searcher.group.AGroup;
 import com.flaptor.hounder.searcher.query.AQuery;
 import com.flaptor.hounder.searcher.sort.ASort;
-import com.flaptor.util.remote.ConnectionException;
+import com.flaptor.util.remote.RpcException;
 
 
 /**
@@ -28,6 +28,6 @@ import com.flaptor.util.remote.ConnectionException;
  */
 public interface IRemoteSearcher {
     /*@fixme writeme*/
-	public GroupedSearchResults search(AQuery query, int firstResult, int count,  AGroup group, int groupSize, AFilter filter, ASort sort) throws ConnectionException;
+	public GroupedSearchResults search(AQuery query, int firstResult, int count,  AGroup group, int groupSize, AFilter filter, ASort sort) throws RpcException;
 }
 

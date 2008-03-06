@@ -37,7 +37,7 @@ import org.dom4j.Element;
 import com.flaptor.util.PortUtil;
 import com.flaptor.util.remote.ARmiClientStub;
 import com.flaptor.util.remote.AlwaysRetryPolicy;
-import com.flaptor.util.remote.ConnectionException;
+import com.flaptor.util.remote.RpcException;
 
 /**
  * A client-side IRemoteIndexer that connects with the server
@@ -69,7 +69,7 @@ public class RmiIndexerStub extends ARmiClientStub implements IRemoteIndexer {
     }
 
 
-    public int index(Document doc) throws ConnectionException {
+    public int index(Document doc) throws RpcException {
         try {
             super.checkConnection();
             int res = remoteIndexer.index(doc);
@@ -78,11 +78,11 @@ public class RmiIndexerStub extends ARmiClientStub implements IRemoteIndexer {
         } catch (RemoteException e) {
             logger.error(e,e);
             super.connectionFailure();
-            throw new ConnectionException();
+            throw new RpcException();
         }
     }
 
-    public int index(String text) throws ConnectionException {
+    public int index(String text) throws RpcException {
         try {
             super.checkConnection();
             int res = remoteIndexer.index(text);
@@ -91,7 +91,7 @@ public class RmiIndexerStub extends ARmiClientStub implements IRemoteIndexer {
         } catch (RemoteException e) {
             logger.error(e,e);
             super.connectionFailure();
-            throw new ConnectionException();
+            throw new RpcException();
         }
     }
 

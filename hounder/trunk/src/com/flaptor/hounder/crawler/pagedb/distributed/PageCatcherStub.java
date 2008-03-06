@@ -23,7 +23,7 @@ import org.apache.log4j.Logger;
 import com.flaptor.hounder.crawler.pagedb.Page;
 import com.flaptor.util.PortUtil;
 import com.flaptor.util.remote.ARmiClientStub;
-import com.flaptor.util.remote.ConnectionException;
+import com.flaptor.util.remote.RpcException;
 import com.flaptor.util.remote.ExponentialFallbackPolicy;
 
 /**
@@ -44,7 +44,7 @@ public class PageCatcherStub extends ARmiClientStub implements IRemotePageCatche
         logger.info("Creating PageCatcherStub for PageCatcher located at " + host + ":" + PortUtil.getPort(basePort,"pagecatcher.rmi"));
     }
     
-    public void addPage(Page page) throws  ConnectionException{
+    public void addPage(Page page) throws  RpcException{
         try {
             super.checkConnection();
             remotePageCatcher.addPage(page);
@@ -52,7 +52,7 @@ public class PageCatcherStub extends ARmiClientStub implements IRemotePageCatche
         } catch (RemoteException e) {
             logger.error(e,e);
             super.connectionFailure();
-            throw new ConnectionException(e);
+            throw new RpcException(e);
         }
     }
 

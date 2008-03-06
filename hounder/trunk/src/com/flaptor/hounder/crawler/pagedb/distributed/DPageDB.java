@@ -25,7 +25,7 @@ import com.flaptor.hounder.crawler.pagedb.PageDB;
 import com.flaptor.util.Config;
 import com.flaptor.util.Execute;
 import com.flaptor.util.NetUtil;
-import com.flaptor.util.remote.ConnectionException;
+import com.flaptor.util.remote.RpcException;
 
 
 /**
@@ -153,7 +153,7 @@ public class DPageDB extends PageDB {
                 catcher.addPage(page);
                 sent = true;
             }
-        } catch (ConnectionException e) {
+        } catch (RpcException e) {
             logger.error("Attempting to send a page to a remote PageCatcher",e);
             page.setLocal(false);
         }

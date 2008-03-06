@@ -28,7 +28,7 @@ import com.flaptor.hounder.searcher.query.LazyParsedQuery;
 import com.flaptor.hounder.searcher.sort.ASort;
 import com.flaptor.util.PortUtil;
 import com.flaptor.util.remote.ARmiClientStub;
-import com.flaptor.util.remote.ConnectionException;
+import com.flaptor.util.remote.RpcException;
 import com.flaptor.util.remote.ExponentialFallbackPolicy;
 
 /**
@@ -48,7 +48,7 @@ public class RmiSearcherStub extends ARmiClientStub implements IRemoteSearcher {
         logger.info("Creating RmiSearcherStub for Searcher located at " + host + ":" + PortUtil.getPort(basePort,"searcher.rmi"));
     }
     
-	public GroupedSearchResults search(AQuery query, int firstResult, int count,  AGroup groupBy, int groupSize, AFilter filter, ASort sort) throws ConnectionException {
+	public GroupedSearchResults search(AQuery query, int firstResult, int count,  AGroup groupBy, int groupSize, AFilter filter, ASort sort) throws RpcException {
         try { 
             super.checkConnection();
             GroupedSearchResults res = remoteSearcher.search(query, firstResult, count, groupBy, groupSize,filter, sort);
@@ -57,7 +57,7 @@ public class RmiSearcherStub extends ARmiClientStub implements IRemoteSearcher {
         } catch (RemoteException e) {
             logger.error(e,e);
             super.connectionFailure();
-            throw new ConnectionException(e);
+            throw new RpcException(e);
         }
     }
 

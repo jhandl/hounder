@@ -103,7 +103,7 @@ public class MultiIndexer implements IRmiIndexer, IIndexer {
             IRemoteIndexer indexer = indexers.get(target);
             logger.debug("Sending " + node.getText() + " to indexer " + target);
             return indexer.index(doc);
-        } catch (com.flaptor.util.remote.ConnectionException e) {
+        } catch (com.flaptor.util.remote.RpcException e) {
             logger.error("Connection failed: ",e);
             return Indexer.FAILURE;
         }
@@ -148,7 +148,7 @@ public class MultiIndexer implements IRmiIndexer, IIndexer {
                             retries++;
                             Execute.sleep(10*1000); // wait 10 seconds before retry
                         }
-                    } catch (com.flaptor.util.remote.ConnectionException e ) {
+                    } catch (com.flaptor.util.remote.RpcException e ) {
                         logger.error("processCommand: Connection failed: " + e.getMessage(),e);
                     }
                 }
@@ -169,7 +169,7 @@ public class MultiIndexer implements IRmiIndexer, IIndexer {
                     IRemoteIndexer indexer = indexers.get(indexerNumber);
                     try {
                         return indexer.index(doc);
-                    } catch (com.flaptor.util.remote.ConnectionException e) {
+                    } catch (com.flaptor.util.remote.RpcException e) {
                         logger.error("processCommand: while sending command to single node " + indexer.toString() + " " + e.getMessage(),e);
                         return Indexer.FAILURE;
                     }

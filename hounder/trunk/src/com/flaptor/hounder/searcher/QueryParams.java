@@ -22,7 +22,7 @@ import com.flaptor.hounder.searcher.filter.AFilter;
 import com.flaptor.hounder.searcher.group.AGroup;
 import com.flaptor.hounder.searcher.query.AQuery;
 import com.flaptor.hounder.searcher.sort.ASort;
-import com.flaptor.util.remote.ConnectionException;
+import com.flaptor.util.remote.RpcException;
 
 /**
  * class that stores the query parameters
@@ -86,9 +86,9 @@ public class QueryParams implements Serializable {
      * executes the query with the given params in a remote searcher
      * @param searcher the remote seacher to execute the query in
      * @return results of the query from that searcher
-     * @throws ConnectionException 
+     * @throws RpcException 
      */
-    public GroupedSearchResults executeInRemoteSearcher(IRemoteSearcher searcher) throws ConnectionException {
+    public GroupedSearchResults executeInRemoteSearcher(IRemoteSearcher searcher) throws RpcException {
         return searcher.search(
                 (AQuery)params.get(0),
                 (Integer)params.get(1),

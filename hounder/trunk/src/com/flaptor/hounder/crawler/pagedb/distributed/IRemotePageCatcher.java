@@ -19,14 +19,14 @@ import java.rmi.Remote;
 import java.rmi.RemoteException;
 
 import com.flaptor.hounder.crawler.pagedb.Page;
-import com.flaptor.util.remote.ConnectionException;
+import com.flaptor.util.remote.RpcException;
 
 /**
  * @author Flaptor Development Team
  */
 public interface IRemotePageCatcher extends Remote {
 
-    public void addPage (Page page) throws ConnectionException, RemoteException;
+    public void addPage (Page page) throws RpcException, RemoteException;
 
 }
 

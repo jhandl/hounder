@@ -29,7 +29,7 @@ public class CrawlerControlNode extends ModuleNodeDescriptor {
 	
 	public CrawlerControlNode(NodeDescriptor node) {
 		super(node);
-		crawlerControllable = CrawlerControl.getCrawlerControllableProxy(node.getXmlrpcClient());
+		crawlerControllable = CrawlerControlModule.getCrawlerControllableProxy(node.getXmlrpcClient());
 	}
 
 	public String getBoostConfig() throws NodeUnreachableException {

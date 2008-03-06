@@ -21,10 +21,10 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 
 import com.flaptor.clustering.AbstractModule;
-import com.flaptor.clustering.ModuleNodeDescriptor;
 import com.flaptor.clustering.NodeDescriptor;
 import com.flaptor.clustering.NodeUnreachableException;
 import com.flaptor.clustering.WebModule;
+import com.flaptor.util.remote.NoSuchRpcMethodException;
 import com.flaptor.util.remote.WebServer;
 import com.flaptor.util.remote.XmlrpcClient;
 
@@ -33,7 +33,7 @@ import com.flaptor.util.remote.XmlrpcClient;
  * 
  * @author Martin Massera
  */
-public class CrawlerControl extends AbstractModule<CrawlerControlNode> implements WebModule {
+public class CrawlerControlModule extends AbstractModule<CrawlerControlNode> implements WebModule {
 
 	@Override
 	protected CrawlerControlNode createModuleNode(NodeDescriptor node) {
@@ -45,7 +45,7 @@ public class CrawlerControl extends AbstractModule<CrawlerControlNode> implement
 		try {
 			boolean ret = getCrawlerControllableProxy(node.getXmlrpcClient()).ping();
 			return ret;
-		} catch (NoSuchMethodException e) {
+		} catch (NoSuchRpcMethodException e) {
 			return false;
 		} catch (Exception e) {
 			throw new NodeUnreachableException(e);

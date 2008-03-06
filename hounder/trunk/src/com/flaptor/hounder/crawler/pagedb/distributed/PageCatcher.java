@@ -22,7 +22,7 @@ import org.apache.log4j.Logger;
 import com.flaptor.hounder.crawler.pagedb.Page;
 import com.flaptor.hounder.crawler.pagedb.PageDB;
 import com.flaptor.util.Execute;
-import com.flaptor.util.remote.ConnectionException;
+import com.flaptor.util.remote.RpcException;
 import com.flaptor.util.remote.RmiServer;
 
 
@@ -92,7 +92,7 @@ public class PageCatcher implements IRemotePageCatcher {
      * Add pages sent by remote dpagedb via RMI.
      * @param page the page sent by a remote dpagedb.
      */
-    public void addPage (Page page) throws ConnectionException {
+    public void addPage (Page page) throws RpcException {
         if (running) {
             logger.debug("Receieved remote page "+page.getUrl());
             addCatch(page);
