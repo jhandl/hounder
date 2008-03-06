@@ -19,6 +19,8 @@ import org.apache.log4j.Logger;
 import org.apache.lucene.analysis.Token;
 import org.apache.lucene.search.highlight.Fragmenter;
 
+import com.flaptor.hounder.util.TokenUtil;
+
 /**
  * @author Flaptor Development Team
  */
@@ -49,7 +51,7 @@ public class PhraseMatchingFragmenter implements Fragmenter {
     
     public boolean isNewFragment(Token token) {
         boolean isNewFrag= lineBreaker(lastOffset, token.startOffset());
-        logger.debug("token: " + token.termText());
+        logger.debug("token: " + TokenUtil.termText(token));
         if (isNewFrag) logger.debug("BREAK!");
         lastOffset = token.endOffset();
         return isNewFrag;

@@ -24,6 +24,8 @@ import org.apache.lucene.analysis.TokenStream;
 import com.flaptor.util.TestCase;
 import com.flaptor.util.TestInfo;
 
+import com.flaptor.hounder.util.TokenUtil;
+
 /**
  * @author Flaptor Development Team
  */
@@ -33,38 +35,39 @@ public class TupleTokenizerTest extends TestCase {
         super.setUp();
     }
 
+
     @TestInfo(testType = TestInfo.TestType.UNIT)
     public void testNext() throws IOException {
         TupleTokenizer tt= new TupleTokenizer(new MockTokenStrem(),3);
-        assertEquals("t1", tt.next().termText());
-        assertEquals("t2", tt.next().termText());
-        assertEquals("t3", tt.next().termText());
-        assertEquals("t4", tt.next().termText());
-        assertEquals("t5", tt.next().termText());
-        assertEquals("t6", tt.next().termText());
-        assertEquals("t7", tt.next().termText());
-        assertEquals("t8", tt.next().termText());
-        assertEquals("t9", tt.next().termText());
-        assertEquals("t10", tt.next().termText());
+        assertEquals("t1", TokenUtil.termText(tt.next()));
+        assertEquals("t2", TokenUtil.termText(tt.next()));
+        assertEquals("t3", TokenUtil.termText(tt.next()));
+        assertEquals("t4", TokenUtil.termText(tt.next()));
+        assertEquals("t5", TokenUtil.termText(tt.next()));
+        assertEquals("t6", TokenUtil.termText(tt.next()));
+        assertEquals("t7", TokenUtil.termText(tt.next()));
+        assertEquals("t8", TokenUtil.termText(tt.next()));
+        assertEquals("t9", TokenUtil.termText(tt.next()));
+        assertEquals("t10", TokenUtil.termText(tt.next()));
 
-        assertEquals("t1_t2", tt.next().termText());
-        assertEquals("t2_t3", tt.next().termText());
-        assertEquals("t3_t4", tt.next().termText());
-        assertEquals("t4_t5", tt.next().termText());
-        assertEquals("t5_t6", tt.next().termText());
-        assertEquals("t6_t7", tt.next().termText());
-        assertEquals("t7_t8", tt.next().termText());
-        assertEquals("t8_t9", tt.next().termText());
-        assertEquals("t9_t10", tt.next().termText());
+        assertEquals("t1_t2", TokenUtil.termText(tt.next()));
+        assertEquals("t2_t3", TokenUtil.termText(tt.next()));
+        assertEquals("t3_t4", TokenUtil.termText(tt.next()));
+        assertEquals("t4_t5", TokenUtil.termText(tt.next()));
+        assertEquals("t5_t6", TokenUtil.termText(tt.next()));
+        assertEquals("t6_t7", TokenUtil.termText(tt.next()));
+        assertEquals("t7_t8", TokenUtil.termText(tt.next()));
+        assertEquals("t8_t9", TokenUtil.termText(tt.next()));
+        assertEquals("t9_t10", TokenUtil.termText(tt.next()));
         
-        assertEquals("t1_t2_t3", tt.next().termText());
-        assertEquals("t2_t3_t4", tt.next().termText());
-        assertEquals("t3_t4_t5", tt.next().termText());
-        assertEquals("t4_t5_t6", tt.next().termText());
-        assertEquals("t5_t6_t7", tt.next().termText());
-        assertEquals("t6_t7_t8", tt.next().termText());
-        assertEquals("t7_t8_t9", tt.next().termText());
-        assertEquals("t8_t9_t10", tt.next().termText());
+        assertEquals("t1_t2_t3", TokenUtil.termText(tt.next()));
+        assertEquals("t2_t3_t4", TokenUtil.termText(tt.next()));
+        assertEquals("t3_t4_t5", TokenUtil.termText(tt.next()));
+        assertEquals("t4_t5_t6", TokenUtil.termText(tt.next()));
+        assertEquals("t5_t6_t7", TokenUtil.termText(tt.next()));
+        assertEquals("t6_t7_t8", TokenUtil.termText(tt.next()));
+        assertEquals("t7_t8_t9", TokenUtil.termText(tt.next()));
+        assertEquals("t8_t9_t10", TokenUtil.termText(tt.next()));
         
         assertNull(tt.next());
     }

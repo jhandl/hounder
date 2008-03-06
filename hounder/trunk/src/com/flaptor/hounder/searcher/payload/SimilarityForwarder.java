@@ -16,11 +16,12 @@ limitations under the License.
 package com.flaptor.hounder.searcher.payload;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+import java.util.List;
 
-import org.apache.log4j.Logger;
 import org.apache.lucene.search.DefaultSimilarity;
+import org.apache.log4j.Logger;
+
 
 import com.flaptor.util.Config;
 import com.flaptor.util.Pair;
@@ -78,7 +79,7 @@ public class SimilarityForwarder extends DefaultSimilarity {
 
         PayloadScorer scorer = scorers.get(fieldName);
         if (null == scorer) {
-            return super.scorePayload(/*fieldName,*/ payload, offset, length);
+            return super.scorePayload(fieldName, payload, offset, length);
         } else {
             // Lucene gives an array that is larger than the length parameter.
             // trim it.

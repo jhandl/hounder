@@ -77,8 +77,10 @@ public class DatePayloadScorer extends DefaultSimilarity implements PayloadScore
     }
 
     @Override
-    public float scorePayload(byte[] payload, int offset, int length) {
-        // ignore offset and length parameters... Is this ok?
+    public float scorePayload(String fieldName, byte[] payload, int offset, int length) {
+         // ignore offset and length parameters... Is this ok?
+         // also ignore fieldname, as we should have been called by
+         // a SimilarityForwarder
         return scorePayload(payload);
     }
 }

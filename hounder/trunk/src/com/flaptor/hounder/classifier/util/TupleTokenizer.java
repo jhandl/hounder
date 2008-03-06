@@ -21,6 +21,8 @@ import java.util.Vector;
 import org.apache.lucene.analysis.Token;
 import org.apache.lucene.analysis.TokenStream;
 
+import com.flaptor.hounder.util.TokenUtil;
+
 /**
  * @author rafa
  *
@@ -41,7 +43,7 @@ public class TupleTokenizer extends TokenStream {
      * 
      */
     public TupleTokenizer(TokenStream ts, int maxTuples ) throws IOException {
-        
+
         MAX_INCREMENT= maxTuples;
         Token tk;
         while ((tk = ts.next()) != null) {
@@ -51,7 +53,7 @@ public class TupleTokenizer extends TokenStream {
 
     private Token mergeTokens(Token t1, Token t2){
         if (null == t1) return t2;
-        return new Token(t1.termText()+"_"+t2.termText(), 
+        return new Token(TokenUtil.termText(t1)+"_"+TokenUtil.termText(t2), 
                 t1.startOffset(), t2.endOffset());
     }
     /* (non-Javadoc)

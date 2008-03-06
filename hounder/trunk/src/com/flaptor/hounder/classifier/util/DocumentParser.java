@@ -28,6 +28,7 @@ import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 
 import com.flaptor.util.Execute;
+import com.flaptor.hounder.util.TokenUtil;
 
 
 /**
@@ -84,7 +85,7 @@ public class DocumentParser {
                 tokenStream= new TupleTokenizer(tokenStream, maxTuple);
             }
             while ((token = tokenStream.next()) != null) {
-                String term = token.termText();
+                String term = TokenUtil.termText(token);
                 int[] count = tokenCount.get(term);
                 if (count == null) {
                     count = new int[] { 0 };

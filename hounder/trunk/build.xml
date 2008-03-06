@@ -42,15 +42,6 @@ limitations under the License.
 	   <format property="now" pattern="HH:mm:ss d-MMMM-yyyy"/>
     </tstamp>
 
-    <path id="classpath.jars.util">
-        <fileset dir="${basedir}/lib">
-			<include name="dom4j-1.6.1.jar" />
-			<include name="xmlrpc-2.0.jar" />
-			<include name="log4j-1.2.11.jar" />
-			<include name="lucene-core-2.0.0.jar" />
-        </fileset>
-    </path>
-
     <path id="classpath.jars.hounder">
         <fileset dir="${lib.dir}">
             <include name="flaptor-util-*.jar" />
@@ -63,10 +54,10 @@ limitations under the License.
 			<include name="commons-httpclient-2.0.2.jar" />
 			<include name="commons-logging-1.0.2.jar" />
             <include name="commons-codec-1.3.jar" />
-			<include name="lucene-core-2.2.0.jar" />
-			<include name="lucene-highlighter-2.2.0.jar" />
-			<include name="lucene-misc-2.2.0.jar" />
-			<include name="lucene-memory-2.2.0.jar" />
+			<include name="lucene-core-2.3.1.jar" />
+			<include name="lucene-highlighter-2.3.1.jar" />
+			<include name="lucene-misc-2.3.1.jar" />
+			<include name="lucene-memory-2.3.1.jar" />
             <include name="jakarta-oro-2.0.7.jar" />
 			<include name="stringtemplate.jar" />
 			<include name="antlr-2.7.7.jar" />

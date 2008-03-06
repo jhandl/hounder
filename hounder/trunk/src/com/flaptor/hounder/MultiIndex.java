@@ -119,17 +119,19 @@ public class MultiIndex extends Index {
         	return null;
         }
 
-        try {
+        // try - catch code commented out because in lucene 2.3.1 it multireader does not throw IOException
+        // TODO remove this commented code (mono)
+        //try {
             IndexReader[] readers = new IndexReader[children.size()];
             for (int i = 0; i < readers.length; i++) {
                 readers[i] = children.get(i).getReader();
             }
             reader = new MultiReader(readers);
             return reader;
-        } catch (IOException e) {
-            logger.error(e,e);
-            throw new RuntimeException("Error while getting reader: " + e.getMessage(),e);
-        }
+        //} catch (IOException e) {
+        //    logger.error(e,e);
+        //    throw new RuntimeException("Error while getting reader: " + e.getMessage(),e);
+        //}
     }
 
 

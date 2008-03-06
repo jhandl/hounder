@@ -24,7 +24,7 @@ import org.apache.log4j.Logger;
 import org.apache.lucene.analysis.Token;
 import org.apache.lucene.analysis.standard.StandardTokenizer;
 
-
+import com.flaptor.hounder.util.TokenUtil;
 
 /**
  * Suggests queries based on a WordSuggestor
@@ -72,7 +72,7 @@ public class AQuerySuggestor {
                 while(true) {
                     Token token = tokenizer.next();
                     if (null == token) break;
-                    tokens.add(token.termText());
+                    tokens.add(TokenUtil.termText(token));
                 }
 
                 // for every word, suggest something
