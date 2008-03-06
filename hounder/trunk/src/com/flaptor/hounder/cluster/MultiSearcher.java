@@ -131,7 +131,7 @@ public class MultiSearcher implements ISearcher {
                     totalDocuments += gsr.totalGroupsEstimation();
                 } else {
                     badResults.add(result);
-                    logger.warn("Exception from remote search", result.getException());
+                    logger.warn("Exception from remote search on searcher " + result.getResults().first(), result.getException());
                 }
             }
         }

@@ -312,12 +312,12 @@ public class Index {
     /**
      * Makes a lightweight copy of the source directory to the destination.
      * This implementation executes the command
-     * <pre>cp -lr [source] [destination]</pre>.
+     * <pre>cp -lpr [source] [destination]</pre>.
      * @param source the absolute path of the source directory. Must exist.
      * @param destination the absolute path of the destination directory
      */
     protected static void makeHardLinkCopy(final File source, final File destination) {
-        String command = "cp -lr " + source.getAbsolutePath() + " " + destination.getAbsolutePath();
+        String command = "cp -lpr " + source.getAbsolutePath() + " " + destination.getAbsolutePath();
         logger.debug("makeHardLinkCopy: \"" + command + "\"");
         CommandUtil.execute(command, null, logger);
     }

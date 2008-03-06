@@ -152,7 +152,7 @@ public final class IndexManager implements IndexWriteProvider, Stoppable {
             workIndex = Index.createIndex(indexDirectory);
             workIndex.setIndexDescriptor(indexDescriptor);
             nextAddId = 1;
-            openWriter(true);
+            openWriter();
         } else {
             logger.info("constructor: Using latest copy as index.");
             String indexPath = indexDirectory.getAbsolutePath();
@@ -167,7 +167,7 @@ public final class IndexManager implements IndexWriteProvider, Stoppable {
                 throw new IllegalStateException(s);
             }
             nextAddId = findLargestAddId() + 1;
-            openWriter(false);
+            openWriter();
         }
 	}
 
@@ -420,11 +420,9 @@ public final class IndexManager implements IndexWriteProvider, Stoppable {
 
 	/**
 	 * Opens the writer.
-	 * @param create if set to true, a new index will be created. If set to false,
-	 *            an existing one is used.
 	 * @throws RuntTimeException if there was a problem opening the writer.
 	 */
-	private void openWriter(final boolean create) {
+	private void openWriter() {
         writer = workIndex.getWriter();
 	}
 
@@ -449,6 +447,8 @@ public final class IndexManager implements IndexWriteProvider, Stoppable {
 		if (optimizeScheduled) {
 			logger.info("Beginning index optimization..");
 			try {
+                // make sure that the writer is open to optimize.
+                openWriter();
 				// If optimize() fails, optimization signal keeps schedules.
 				writer.optimize();
                 workIndex.setIndexProperty("lastOptimization", String.valueOf(System.currentTimeMillis()));
@@ -459,6 +459,10 @@ public final class IndexManager implements IndexWriteProvider, Stoppable {
 				logger.fatal("Exception caught while trying to optimize the index. ", e);
                 throw new RuntimeException(e);
 			}
+            finally {
+                // anyway, we need to close the writer after trying to optimize
+		        closeWriter();
+            }
 		}
 
         workIndex.setIndexProperty("lastCheckpoint", String.valueOf(System.currentTimeMillis()));
@@ -474,7 +478,7 @@ public final class IndexManager implements IndexWriteProvider, Stoppable {
             throw new RuntimeException("Could not add index to library.");
         }
 
-		openWriter(false);
+		openWriter();
 	}
 
 	/**

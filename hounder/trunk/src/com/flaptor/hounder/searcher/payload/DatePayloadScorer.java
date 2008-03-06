@@ -15,8 +15,8 @@ limitations under the License.
 */
 package com.flaptor.hounder.searcher.payload;
 
-import org.apache.log4j.Logger;
 import org.apache.lucene.search.DefaultSimilarity;
+import org.apache.log4j.Logger;
 
 /**
  * A Scorer that scores payloads depending the date
@@ -37,33 +37,34 @@ public class DatePayloadScorer extends DefaultSimilarity implements PayloadScore
             long date = new LongPayload(payload).asLong() / 1000 ;
             long now = System.currentTimeMillis() / 1000;
 
+            long diff = Math.abs(now - date);
             float ret = 1.0f;
 
-            if (now - date < 3600*24*30) {
+            if (diff < 3600*24*30) {
                 ret = 5.0f; //last month
             }
 
-            if (now - date < 3600*24*7) {
+            if (diff < 3600*24*7) {
                 ret = 10.0f; //last week
             }
 
-            if (now - date < 3600*48) {
+            if (diff < 3600*48) {
                 ret = 20.0f; // last two days
             }
 
-            if (now - date < 3600*24) {
+            if (diff < 3600*24) {
                 ret = 30.0f; //last day
             }
 
-            if (now - date < 3600*12) {
+            if (diff < 3600*12) {
                 ret = 40.0f; //last 12 hours
             }
 
-            if (now - date < 7200) {
+            if (diff < 7200) {
                 ret = 60.0f; //last two hours
             }
 
-            if (now - date < 3600) {
+            if (diff < 3600) {
                 ret = 100.0f;
             }
 
