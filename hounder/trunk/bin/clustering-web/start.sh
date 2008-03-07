@@ -17,7 +17,7 @@ HOUNDER=$LIBS/hounder-trunk.jar
 DEPS=$LIBS/hounder-trunk-deps.jar
 
 CP=${CONF}:.:${HOUNDER}:${DEPS}
-MAIN=com.flaptor.clustering.HTTPClusteringServer
+MAIN=com.flaptor.clusterfest.HTTPClusterfestServer
 
 if [ ! -d ${LOG_DIR} ]; then
     mkdir -p ${LOG_DIR}
