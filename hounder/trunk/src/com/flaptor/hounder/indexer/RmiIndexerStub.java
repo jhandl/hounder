@@ -78,7 +78,7 @@ public class RmiIndexerStub extends ARmiClientStub implements IRemoteIndexer {
         } catch (RemoteException e) {
             logger.error(e,e);
             super.connectionFailure();
-            throw new RpcException();
+            throw new RpcException(e);
         }
     }
 
@@ -91,7 +91,7 @@ public class RmiIndexerStub extends ARmiClientStub implements IRemoteIndexer {
         } catch (RemoteException e) {
             logger.error(e,e);
             super.connectionFailure();
-            throw new RpcException();
+            throw new RpcException(e);
         }
     }
 
