@@ -15,10 +15,10 @@ LOUT=${LOG_DIR}/cache-server.out
 
 CONF=./conf
 LIBS=../lib
-S4J=$LIBS/hounder-trunk.jar
+HOUNDER=$LIBS/hounder-trunk.jar
 DEPS=$LIBS/hounder-trunk-deps.jar
 
-CP=${CONF}:.:${S4J}:${DEPS}
+CP=${CONF}:.:${HOUNDER}:${DEPS}
 MAIN=com.flaptor.hounder.cache.HttpCacheServer 
 
 
