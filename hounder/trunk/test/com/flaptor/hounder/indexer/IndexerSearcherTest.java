@@ -140,7 +140,7 @@ public class IndexerSearcherTest extends TestCase {
 
         indexer = new Indexer();
         searcher = new CompositeSearcher();
-        baseSearcher = searcher.getBaseSearcher();       
+        baseSearcher = (Searcher)searcher.getBaseSearcher();       
         
         cache = new LRUCache<QueryParams, GroupedSearchResults>(500);
         cacheSearcher = new CacheSearcher(baseSearcher, cache); //a cacheSearcher that uses the same baseSearcher
@@ -421,7 +421,7 @@ public class IndexerSearcherTest extends TestCase {
 
         if (invalidIndexPresent) filterOutput("Cannot find the properties inside the index");
         searcher = new CompositeSearcher();
-        baseSearcher = searcher.getBaseSearcher();
+        baseSearcher = (Searcher)searcher.getBaseSearcher();
         unfilterOutput();
 
         if (!validIndexPresent) filterOutput("No indexId active");

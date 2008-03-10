@@ -23,6 +23,7 @@ import com.flaptor.clusterfest.ClusterableListener;
 import com.flaptor.clusterfest.controlling.ControllerModule;
 import com.flaptor.clusterfest.controlling.node.ControllableImplementation;
 import com.flaptor.clusterfest.monitoring.MonitorModule;
+import com.flaptor.hounder.cluster.MultiSearcher;
 import com.flaptor.hounder.searcher.filter.AFilter;
 import com.flaptor.hounder.searcher.group.AGroup;
 import com.flaptor.hounder.searcher.query.AQuery;
@@ -33,6 +34,7 @@ import com.flaptor.util.Cache;
 import com.flaptor.util.Config;
 import com.flaptor.util.LRUCache;
 import com.flaptor.util.PortUtil;
+import com.flaptor.util.Statistics;
 
 /**
  * The composition of Searchers in the order we are interested:
@@ -46,7 +48,7 @@ public class CompositeSearcher implements ISearcher {
     private static final Logger logger = Logger.getLogger(com.flaptor.util.Execute.whoAmI());
 
     private ISearcher searcher;
-    private Searcher baseSearcher;
+    private ISearcher baseSearcher;
     private ClusterableListener clusteringListener;
     private TrafficLimitingSearcher trafficLimitingSearcher;
     
@@ -64,20 +66,19 @@ public class CompositeSearcher implements ISearcher {
     		ControllerModule.addControllerListener(clusteringListener, new ControllableImplementation());    		
         }
 
-
-        baseSearcher = new Searcher();
-
+    	if (searcherConfig.getBoolean("searcher.isMultiSearcher")) {
+    		baseSearcher = new MultiSearcher();
+    	} else {
+    		baseSearcher = new Searcher();
+    	}
         searcher = baseSearcher;
 
-        
-        if (searcherConfig.getBoolean("compositeSearcher.useSnippetSearcher")){
+        if (searcherConfig.getBoolean("compositeSearcher.useSnippetSearcher")) {
             searcher= new SnippetSearcher(searcher,searcherConfig);
         }
-
         if (searcherConfig.getBoolean("compositeSearcher.useTrafficLimiting")) {
             int maxSimultaneousQueries = searcherConfig.getInt("searcher.trafficLimiting.maxSimultaneousQueries");
             int maxTimeInQueue = searcherConfig.getInt("searcher.trafficLimiting.maxTimeInQueue");
-
             trafficLimitingSearcher = new TrafficLimitingSearcher(searcher, maxSimultaneousQueries, maxTimeInQueue);
             searcher = trafficLimitingSearcher;
         }
@@ -86,13 +87,15 @@ public class CompositeSearcher implements ISearcher {
         }
         if (searcherConfig.getBoolean("compositeSearcher.useCache")) {
             Cache<QueryParams, GroupedSearchResults> cache = new LRUCache<QueryParams, GroupedSearchResults>(500); //XXX TODO: make this configurable
-            baseSearcher.addCache(cache);
+            if (baseSearcher instanceof Searcher) {
+            	((Searcher)baseSearcher).addCache(cache);
+            }
             searcher = new CacheSearcher(searcher, cache); 
         }
         if (searcherConfig.getBoolean("compositeSearcher.useSynonymSuggestQuery")) {
             try {
                 searcher = new SuggestQuerySearcher(searcher,
-                            new SynonymQuerySuggestor(new File(searcherConfig.getString("QueryParser.synonymFile"))),
+                            new SynonymQuerySuggestor(new File(searcherConfig.getString("searcher.suggestQuerySearcher.synonymFile"))),
                             100,
                             searcherConfig.getFloat("searcher.suggestQuerySearcher.factor"));
             } catch (java.io.IOException e) {
@@ -100,7 +103,6 @@ public class CompositeSearcher implements ISearcher {
                 throw new RuntimeException(e.getMessage(),e);
          
            }
-
         }
         if (searcherConfig.getBoolean("compositeSearcher.useSpellCheckSuggestQuery")) {
             try {
@@ -113,14 +115,14 @@ public class CompositeSearcher implements ISearcher {
                 throw new RuntimeException(e.getMessage(),e);
             }
         }
-    	searcher = new StatisticSearcher(searcher, "searcher");
+    	searcher = new StatisticSearcher(searcher);
     }
     
     public GroupedSearchResults search(AQuery query, int firstResult, int count, AGroup group, int groupSize, AFilter filter, ASort sort) throws SearcherException{
-        return searcher.search(query, firstResult, count, group, groupSize, filter, sort);
+    	return searcher.search(query, firstResult, count, group, groupSize, filter, sort);
     }
-
-    public Searcher getBaseSearcher() {
+    
+    public ISearcher getBaseSearcher() {
         return baseSearcher;
     }
     

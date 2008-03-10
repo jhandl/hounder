@@ -20,6 +20,7 @@ import org.apache.log4j.Logger;
 
 import com.flaptor.hounder.indexer.Indexer;
 import com.flaptor.hounder.searcher.CompositeSearcher;
+import com.flaptor.hounder.searcher.Searcher;
 import com.flaptor.util.Execute;
 import com.flaptor.util.remote.XmlrpcServer;
 
@@ -81,7 +82,7 @@ public class HounderServer {
                 indexer.requestStop();
             }
             if (searcher != null) {
-                searcher.getBaseSearcher().close();
+                ((Searcher)searcher.getBaseSearcher()).close();
             }
             while (!indexer.isStopped()) {
                 Execute.sleep(10);

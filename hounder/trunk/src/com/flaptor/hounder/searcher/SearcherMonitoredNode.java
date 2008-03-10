@@ -38,12 +38,16 @@ public class SearcherMonitoredNode extends MonitoreableImplementation {
 	public void updateProperties() {
 		super.updateProperties();
 		Statistics stats = Statistics.getStatistics();
-		setProperty("maxSimultaneousQueries", String.valueOf(searcher.getTrafficLimitingSearcher().getMaxSimultaneousQueries()));
-		setProperty("simultaneousQueries", String.valueOf(searcher.getTrafficLimitingSearcher().getSimultaneousQueries()));
+		TrafficLimitingSearcher tls = searcher.getTrafficLimitingSearcher();
+		if (null != tls) {
+			setProperty("maxSimultaneousQueries", String.valueOf(tls.getMaxSimultaneousQueries()));
+			setProperty("simultaneousQueries", String.valueOf(tls.getSimultaneousQueries()));
+		}
 		setProperty("queryStats", stats.getStats("searcherQuery"));
 		setProperty("cacheHit", stats.getStats("cacheHit"));
 		setProperty("cacheMiss", stats.getStats("cacheMiss"));
 		setProperty("suggestQuery", stats.getStats("suggestQuery"));
+		setProperty("responseTimes", stats.getStats("responseTimes"));
 	}
 	
 	public static List<String> getThreadNames() {

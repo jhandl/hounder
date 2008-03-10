@@ -20,8 +20,8 @@ import java.util.List;
 
 import org.antlr.stringtemplate.StringTemplate;
 
-import com.flaptor.hounder.cluster.CompositeMultiSearcher;
 import com.flaptor.hounder.cluster.MultiSearcher;
+import com.flaptor.hounder.searcher.CompositeSearcher;
 import com.flaptor.hounder.indexer.Indexer;
 import com.flaptor.hounder.searcher.group.NoGroup;
 import com.flaptor.hounder.searcher.group.StoredFieldGroup;
@@ -164,14 +164,14 @@ public class MultiSearcherTest extends TestCase {
         }
 
         //now check through multiSearcher
-        Config multiSearcherConfig = Config.getConfig("multiSearcher.properties");
-        multiSearcherConfig.set("multiSearcher.hosts", hosts);
+        Config.getConfig("searcher.properties").set("searcher.isMultiSearcher", "true");
+        Config.getConfig("multiSearcher.properties").set("multiSearcher.hosts", hosts);
         doQueries(false);
         doQueries(true);
     }
 
     private void doQueries(boolean withComposite)  throws SearcherException {
-        ISearcher multiSearcher = withComposite ? new CompositeMultiSearcher() : new MultiSearcher();
+        ISearcher multiSearcher = withComposite ? new CompositeSearcher() : new MultiSearcher();
 
         //repeat 100 times
         for (int times = 0; times < 100; ++times) {
@@ -189,6 +189,7 @@ public class MultiSearcherTest extends TestCase {
             requiresPort = {30000, 31000})
     public void testSearchGroups() throws Exception {
     
+        Config.getConfig("searcher.properties").set("searcher.isMultiSearcher", "false");
         String hosts = "";
         for (int i = 0; i < numServers; ++i) {
             int basePort = getBasePort(i);
@@ -200,12 +201,11 @@ public class MultiSearcherTest extends TestCase {
 
         
         //now check through multiSearcher
-        Config multiSearcherConfig = Config.getConfig("multiSearcher.properties");
-        multiSearcherConfig.set("multiSearcher.hosts", hosts);
-        
+
+        Config.getConfig("multiSearcher.properties").set("multiSearcher.hosts", hosts);
+
         ISearcher multiSearcher = new MultiSearcher();
         GroupedSearchResults gsr = multiSearcher.search(new MatchAllQuery(),0,docsPerSearcher*numServers,new StoredFieldGroup("group"),docsPerGroup,null,null);
-    
     
         assertEquals("Not the same count of groups.", docsPerSearcher / docsPerGroup, gsr.groups());
         

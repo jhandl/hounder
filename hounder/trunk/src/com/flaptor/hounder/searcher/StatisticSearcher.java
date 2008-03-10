@@ -29,12 +29,9 @@ import com.flaptor.util.Statistics;
 public class StatisticSearcher implements ISearcher {
 
 	private ISearcher searcher;
-	private String eventName; 
 	
-	
-	public StatisticSearcher(ISearcher searcher, String eventPrefix) {
+	public StatisticSearcher(ISearcher searcher) {
 		this.searcher = searcher;
-		this.eventName = eventPrefix + "Query";
 	}
 
 	public GroupedSearchResults search(AQuery query, int firstResult, int count, AGroup group, int groupSize, AFilter filter, ASort sort)  throws SearcherException{
@@ -47,9 +44,9 @@ public class StatisticSearcher implements ISearcher {
 		} finally {
 			if (success) { 
 				long end = System.currentTimeMillis();
-				Statistics.getStatistics().notifyEventValue(eventName, (end - start)/1000.0f);
+				Statistics.getStatistics().notifyEventValue("responseTimes", end - start);
 			} else {
-				Statistics.getStatistics().notifyEventError(eventName);
+				Statistics.getStatistics().notifyEventError("responseTimes");
 			}
 		}
 		if (null == results) throw new SearcherException("GroupedSearchResults is NULL");
