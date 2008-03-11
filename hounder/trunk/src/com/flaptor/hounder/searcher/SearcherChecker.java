@@ -15,10 +15,12 @@ limitations under the License.
 */
 package com.flaptor.hounder.searcher;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.flaptor.clusterfest.monitoring.MonitorNodeDescriptor;
 import com.flaptor.clusterfest.monitoring.NodeChecker;
 import com.flaptor.clusterfest.monitoring.NodeState;
-import com.flaptor.clusterfest.monitoring.NodeState.Sanity;
 
 /**
  * Checker for searcher node type
@@ -27,8 +29,14 @@ import com.flaptor.clusterfest.monitoring.NodeState.Sanity;
  */
 public class SearcherChecker implements NodeChecker{
 
-	public Sanity checkNode(MonitorNodeDescriptor node, NodeState state) {
-		return Sanity.UNKNOWN;
-	}
-
+    public NodeChecker.Result checkNode(MonitorNodeDescriptor node, NodeState state) {
+        List<String> remarks = new ArrayList<String>();
+        Sanity sanity = Sanity.GOOD;
+        String exception = (String)state.getProperties().get("searcherException");
+        if (exception != null) {
+            sanity = Sanity.BAD;
+            remarks.add("Searcher throwing exception: " + exception);
+        }
+        return new Result(sanity, remarks);
+    }
 }

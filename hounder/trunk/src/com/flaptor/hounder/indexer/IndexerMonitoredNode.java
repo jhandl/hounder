@@ -43,7 +43,7 @@ public class IndexerMonitoredNode extends MonitoreableImplementation {
 
 	public void updateProperties() {
 		super.updateProperties();
-        properties.put(Indexer.DOCUMENT_ENQUEUED,statistics.getStats(Indexer.DOCUMENT_ENQUEUED));
+        properties.put(Indexer.DOCUMENT_ENQUEUED, statistics.getStats(Indexer.DOCUMENT_ENQUEUED));
 	}
 	
 	public void updateProperty(String property) {

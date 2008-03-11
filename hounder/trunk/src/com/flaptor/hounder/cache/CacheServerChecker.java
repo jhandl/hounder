@@ -15,10 +15,12 @@ limitations under the License.
 */
 package com.flaptor.hounder.cache;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.flaptor.clusterfest.monitoring.MonitorNodeDescriptor;
 import com.flaptor.clusterfest.monitoring.NodeChecker;
 import com.flaptor.clusterfest.monitoring.NodeState;
-import com.flaptor.clusterfest.monitoring.NodeState.Sanity;
 
 /**
  * Checker for cacheServer node type
@@ -27,8 +29,9 @@ import com.flaptor.clusterfest.monitoring.NodeState.Sanity;
  */
 public class CacheServerChecker implements NodeChecker{
 
-	public Sanity checkNode(MonitorNodeDescriptor node, NodeState state) {
-		return Sanity.UNKNOWN;
+	public NodeChecker.Result checkNode(MonitorNodeDescriptor node, NodeState state) {
+	    List<String> remarks = new ArrayList<String>();
+	    remarks.add("This is a stub checker, please write a sanity checker for this type of node.");
+	    return new Result(Sanity.GOOD, remarks);
 	}
-
 }

@@ -19,6 +19,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.flaptor.clusterfest.monitoring.node.MonitoreableImplementation;
+import com.flaptor.hounder.searcher.group.NoGroup;
+import com.flaptor.hounder.searcher.query.LazyParsedQuery;
 import com.flaptor.util.Statistics;
 import com.flaptor.util.ThreadUtil;
 
@@ -47,7 +49,13 @@ public class SearcherMonitoredNode extends MonitoreableImplementation {
 		setProperty("cacheHit", stats.getStats("cacheHit"));
 		setProperty("cacheMiss", stats.getStats("cacheMiss"));
 		setProperty("suggestQuery", stats.getStats("suggestQuery"));
-		setProperty("responseTimes", stats.getStats("responseTimes"));
+        setProperty("responseTimes", stats.getStats("responseTimes"));
+		try {
+            searcher.search(new LazyParsedQuery("testing123"), 0, 1, new NoGroup(), 1, null,null);
+            setProperty("searcherException", null);
+        } catch (SearcherException e) {
+            setProperty("searcherException", e.getMessage());
+        }
 	}
 	
 	public static List<String> getThreadNames() {
