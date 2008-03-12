@@ -21,6 +21,7 @@ import java.util.List;
 import com.flaptor.clusterfest.monitoring.node.MonitoreableImplementation;
 import com.flaptor.hounder.searcher.group.NoGroup;
 import com.flaptor.hounder.searcher.query.LazyParsedQuery;
+import com.flaptor.util.Pair;
 import com.flaptor.util.Statistics;
 import com.flaptor.util.ThreadUtil;
 
@@ -32,7 +33,7 @@ import com.flaptor.util.ThreadUtil;
 public class SearcherMonitoredNode extends MonitoreableImplementation {
 
 	CompositeSearcher searcher;
-	
+
 	public SearcherMonitoredNode(CompositeSearcher searcher) {
 		this.searcher = searcher;
 	}
@@ -56,8 +57,17 @@ public class SearcherMonitoredNode extends MonitoreableImplementation {
         } catch (SearcherException e) {
             setProperty("searcherException", e.getMessage());
         }
+		ArrayList<Pair<String,Float>> averageTimes = new ArrayList<Pair<String,Float>>();
+		for (String eventName : stats.getEvents()) {
+			if (eventName.startsWith("averageTimes_")) {
+				averageTimes.add(new Pair<String,Float>(eventName.substring(13),stats.getLastPeriodStats(eventName).getSampleAverage()));
+			}
+		}
+		if (averageTimes.size() > 0) {
+			setProperty("averageTimes",averageTimes);
+		}
 	}
-	
+
 	public static List<String> getThreadNames() {
 		List<String> ret = new ArrayList<String>();
 		for (Thread t : ThreadUtil.getLiveThreads()) {

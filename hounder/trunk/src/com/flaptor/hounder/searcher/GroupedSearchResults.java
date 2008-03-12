@@ -39,6 +39,7 @@ public final class GroupedSearchResults implements java.io.Serializable {
 	private final Vector<Pair<String,Vector<Document>>> results;
 	private final Vector<Vector<Float>> scores;
     private AQuery suggestedQuery = null;
+    private long responseTime = 0;
 
 	/**
 	 * Construct a new empty GroupedSearchResults.
@@ -164,4 +165,13 @@ public final class GroupedSearchResults implements java.io.Serializable {
     public AQuery getSuggestedQuery() {
         return suggestedQuery;
     }
+    
+    public void setResponseTime(long responseTime) {
+    	this.responseTime = responseTime;
+    }
+    
+    public long getResponseTime() {
+    	return responseTime;
+    }
+    
 }

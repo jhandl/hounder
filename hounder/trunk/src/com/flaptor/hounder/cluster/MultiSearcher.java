@@ -40,6 +40,7 @@ import com.flaptor.util.Execution;
 import com.flaptor.util.MultiExecutor;
 import com.flaptor.util.Pair;
 import com.flaptor.util.PortUtil;
+import com.flaptor.util.Statistics;
 import com.flaptor.util.Execution.Results;
 
 /**
@@ -54,6 +55,7 @@ public class MultiSearcher implements ISearcher {
 
     private List<IRemoteSearcher> searchers = new ArrayList<IRemoteSearcher>();
     private MultiExecutor<Pair<Integer, GroupedSearchResults>> multiQueryExecutor;
+    private List<String> searcherIPs = new ArrayList<String>();
     private long timeout;
     
     public MultiSearcher() {
@@ -63,6 +65,7 @@ public class MultiSearcher implements ISearcher {
         for (int i = 0; i < hosts.length; i++) {
             Pair<String, Integer> host = PortUtil.parseHost(hosts[i]);
             searchers.add(new RmiSearcherStub(host.last(), host.first()));
+            searcherIPs.add(host.first());
         }
         timeout = config.getLong("multiSearcher.timeout");
         multiQueryExecutor = new MultiExecutor<Pair<Integer, GroupedSearchResults>>(config.getInt("multiSearcher.workerThreads"), "multiSearcher");
@@ -125,17 +128,21 @@ public class MultiSearcher implements ISearcher {
         synchronized(execution) {
             execution.forget();
             for (Results<Pair<Integer, GroupedSearchResults>> result : execution.getResultsList()) {
+            	int numSearcher = result.getResults().first();
                 if (result.isFinishedOk()) {
-            	    GroupedSearchResults gsr = result.getResults().last();
-                	goodResultsMap.put(result.getResults().first() , gsr);
+                	GroupedSearchResults gsr = result.getResults().last();
+                	goodResultsMap.put(numSearcher, gsr);
                     totalDocuments += gsr.totalGroupsEstimation();
+                    // gather stats from the uni-searchers
+                	Statistics.getStatistics().notifyEventValue("averageTimes_"+searcherIPs.get(numSearcher), gsr.getResponseTime());
                 } else {
                     badResults.add(result);
-                    logger.warn("Exception from remote search on searcher " + result.getResults().first(), result.getException());
+                    logger.warn("Exception from remote search on searcher " + numSearcher, result.getException());
                 }
             }
         }
         
+		
         //move (sorted) entries to a list
         for (Map.Entry<Integer, GroupedSearchResults> entry : goodResultsMap.entrySet()) {
         	goodResults.add(entry.getValue());

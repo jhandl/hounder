@@ -90,7 +90,7 @@ public class MultipleRpcSearcher implements ISearcher {
         }
 
         Config conf = Config.getConfig("searcher.properties");
-        ISearcher baseSearcher = conf.getBoolean("searcher.isMultiSearcher") ? new MultiSearcher() : new CompositeSearcher();
+        ISearcher baseSearcher = new CompositeSearcher();
         new MultipleRpcSearcher(baseSearcher,conf.getBoolean("rmiInterface"), conf.getBoolean("xmlInterface"), conf.getBoolean("openSearchInterface"), conf.getBoolean("webInterface"));
     }
 }

@@ -43,8 +43,9 @@ public class StatisticSearcher implements ISearcher {
 			success = true;
 		} finally {
 			if (success) { 
-				long end = System.currentTimeMillis();
-				Statistics.getStatistics().notifyEventValue("responseTimes", end - start);
+				long time = System.currentTimeMillis() - start;
+				Statistics.getStatistics().notifyEventValue("responseTimes", time);
+				results.setResponseTime(time);
 			} else {
 				Statistics.getStatistics().notifyEventError("responseTimes");
 			}
