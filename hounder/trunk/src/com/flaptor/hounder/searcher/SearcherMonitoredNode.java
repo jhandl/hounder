@@ -60,7 +60,7 @@ public class SearcherMonitoredNode extends MonitoreableImplementation {
 		ArrayList<Pair<String,Float>> averageTimes = new ArrayList<Pair<String,Float>>();
 		for (String eventName : stats.getEvents()) {
 			if (eventName.startsWith("averageTimes_")) {
-				averageTimes.add(new Pair<String,Float>(eventName.substring(13),stats.getLastPeriodStats(eventName).getSampleAverage()));
+				averageTimes.add(new Pair<String,Float>(eventName.substring(13),stats.getLastPeriodStats(eventName).getAvg()));
 			}
 		}
 		if (averageTimes.size() > 0) {
