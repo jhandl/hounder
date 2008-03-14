@@ -24,7 +24,9 @@ import java.io.Serializable;
  */
 public class SearcherException extends Exception implements Serializable {
 
-	public SearcherException() {
+    private static final long serialVersionUID = 1L;
+
+    public SearcherException() {
 		super();
 	}
 

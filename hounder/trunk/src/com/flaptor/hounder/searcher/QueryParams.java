@@ -30,6 +30,8 @@ import com.flaptor.util.remote.RpcException;
  * @author Martin Massera
  */
 public class QueryParams implements Serializable {
+
+    private static final long serialVersionUID = 1L;
     private final Vector<Object> params = new Vector<Object>(7);
 
     

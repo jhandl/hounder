@@ -27,6 +27,8 @@ import org.apache.lucene.search.Query;
  */
 public final class MatchAllQuery extends AQuery implements Serializable {
     
+    private static final long serialVersionUID = 1L;
+
     public MatchAllQuery() {
         super();
     }

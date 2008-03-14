@@ -32,7 +32,10 @@ import com.flaptor.util.TranscodeUtil;
  * @author Flaptor Development Team
  */
 public class Page implements Serializable {
+    
+    private static final long serialVersionUID = 5L;
     private static final int CURRENT_VERSION = 5;
+
     private String url;
     private float score;
     private float priority;

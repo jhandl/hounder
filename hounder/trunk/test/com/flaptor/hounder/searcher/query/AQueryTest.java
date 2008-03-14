@@ -46,6 +46,8 @@ public class AQueryTest extends TestCase {
     //-----------------------------------------------------------
     //Private class
     private class DummyQuery extends AQuery {
+        private static final long serialVersionUID = 1L;
+
         public DummyQuery() {
             super();
         }

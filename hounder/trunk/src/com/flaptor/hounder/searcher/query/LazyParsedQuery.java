@@ -20,38 +20,39 @@ package com.flaptor.hounder.searcher.query;
  */
 public class LazyParsedQuery extends AQuery {
 
-        private org.apache.lucene.search.Query lq = null;
-        private final String queryStr;
+    private static final long serialVersionUID = 1L;
+    private org.apache.lucene.search.Query lq = null;
+    private final String queryStr;
 
-        public LazyParsedQuery(String queryString) {
-            if (null == queryString) {
-                throw new IllegalArgumentException("queryString cannot be null.");
-            }
-            queryStr = queryString;
+    public LazyParsedQuery(String queryString) {
+        if (null == queryString) {
+            throw new IllegalArgumentException("queryString cannot be null.");
         }
-
-        public  org.apache.lucene.search.Query getLuceneQuery() {
-            if (null == lq) {
-                lq = new QueryParser().parse(queryStr);
-            }
-            return lq;
-        }
-
-        public String getQueryString() {
-            return queryStr;
-        }
-        
-        @Override
-            public int hashCode() {
-                return queryStr.hashCode();
-            }
-
-        @Override
-            public boolean equals(Object obj) {
-                if(this == obj)
-                    return true;
-                if((obj == null) || (obj.getClass() != this.getClass()))
-                    return false;
-                return queryStr.equals(((LazyParsedQuery)obj).queryStr);
-            }
+        queryStr = queryString;
     }
+
+    public  org.apache.lucene.search.Query getLuceneQuery() {
+        if (null == lq) {
+            lq = new QueryParser().parse(queryStr);
+        }
+        return lq;
+    }
+
+    public String getQueryString() {
+        return queryStr;
+    }
+    
+    @Override
+    public int hashCode() {
+        return queryStr.hashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if(this == obj)
+            return true;
+        if((obj == null) || (obj.getClass() != this.getClass()))
+            return false;
+        return queryStr.equals(((LazyParsedQuery)obj).queryStr);
+    }
+}

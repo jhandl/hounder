@@ -30,7 +30,9 @@ import org.apache.lucene.search.SortField;
  */
 public final class ScoreSort extends ASort {
 	
-	public ScoreSort() {
+    private static final long serialVersionUID = 1L;
+
+    public ScoreSort() {
 		//This class won't need any information at all
 		super(false, null);
 	}

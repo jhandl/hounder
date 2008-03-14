@@ -21,6 +21,7 @@ import java.io.Serializable;
  * @author Flaptor Development Team
  */
 public final class SimplePhraseQuery extends AQuery implements Serializable {
+    private static final long serialVersionUID = 1L;
     private final String field;
     private final String[] terms;
     

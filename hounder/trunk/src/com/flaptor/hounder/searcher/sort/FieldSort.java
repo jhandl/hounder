@@ -30,7 +30,9 @@ import org.apache.lucene.search.SortField;
  * @author Flaptor Development Team
  */
 public final class FieldSort extends ASort {
-	private final String fieldName;
+
+    private static final long serialVersionUID = 1L;
+    private final String fieldName;
 	private final OrderType orderType;
 
 	/**

@@ -21,7 +21,9 @@ package com.flaptor.hounder.searcher;
  */
 public class NoIndexActiveException extends SearcherException {
 
-	public NoIndexActiveException() {
+    private static final long serialVersionUID = 1L;
+
+    public NoIndexActiveException() {
 		super("No indexId active");
 	}
 }

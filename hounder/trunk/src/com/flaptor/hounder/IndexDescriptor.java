@@ -23,7 +23,9 @@ package com.flaptor.hounder;
  * @author Flaptor Development Team
  */
 public final class IndexDescriptor implements java.io.Serializable{
-	private int totalNumberOfNodes;
+    private static final long serialVersionUID = 1L;
+
+    private int totalNumberOfNodes;
 	private int nodeNumber;
 	private String clusterName;
 

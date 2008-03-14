@@ -28,6 +28,7 @@ import org.apache.log4j.Logger;
  */
 public class DatePayloadScorer extends DefaultSimilarity implements PayloadScorer {
 
+    private static final long serialVersionUID = 1L;
     private static final Logger logger = Logger.getLogger(com.flaptor.util.Execute.whoAmI());
 
     public float scorePayload(byte[] payload) {

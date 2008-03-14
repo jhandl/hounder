@@ -26,6 +26,8 @@ import org.apache.lucene.search.BooleanQuery;
  */
 public final class DifferenceQuery extends ABinaryOperator implements Serializable {
 
+    private static final long serialVersionUID = 1L;
+
     public DifferenceQuery(final AQuery lt, final AQuery rt) {
         super(lt, rt);
     }

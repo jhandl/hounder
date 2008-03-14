@@ -34,6 +34,7 @@ import com.flaptor.util.Pair;
  */
 public class SimilarityForwarder extends DefaultSimilarity {
 
+    private static final long serialVersionUID = 1L;
     private final Map<String,PayloadScorer> scorers;
     private static final Logger logger = Logger.getLogger(com.flaptor.util.Execute.whoAmI());
 

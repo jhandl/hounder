@@ -30,7 +30,8 @@ import com.flaptor.util.Pair;
  */
 public final class GroupedSearchResults implements java.io.Serializable {
 
-	private static final Logger logger = Logger.getLogger(com.flaptor.util.Execute.whoAmI()); 
+    private static final long serialVersionUID = 1L;
+    private static final Logger logger = Logger.getLogger(com.flaptor.util.Execute.whoAmI()); 
 	private final int count;
 
     // Which is the offset of the last checked document of this vector.
