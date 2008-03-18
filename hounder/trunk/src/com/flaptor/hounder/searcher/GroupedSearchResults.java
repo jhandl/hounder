@@ -33,6 +33,7 @@ public final class GroupedSearchResults implements java.io.Serializable {
     private static final long serialVersionUID = 1L;
     private static final Logger logger = Logger.getLogger(com.flaptor.util.Execute.whoAmI()); 
 	private final int count;
+	private final int totalDocuments;
 
     // Which is the offset of the last checked document of this vector.
     // Useful for pagination.
@@ -51,6 +52,7 @@ public final class GroupedSearchResults implements java.io.Serializable {
 		scores = new Vector<Vector<Float>>();
 		count = 0;
         offset = 0;
+        totalDocuments = 0;
 	}
     
     @Override
@@ -115,6 +117,9 @@ public final class GroupedSearchResults implements java.io.Serializable {
         // are no more documents to check. use -1 as flag
         this.offset = (offset == totalDocuments ) ? -1 : offset;
 		this.scores = scores;
+
+        //also, store the totalDocuments
+        this.totalDocuments = totalDocuments;
 	}
 
 	/**
@@ -126,17 +131,25 @@ public final class GroupedSearchResults implements java.io.Serializable {
 	}
 
 	/**
-	 * Returns the total number of documents that resulted from the search that
+	 * Returns the total number of groups that resulted from the search that
 	 * generated this result set. This number is generally greater than the 
-     * number of documents stored in this object.
+     * number of groups stored in this object.
      *
-     * This number does not take into consideration groups. It is global.
-     *
-	 * @return the total number of documents that matched the original query
+	 * @return an estimation of the total number of groups that matched the original query
 	 */
 	public int totalGroupsEstimation() {
 		return count;
 	}
+
+
+
+    /**
+     * Returns the total number of results, disregarding grouping. This is the number of hits
+     * lucene gives
+     */
+    public int totalResults() {
+        return totalDocuments;
+    }
 
 
     /**

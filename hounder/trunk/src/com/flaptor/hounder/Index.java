@@ -236,7 +236,7 @@ public class Index {
             } catch (IOException e) { 
                 logger.error("Exception while trying to load index.properties for index at " + path.getAbsolutePath(), e);
             } catch (NullPointerException e) {
-                logger.error("There is no index descriptor on " + propFile.getName() + ". using default");
+                logger.error("There is no index descriptor on " + propFile.getName() + ". using default. Exception caused by " + e.getMessage(), e);
                 indexDescriptor = IndexDescriptor.defaultDescriptor();
             }finally {
                 com.flaptor.util.Execute.close(is, logger);
@@ -319,6 +319,15 @@ public class Index {
     protected static void makeHardLinkCopy(final File source, final File destination) {
         String command = "cp -lpr " + source.getAbsolutePath() + " " + destination.getAbsolutePath();
         logger.debug("makeHardLinkCopy: \"" + command + "\"");
+        CommandUtil.execute(command, null, logger);
+
+        // copy index.properties, do not link it
+        command = "rm " + destination.getAbsolutePath() + File.separator + "index.properties ";
+        logger.debug("makeHardLinkCopy: removing index.properties link: \"" + command + "\"");
+        CommandUtil.execute(command, null, logger);
+
+        command = "cp " + source.getAbsolutePath() + File.separator + "index.properties " + destination.getAbsolutePath();
+        logger.debug("makeHardLinkCopy: copying index.properties: \"" + command + "\"");
         CommandUtil.execute(command, null, logger);
     }
 

@@ -43,7 +43,7 @@ public class Idx {
             "    Idx search <idxDir> <term> <query>\n" +
             "    Idx optimize <idxDir>\n" +
             "    Idx term-count <idxDir> <field>\n" +
-            "    Idx terms <idxDir> <field>" +
+            "    Idx terms <idxDir> <field>\n" +
             "    Idx uncompound <idxDir>\n" +
             "    Idx compound <idxDir>\n" +
             "\n    The input and output line format for create and list is:   <field>[,s(tore)][,i(ndex)][,t(oken)]: <value>\n";
@@ -137,13 +137,12 @@ public class Idx {
             writer.optimize();
             writer.close();
         } else if ("terms".equals(cmd)) {
+            check(arg.length == 3, "not enough parameters");
+            check(idx.exists(), "Index dir not found");
             String field = arg[2];
             IndexReader reader = IndexReader.open(idx);
             TermEnum terms = reader.terms();
-            //This ends with an exception, but lucene documentation doensn't say how to figure out
-            // when we've reached the end of the list.
-            while (true) {
-                terms.next();
+            while (terms.next()) {
                 Term t = terms.term();
                 if (t.field().equals(field)) {
                     System.out.println(t.text());

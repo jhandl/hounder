@@ -341,10 +341,11 @@ public class XmlSearcher {
 	 * @param s the GroupedSearchResults to convert to a vector.
 	 * @return a vector representation of the search Results. The format is:
 	 * first element: the number of documents in this set
-	 * second element: the estimation of the total number of matches for the query (totalGroupsEstimation)
+	 * second element: the estimation of the total number of groups matching the query (totalGroupsEstimation)
      * third: the offset of the last document checked. useful to know offset for next query, and -1 if there are no more results.
-	 * fourth: suggested query
-     * fifth and onwards : a vector of the names and values of each field in the document, stored as map&lt;field,value&gt;
+	 * fourth: the total number of hits matching the query(no matter grouping)
+	 * fifth: suggested query
+     * sixth and onwards : a vector of the names and values of each field in the document, stored as map&lt;field,value&gt;
 	 * This method is meant to be used by the xmlrpc server, which has a limited repertoire of objects that it can return.
 	 **/
     public static final Vector groupedSearchResultsToVector(final GroupedSearchResults gsr){
@@ -352,6 +353,7 @@ public class XmlSearcher {
         v.add(gsr.groups());
         v.add(gsr.totalGroupsEstimation());
         v.add(gsr.lastDocumentOffset());
+        v.add(gsr.totalResults());
         v.add(""); // TODO put suggested queries here, if available
 
         for (int i = 0; i < gsr.groups(); i++) {
