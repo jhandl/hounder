@@ -1,0 +1,806 @@
+<!--
+Copyright 2008 Flaptor (flaptor.com) 
+
+Licensed under the Apache License, Version 2.0 (the "License"); 
+you may not use this file except in compliance with the License. 
+You may obtain a copy of the License at 
+
+    http://www.apache.org/licenses/LICENSE-2.0 
+
+Unless required by applicable law or agreed to in writing, software 
+distributed under the License is distributed on an "AS IS" BASIS, 
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
+See the License for the specific language governing permissions and 
+limitations under the License.
+-->
+<project name="hounder" default="jar" basedir=".">
+	<property name="project" value="hounder"/>
+	<property name="version" value="1.0"/>
+
+    <property name="src.dir" value="${basedir}/src"/>
+    <property name="test.dir" value="${basedir}/test"/>
+    <property name="build.dir" value="${basedir}/build"/>
+    <property name="lib.dir" value="${basedir}/lib"/>
+    <property name="tools.dir" value="${basedir}/tools"/>
+    <property name="conf.dir" value="${basedir}/conf"/>
+    <property name="plugins.dir" value="${basedir}/plugins"/>
+    <property name="docs.dir" value="${basedir}/docs"/>
+    <property name="javadoc.dir" value="${docs.dir}/javadoc"/>
+	<property name="output.dir"  location="${basedir}/output"/>
+	<property name="gen.src.dir"  location="${basedir}/jsp_to_java"/>
+	<property name="gen.build.dir"  location="${basedir}/jsp_build"/>
+	<property name="bin.dir" location="${basedir}/bin"/>	
+	<property name="tmp.dir" location="${basedir}/tmp"/>
+	<property name="tmp.bin.dir" location="${tmp.dir}/bin"/>
+	<property name="tmp.conf.dir" location="${tmp.dir}/conf"/>
+
+	<property name="dist.dir" location="${basedir}/dist"/>
+	<property name="product.dir" location="${basedir}/product"/>
+	<property name="product.output.dir" location="${basedir}/product-output"/>
+
+	<tstamp>
+	   <format property="now" pattern="HH:mm:ss d-MMMM-yyyy"/>
+    </tstamp>
+
+    <path id="classpath.jars.hounder">
+        <fileset dir="${lib.dir}">
+            <include name="flaptor-util-*.jar" />
+            <include name="clusterfest-*.jar" />
+            <include name="hist4j-*.jar" />
+            <include name="wiz4j-*.jar" />
+        	
+        	<include name="nutch-0.7.2.jar" />
+			<include name="commons-cli-1.1.jar" />
+			<include name="commons-httpclient-2.0.2.jar" />
+			<include name="commons-logging-1.0.2.jar" />
+            <include name="commons-codec-1.3.jar" />
+			<include name="lucene-core-2.3.1.jar" />
+			<include name="lucene-highlighter-2.3.1.jar" />
+			<include name="lucene-misc-2.3.1.jar" />
+			<include name="lucene-memory-2.3.1.jar" />
+            <include name="jakarta-oro-2.0.7.jar" />
+			<include name="stringtemplate.jar" />
+			<include name="antlr-2.7.7.jar" />
+            <include name="dom4j-1.6.1.jar" />
+            <include name="jaxen-1.1-beta-8.jar" />
+            <include name="language-identifier.jar" />
+            <include name="log4j-1.2.11.jar" />
+            <include name="javassist.jar" />
+            <include name="jetty-6.1.1.jar" />
+            <include name="jetty-util-6.1.1.jar" />
+            <include name="jsp-2.1.jar" />
+            <include name="jsp-api-2.1.jar" />
+            <include name="servlet-api-2.5-6.1.1.jar" />
+            <include name="nekohtml.jar" />
+            <include name="nekohtmlSamples.jar" />
+            <include name="xercesImpl.jar" />
+            <include name="xml-apis.jar" />
+            <include name="xmlrpc-2.0.jar" />
+            <include name="hsqldb.jar" />
+        </fileset>
+    </path>
+
+    <path id="classpath.jars.tools">
+        <pathelement location="${build.dir}" />
+        <fileset dir="${basedir}/tools">
+            <include name="**/*.jar" />
+        </fileset>
+    </path>
+
+    <path id="classpath.jsp.tools">
+        <pathelement location="${output.dir}/${project}-forTomcat-${version}.jar" />
+        <fileset dir="${basedir}/tools/tomcat">
+            <include name="**/*.jar" />
+        </fileset>
+    </path>
+
+    <path id="classpath.nutch.plugins">
+        <pathelement location="${build.dir}" />
+        <fileset dir="${basedir}/plugins/parse-html">
+            <include name="**/*.jar" />
+        </fileset>       
+        <fileset dir="${basedir}/plugins/language-identifier">
+            <include name="**/*.jar" />
+        </fileset>        
+        <fileset dir="${basedir}/plugins/language-identifier">
+            <include name="**/*.jar" />
+        </fileset>        
+    </path>
+
+    <!--******************************************************************************************************-->
+    <target name="compile" depends="prepare" description="compiles everything">
+        <javac destdir="${build.dir}" debug="true" debuglevel="lines,vars,source" target="5" >
+          <compilerarg value="-Xlint:deprecation" />
+          <compilerarg value="-Xlint:unchecked" />
+	  <compilerarg value="-target" />
+	  <compilerarg value="5" />
+
+		  <classpath>
+		    <path refid="classpath.jars.hounder" />
+			<path refid="classpath.jars.tools" />
+			<path refid="classpath.nutch.plugins" />
+		  </classpath>
+            <src path="${src.dir}/com/flaptor" />
+            <src path="${test.dir}/com/flaptor" />
+        </javac>
+    </target>
+
+
+    <target name="check-jsp"  description="compiles jsp files to java files, for verification">
+       
+
+        <delete dir="${gen.src.dir}"/>
+        <delete dir="${gen.build.dir}"/>
+        <mkdir dir="${gen.src.dir}"/>
+        <mkdir dir="${gen.build.dir}"/>
+
+        <java classname="org.apache.jasper.JspC" fork="yes" failonerror="yes">
+            <classpath refid="classpath.jars.tools" />
+            <arg line="-uriroot ${webapp.dir} -d ${gen.src.dir} -p com.flaptor.jsp -webapp ${webapp.dir}" />
+        </java>
+        
+        <javac srcdir="${gen.src.dir}" destdir="${gen.build.dir}" >
+            <classpath refid="classpath.jsp.tools" />
+        </javac>
+
+        <delete dir="${gen.src.dir}"/>
+        <delete dir="${gen.build.dir}"/>
+
+    </target>
+
+    <!--******************************************************************************************************-->
+    <target name="clean">
+        <delete dir="${build.dir}" />
+        <delete dir="${output.dir}" />
+        <delete dir="${javadoc.dir}" />
+        <delete dir="${tmp.dir}" />
+        <delete dir="${dist.dir}" />
+        <delete dir="${product.output.dir}" />
+    	<delete dir="${basedir}/reports" />
+    	<delete file="${basedir}/cobertura.ser"/>
+        <delete>
+            <fileset dir="${basedir}" includes="TEST-*.txt" />
+        </delete>
+    </target>
+	
+    <target name="clean-tmp">
+        <delete dir="${tmp.dir}"/>
+    </target>
+
+	
+    <!--******************************************************************************************************-->
+    <target name="prepare">
+        <delete dir="${output.dir}"/>
+        <mkdir dir="${build.dir}"/>
+        <mkdir dir="${output.dir}"/>
+        <mkdir dir="${product.output.dir}"/>
+        <mkdir dir="${dist.dir}"/>
+    </target>
+
+
+    <!--******************************************************************************************************-->
+    <target name="jar-for-servlets" depends="compile" description="builds a hounder jar containing the bare minimum to run a searcher on tomcat." >
+		<jar jarfile="${output.dir}/${project}-forTomcat-${version}.jar" >
+			<manifest>
+				<attribute name="Built-By" value="${user.name}"/>
+				<attribute name="Version" value="${version}"/>
+			</manifest>
+			<fileset dir="${build.dir}/" >
+				<include name="com/flaptor/hounder/**/*.class" />
+				<include name="com/flaptor/util/**/*.class" />
+				<exclude name="com/flaptor/hounder/crawler/**/*" />
+				<exclude name="com/flaptor/hounder/indexer/**/*" />
+			</fileset>
+			<fileset dir="${build.dir}/" >
+                <include name="com/flaptor/hounder/crawler/bean/**/*.class"/>
+			</fileset>
+			<fileset dir="${conf.dir}" >
+				<include name="common.properties" />
+				<include name="*.properties.defaults" />
+			</fileset>
+			<zipgroupfileset dir="${lib.dir}">
+				<include name="lucene*.jar" />		
+			    <include name="commons-codec-1.3.jar" />		
+				<include name="log4j-1.2.11.jar" />				
+				<include name="dom4j-1.6.1.jar" />
+			</zipgroupfileset>
+		</jar>
+    </target>
+
+	<!--******************************************************************************************************-->
+
+    <target name="installer-jar" depends="compile" description="builds a jar for the installer." >
+		<jar jarfile="${output.dir}/hounder-installer.jar" >
+			<manifest>
+				<attribute name="Built-By" value="${user.name}"/>
+				<attribute name="Version" value="${version}"/>
+			</manifest>
+			<fileset dir="${build.dir}/" >
+				<include name="com/flaptor/util/**/*.class" />
+				<include name="com/flaptor/hounder/installer/**/*.class" />
+			</fileset>
+			<fileset dir="${conf.dir}" >
+				<include name="common.properties" />
+				<include name="*.properties.defaults" />
+			</fileset>
+			<fileset dir="${conf.dir}/crawler" >
+				<include name="*.properties.defaults" />
+			</fileset>
+			<fileset dir="${conf.dir}/searcher" >
+				<include name="*.properties.defaults" />
+			</fileset>
+			<fileset dir="${conf.dir}/indexer" >
+				<include name="*.properties.defaults" />
+			</fileset>
+			<fileset dir="${conf.dir}/learning" >
+				<include name="*.properties.defaults" />
+			</fileset>
+			<fileset dir="${conf.dir}/cache-server" >
+				<include name="*.properties.defaults" />
+			</fileset>
+			<fileset dir="${conf.dir}/clustering-web" >
+				<include name="*.properties.defaults" />
+			</fileset>
+
+			<zipgroupfileset dir="${lib.dir}">
+                <include name="log4j*.jar" />
+                <include name="flaptor-util-*.jar" />
+                <include name="clusterfest-*.jar" />
+	            <include name="wiz4j-*.jar" />
+			</zipgroupfileset>
+		</jar>
+    </target>
+	
+	
+    <!--******************************************************************************************************-->
+    <target name="jar" depends="compile" description="builds the Hounder jar file" >
+		<jar jarfile="${output.dir}/${project}-${version}.jar" >
+			<manifest>
+				<attribute name="Built-By" value="${user.name}"/>
+				<attribute name="Version" value="${version}"/>
+			</manifest>
+
+			<fileset dir="${build.dir}" excludes="**/*Test.class">
+				<include name="com/flaptor/**/*.class"/>
+			</fileset>
+			<fileset dir="${conf.dir}" >
+				<include name="common.properties" />
+				<include name="*.properties.defaults" />
+			</fileset>
+			<fileset dir="${conf.dir}/crawler" >
+				<include name="*.properties.defaults" />
+			</fileset>
+			<fileset dir="${conf.dir}/searcher" >
+				<include name="*.properties.defaults" />
+			</fileset>
+			<fileset dir="${conf.dir}/indexer" >
+				<include name="*.properties.defaults" />
+			</fileset>
+			<fileset dir="${conf.dir}/learning" >
+				<include name="*.properties.defaults" />
+			</fileset>
+			<fileset dir="${conf.dir}/cache-server" >
+				<include name="*.properties.defaults" />
+			</fileset>
+			<fileset dir="${conf.dir}/clustering-web" >
+				<include name="*.properties.defaults" />
+			</fileset>
+		</jar>
+    </target>
+
+	<!--******************************************************************************************************-->
+    <target name="fatjar" depends="compile" description="builds the Hounder jar file" >
+		<jar jarfile="${output.dir}/${project}-${version}-fat.jar" >
+			<manifest>
+				<attribute name="Built-By" value="${user.name}"/>
+				<attribute name="Version" value="${version}"/>
+			</manifest>
+
+			<fileset dir="${build.dir}" excludes="**/*Test.class">
+				<include name="com/flaptor/**/*.class"/>
+			</fileset>
+			<fileset dir="${conf.dir}" >
+				<include name="common.properties" />
+				<include name="*.properties.defaults" />
+			</fileset>
+			<fileset dir="${conf.dir}/crawler" >
+				<include name="*.properties.defaults" />
+			</fileset>
+			<fileset dir="${conf.dir}/searcher" >
+				<include name="*.properties.defaults" />
+			</fileset>
+			<fileset dir="${conf.dir}/indexer" >
+				<include name="*.properties.defaults" />
+			</fileset>
+			<fileset dir="${conf.dir}/learning" >
+				<include name="*.properties.defaults" />
+			</fileset>
+			<fileset dir="${conf.dir}/cache-server" >
+				<include name="*.properties.defaults" />
+			</fileset>
+			<fileset dir="${conf.dir}/clustering-web" >
+				<include name="*.properties.defaults" />
+			</fileset>
+			<zipgroupfileset dir="${lib.dir}">
+				 <include name="*.jar" />
+			</zipgroupfileset>
+		</jar>
+    </target>
+
+	<!--******************************************************************************************************-->
+    <target name="depjar" depends="prepare" description="builds the Hounder jar file" >
+		<jar jarfile="${output.dir}/${project}-${version}-deps.jar" >
+			<manifest>
+				<attribute name="Built-By" value="${user.name}"/>
+				<attribute name="Version" value="${version}"/>
+			</manifest>
+
+			<zipgroupfileset dir="${lib.dir}">
+				 <include name="*.jar" />
+			</zipgroupfileset>
+		</jar>
+    </target>
+
+
+    <!--******************************************************************************************************-->
+    <target name="doc" description="creates the Hounder javadoc" >
+        <delete dir="${javadoc.dir}" />
+        <mkdir dir="${javadoc.dir}" />
+        <javadoc    sourcepath="${src.dir}"
+                    destdir="${javadoc.dir}"
+                    Private="true"
+                    linksource="yes"
+                    >
+            <fileset dir="${src.dir}" defaultexcludes="yes">
+                <include name="com/flaptor/**/*.java" />
+            </fileset>
+            <fileset dir="${test.dir}" defaultexcludes="yes">
+                <include name="com/flaptor/**/*.java" />
+            </fileset>
+            <doctitle><![CDATA[<h1>Hounder Documentation</h1>]]></doctitle>
+		    <classpath>
+			  <path refid="classpath.jars.tools" />
+		      <path refid="classpath.jars.hounder" />
+		    </classpath>
+			<link href="http://lucene.zones.apache.org:8080/hudson/job/Lucene-Nightly/javadoc/" />
+			<link href="http://s1/javadocs/log4j/1.2.11/" />
+			<link href="http://junit.sourceforge.net/javadoc/" />
+			<taglet name="ToDo" path="tools/taglets.jar" />
+			<taglet name="FixMe" path="tools/taglets.jar" />
+        </javadoc>
+    </target>
+
+
+    <!--******************************************************************************************************-->
+	<!--TESTING-->
+    <target name="test" description="Runs all tests." depends="compile" >
+        <ant antfile="build-test.xml" target="test" inheritAll="false" >
+            <property name="src.dir" value="${src.dir}" />
+            <property name="test.dir" value="${test.dir}" />
+            <property name="lib.dir" value="${lib.dir}" />
+            <property name="tools.dir" value="${tools.dir}" />
+            <property name="build.dir" value="${build.dir}" />
+            <property name="conf.dir" value="${conf.dir}" />
+        </ant>
+    </target>
+
+    <target name="onetest" description="runs one JUnit test, specified by -Dtestfile= parameter" depends="compile" >
+        <ant antfile="build-test.xml" target="onetest" inheritAll="false">
+            <property name="src.dir" value="${src.dir}" />
+            <property name="test.dir" value="${test.dir}" />
+            <property name="lib.dir" value="${lib.dir}" />
+            <property name="tools.dir" value="${tools.dir}" />
+            <property name="build.dir" value="${build.dir}" />
+            <property name="conf.dir" value="${conf.dir}" />
+        </ant>
+    </target>
+
+    <!--******************************************************************************************************-->
+
+    <target name="openSearcher-war" description="Creates a war file to access the hounder searcher via OpenSearch" depends="jar-for-servlets">
+        <property name="webapp.dir" value="${src.dir}/web-searcher/"/>
+        <antcall target="check-jsp"/>
+        <war warfile="output/searcher.war" webxml="${src.dir}/web-searcher/web.xml">
+            <fileset dir="${src.dir}/web-searcher/" >
+				<exclude name="web.xml" />
+			</fileset>
+            <classes dir="${conf.dir}" >
+				<include name="log4j.properties" />
+			</classes>
+            <classes dir="${conf.dir}/searcher" >
+				<include name="searcher.properties" />
+				<include name="opensearch.properties" />
+			</classes>
+            <lib dir="${output.dir}" >
+                <include name="${project}-forTomcat-${version}.jar" />
+            </lib>
+        </war>
+    </target>
+
+
+    <!--******************************************************************************************************-->
+    <target name="searcher-war" depends="jar">
+        <copy todir="${tmp.conf.dir}">
+            <fileset dir="${conf.dir}">
+                <include name="searcher.properties"/>
+                <include name="log4j.properties"/>
+            </fileset>
+        </copy>
+
+        <war warfile="dist/searcher.war" webxml="${src.dir}/web-searcher-descriptor/web.xml">
+            <fileset dir="${src.dir}/web-searcher/"/>
+            <classes dir="${tmp.conf.dir}" />
+            <lib dir="${basedir}/lib" >
+                <include name="log4j*.jar" />
+                <include name="hounder-*.jar" />
+            </lib>
+        </war>
+    </target>
+
+
+    <!--******************************************************************************************************-->
+
+    <target name="admin-war" description="creates the admin webapp" depends="jar-for-servlets">
+        <property name="webapp.dir" value="${src.dir}/web-admin/"/>
+        <antcall target="check-jsp"/>
+        <war warfile="output/admin.war" webxml="${src.dir}/web-admin/web.xml">
+		
+            <classes dir="${build.dir}">
+                <include name="com/flaptor/hounder/crawler/bean/*.class"/>
+                <include name="com/flaptor/hounder/crawler/pagedb/*.class"/>
+                <include name="com/flaptor/hounder/crawler/pagedb/*.class"/>
+                <include name="com/flaptor/hounder/crawler/UrlPatterns*.class"/>
+                <include name="com/flaptor/hounder/crawler/PageRank*.class"/>
+            </classes>
+        	
+            <fileset dir="${src.dir}/web-admin/">
+                <include name="*jsp"/>
+                <include name="*css"/>
+            </fileset>
+	
+            <lib dir="${output.dir}">
+                <include name="*jar"/>
+            </lib>
+            <lib dir="${lib.dir}">
+                <include name="*nutch*jar"/>
+                <include name="*oro*jar"/>
+            </lib>
+	    </war>
+	</target>
+	
+    <target name="clustering-war" description="creates the clustering webapp" depends="compile">
+        <property name="webapp.dir" value="${src.dir}/web-clusterfest/"/>
+        <!--antcall target="check-jsp"/-->
+        <war warfile="output/clustering.war" webxml="${src.dir}/web-clusterfest/WEB-INF/web.xml">
+		
+            <classes dir="${build.dir}">
+                <include name="com/flaptor/util/**/*.class"/>
+                <include name="com/flaptor/clustering/**/*.class"/>
+                <include name="com/flaptor/hounder/**/*.class"/>
+            </classes>
+
+        	<classes dir="${conf.dir}" >
+				<include name="log4j.properties" />
+			</classes>	        		    
+        	<classes dir="${conf.dir}/clustering-web" >
+				<include name="*.properties" />
+				<include name="*.properties.defaults" />
+			</classes>
+
+            <fileset dir="${src.dir}/web-clusterfest/">
+                <include name="*jsp"/>
+                <include name="*css"/>
+            </fileset>
+	
+            <lib dir="${lib.dir}">
+                <include name="*jar"/>
+            </lib>
+	    </war>
+	</target>
+	
+    <!--**************************************************************************************************-->
+    <!--DIST *********************************************************************************************-->
+    <!--**************************************************************************************************-->
+    <target name="prepare-dist">
+		<antcall target="clean-tmp"/>
+        <mkdir dir="${tmp.dir}"/>
+	</target>
+
+	
+    <!--******************************************************************************************************-->
+    <target name="dist-bin-all">
+        <antcall target="prepare-dist"/>
+        <copy todir="${tmp.bin.dir}">
+            <fileset dir="${bin.dir}/all"/>
+        </copy>
+        <tar destfile="${dist.dir}/bin-all.tgz" compression="gzip">
+            <tarfileset dir="${tmp.bin.dir}" mode="755" />
+        </tar>
+    </target>
+    
+    <!--******************************************************************************************************-->
+	<target name="dist-lib" depends="jar, depjar">
+	<!--target name="dist-lib"-->
+        <tar destfile="${dist.dir}/lib.tgz" compression="gzip">
+            <tarfileset dir="${output.dir}" prefix="lib">
+                <include name="${project}-${version}.jar" />
+            	<include name="${project}-${version}-deps.jar" />
+            </tarfileset>
+        </tar>
+   	</target>
+	
+    <!--******************************************************************************************************-->
+    <target name="dist-plugin">
+        <tar destfile="${dist.dir}/plugin.tgz" compression="gzip">
+            <tarfileset dir="${basedir}">
+                <include name="plugins/**" />
+            </tarfileset>
+        </tar>
+    </target>
+	
+    <!--******************************************************************************************************-->
+	<target name="dist-indexer"  depends="dist-lib, dist-plugin">
+		<antcall target="prepare-dist"/>
+        <copy todir="${tmp.bin.dir}">
+            <fileset dir="${bin.dir}/indexer"/>
+        </copy>
+        <copy todir="${tmp.conf.dir}">
+            <fileset dir="${conf.dir}">
+                <include name="*.properties"/>
+            </fileset>
+            <fileset dir="${conf.dir}/indexer">
+                <exclude name="*.properties.defaults"/>
+            </fileset>
+        </copy>
+        
+        <tar destfile="${dist.dir}/indexer.tgz" compression="gzip">
+            <tarfileset dir="${tmp.bin.dir}" prefix="indexer" mode="755" />
+            <tarfileset dir="${tmp.conf.dir}" prefix="indexer/conf" />
+        </tar>
+    </target>
+
+    <!--******************************************************************************************************-->
+    <target name="dist-crawler" depends="dist-lib, dist-plugin">
+		<antcall target="prepare-dist"/>
+        <!-- Copy all the crawler scripts -->
+        <copy todir="${tmp.bin.dir}">
+            <fileset dir="${bin.dir}/crawler"/>
+        </copy>
+
+        <!-- Copy the global crawler scripts 
+    	<copy todir="${tmp.dir}">
+            <fileset dir="${bin.dir}/multicrawler"/>
+        </copy -->
+
+        <!-- Copy conf files that are for this crawler conf only -->
+        <copy todir="${tmp.conf.dir}">
+            <fileset dir="${conf.dir}">
+                <include name="*.properties"/>
+            </fileset>
+            <fileset dir="${conf.dir}/crawler">
+                <exclude name="*.properties.defaults"/>
+            </fileset>
+        </copy>
+
+    	<!-- Build the tgz file  -->
+        <tar destfile="${dist.dir}/crawler.tgz" compression="gzip">
+        	<tarfileset dir="${tmp.bin.dir}" prefix="crawler" mode="755">
+                <exclude name="start" />
+                <exclude name="stop" />
+                <exclude name="status" />
+            </tarfileset>
+            <tarfileset dir="${tmp.dir}" prefix="." mode="755">
+                <include name="start.sh" />
+                <include name="stop.sh" />
+                <include name="status.sh" />
+            </tarfileset>
+            <tarfileset dir="${tmp.conf.dir}" prefix="crawler/conf" />
+        </tar>
+    </target>
+
+    <!--******************************************************************************************************-->
+    <target name="dist-searcher" depends="dist-lib, dist-plugin">
+		<antcall target="prepare-dist"/>
+        <!-- Copy xmlrpc searcher scripts -->
+        <copy todir="${tmp.bin.dir}">
+            <fileset dir="${bin.dir}/searcher"/>        	
+        </copy>
+    	<copy todir="${tmp.bin.dir}/web-searcher/">
+    		<fileset dir="${src.dir}/web-searcher/"/>
+   		</copy>
+    	
+        <copy todir="${tmp.conf.dir}">
+            <fileset dir="${conf.dir}">
+                <include name="*.properties"/>
+            </fileset>
+            <fileset dir="${conf.dir}/searcher">
+                <exclude name="*.properties.defaults"/>
+            </fileset>
+        </copy>
+
+        <tar destfile="${dist.dir}/searcher.tgz" compression="gzip">
+            <tarfileset dir="${tmp.bin.dir}" prefix="searcher" mode="755" />
+            <tarfileset dir="${tmp.conf.dir}" prefix="searcher/conf" />
+        </tar>
+    </target>
+
+    <!--******************************************************************************************************-->
+	<target name="dist-cache-server"  depends="dist-lib, dist-plugin">
+		<antcall target="prepare-dist"/>
+        <copy todir="${tmp.bin.dir}">
+            <fileset dir="${bin.dir}/cache-server"/>
+        </copy>
+        <copy todir="${tmp.conf.dir}">
+            <fileset dir="${conf.dir}">
+                <include name="*.properties"/>
+            </fileset>
+            <fileset dir="${conf.dir}/cache-server">
+                <exclude name="*.properties.defaults"/>
+            </fileset>
+        </copy>
+        
+        <tar destfile="${dist.dir}/cache-server.tgz" compression="gzip">
+            <tarfileset dir="${tmp.bin.dir}" prefix="cache-server" mode="755" />
+            <tarfileset dir="${tmp.conf.dir}" prefix="cache-server/conf" />
+        </tar>
+    </target>
+
+    <!--******************************************************************************************************-->
+	<target name="dist-clustering-web"  depends="dist-lib, dist-plugin">
+		<antcall target="prepare-dist"/>
+		
+        <copy todir="${tmp.bin.dir}">
+            <fileset dir="${bin.dir}/clustering-web"/>
+        </copy>
+		
+		<unjar dest="${tmp.bin.dir}">
+			<fileset dir="${lib.dir}">
+			  <include name="clusterfest-*.jar"/>
+			</fileset>
+			<patternset>
+			    <include name="web-clusterfest/**"/>
+			</patternset>
+		</unjar>
+		
+        <copy todir="${tmp.conf.dir}">
+            <fileset dir="${conf.dir}">
+                <include name="*.properties"/>
+            </fileset>
+            <fileset dir="${conf.dir}/clustering-web">
+                <exclude name="*.properties.defaults"/>
+            </fileset>
+        </copy>
+        
+        <tar destfile="${dist.dir}/clustering-web.tgz" compression="gzip">
+            <tarfileset dir="${tmp.bin.dir}" prefix="clustering-web" mode="755" />
+            <tarfileset dir="${tmp.conf.dir}" prefix="clustering-web/conf" />
+            <tarfileset dir="${src.dir}/web-clusterfest" prefix="clustering-web/web-clusterfest" />
+        </tar>
+    </target>
+
+    <!--******************************************************************************************************-->
+	<target name="dist-learning-web"  depends="dist-lib, dist-plugin">
+		<antcall target="prepare-dist"/>
+        <copy todir="${tmp.bin.dir}">
+            <fileset dir="${bin.dir}/learning"/>
+        </copy>
+        <copy todir="${tmp.conf.dir}">
+            <fileset dir="${conf.dir}">
+                <include name="*.properties"/>
+            </fileset>
+           <fileset dir="${conf.dir}/learning">
+                <include name="classifier.properties"/>
+            </fileset>
+            <fileset dir="${conf.dir}/crawler">
+              	<include name="crawler.properties"/>
+              	<include name="nutch-site.xml"/>
+	          	<include name="nutchfetcher.properties"/>
+            </fileset>      	
+        </copy>
+        
+        <tar destfile="${dist.dir}/learning-web.tgz" compression="gzip">
+            <tarfileset dir="${tmp.bin.dir}" prefix="learning-web" mode="755" />
+            <tarfileset dir="${tmp.conf.dir}" prefix="learning-web/conf" />
+            <tarfileset dir="${src.dir}/web-learning" prefix="learning-web/web-learning" />
+        </tar>
+    </target>
+    <!--******************************************************************************************************-->
+    <target name="dist-loganalysis"  depends="dist-lib, dist-plugin">
+        <antcall target="prepare-dist"/>
+        <copy todir="${tmp.bin.dir}">
+            <fileset dir="${bin.dir}/loganalysis"/>
+        </copy>
+        <copy todir="${tmp.conf.dir}">
+            <fileset dir="${conf.dir}">
+                <include name="*.properties"/>
+            </fileset>
+            <fileset dir="${conf.dir}/loganalysis">
+                <exclude name="*.properties.defaults"/>
+            </fileset>
+        </copy>
+        
+        <tar destfile="${dist.dir}/loganalysis.tgz" compression="gzip">
+            <tarfileset dir="${tmp.bin.dir}" prefix="loganalysis" mode="755" />
+            <tarfileset dir="${tmp.conf.dir}" prefix="loganalysis/conf" />
+            <tarfileset dir="${src.dir}/web-loganalysis" prefix="loganalysis/web-loganalysis" />
+        </tar>
+    </target>
+
+    <!--******************************************************************************************************-->
+	<target name="dist" depends="dist-searcher, dist-indexer, dist-crawler, dist-cache-server, dist-clustering-web, dist-learning-web, dist-loganalysis, dist-bin-all"/>
+
+    <target name="distsrc" depends="prepare, doc" description="builds the source distribution tar ball">
+        <property name="prefix" value="${project}-${version}"/>
+        <tar destfile="${product.output.dir}/${project}-${version}-src.tgz" compression="gzip">
+        	
+            <tarfileset file="*.xml" prefix="${prefix}"/>
+            <tarfileset file="*.sh" prefix="${prefix}"/>
+            <tarfileset file="${docs.dir}/LICENSE" prefix="${prefix}"/>
+            <tarfileset dir="${src.dir}" prefix="${prefix}/src"/>
+            <tarfileset dir="${test.dir}" prefix="${prefix}/test"/>
+            <tarfileset dir="${conf.dir}" prefix="${prefix}/conf" />
+            <tarfileset dir="${docs.dir}" prefix="${prefix}/docs"/>
+            <tarfileset dir="${bin.dir}" mode="755" prefix="${prefix}/bin"/>
+            <tarfileset dir="${lib.dir}" prefix="${prefix}/lib"/>            
+            <tarfileset dir="${tools.dir}" prefix="${prefix}/tools"/>
+            <tarfileset dir="${plugins.dir}" prefix="${prefix}/plugins"/>
+            <tarfileset dir="${product.dir}" prefix="${prefix}/product"/>
+        </tar>
+    </target>
+
+	<target name="distbin" depends="prepareproduct" description="builds the product binary distribution tar ball">
+        <tar destfile="${product.output.dir}/${project}-${version}-bin.tgz" compression="gzip">
+            <tarfileset dir="${tmp.dir}"/>
+        </tar>
+	</target>
+	
+    <!--******************************************************************************************************-->
+    <target name="prepareproduct" depends="dist, installer-jar" >
+        <antcall target="prepare-dist"/>
+        <copy todir="${tmp.dir}">
+            <fileset dir="${product.dir}"/>
+            <fileset file="${docs.dir}/LICENSE"/>
+        </copy>
+        
+        <!-- dist -->
+        <copy todir="${tmp.dir}/dist">
+            <fileset dir="${dist.dir}"/>
+        </copy>
+
+        <!-- installer -->
+        <mkdir dir="${tmp.dir}/installer"/>
+        <copy todir="${tmp.dir}/installer" file="${output.dir}/hounder-installer.jar"/>
+        <copy todir="${tmp.dir}/installer/conf">
+            <fileset dir="${conf.dir}">
+                <include name="*.properties"/>
+            </fileset>
+            <fileset dir="${conf.dir}/crawler">
+                <exclude name="*.properties.defaults"/>
+            </fileset>
+            <fileset dir="${conf.dir}/indexer">
+                <exclude name="*.properties.defaults"/>
+            </fileset>
+            <fileset dir="${conf.dir}/searcher">
+                <exclude name="*.properties.defaults"/>
+            </fileset>
+            <fileset dir="${conf.dir}/cache-server">
+                <exclude name="*.properties.defaults"/>
+            </fileset>
+            <fileset dir="${conf.dir}/clustering-web">
+                <exclude name="*.properties.defaults"/>
+            </fileset>
+        </copy>
+        <chmod perm="777" file="${tmp.dir}/installer/*.sh"/>
+    </target>
+
+	<target name="product" depends="prepareproduct" description="creates the product (but doesnt tar it)" >
+   		<copy todir="${product.output.dir}"> 
+            <fileset dir="${tmp.dir}"/>
+        </copy>
+   		<chmod perm="777" file="${product.output.dir}/installer/*.sh"/>
+   	</target>
+
+</project>
+
+	
+	

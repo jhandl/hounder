@@ -1,0 +1,77 @@
+##### THESE ARE CRAWLER SETTINGS
+
+crawler.mode=runforever
+crawler.mode.skip=0
+#only valid if crawler.mode=cycles
+crawler.mode.cycles=2
+
+# The number of threads to use to process documents fetched, per cpu. It is a float.
+workers.per.cpu = 0.8
+
+# The fetcher plugin. By default it is the Nutch Fetcher, but any fetcher that implements the IFetcher interface will work.
+fetcher.plugin = com.flaptor.hounder.crawler.NutchFetcher
+
+# The directory of the pagedb.
+pagedb.dir = pagedb
+
+# The directory of the injected pagedb.
+injected.pagedb.dir = injectdb
+
+# The number of web pages to fetch per fetch cycle.
+fetchlist.size = 1000
+
+# The distance (in jumps) the crawler will venture from the known hotspots in search for more hotspots.
+max.distance = 0
+
+# The number of times a page will be allowed to fail before dropping it. For each distance, there is one retry limit.
+max.retries = 5
+
+# The number of pages to fetch outside of the hotspot vicinity. 
+# These pages will only be kept if they become hotspots, there is no distance limit for them, and retries is 0.
+discovery.front.size = 100000
+
+# The limit to the number of pages stored on the pagedb. If zero or undefined, no limit is imposed.
+pagedb.size.limit = 0
+
+# If true, discovery pages are selected at random to form the front line. If false, the first {discovery.front.size} pages are selected.
+discovery.front.stocastic = true
+
+# The number of crawl cycles before a new discovery wave is launched from the outskirts of the hotspot vicinity.
+cycles.between.discovery.waves = 30
+
+# File containing a list of grep patterns a url must match to become a hotspot.
+hotspot.file = hotspots.regex
+
+# The percentile of pages from the pagedb that should be fetched on a crawl cycle based on their priority.
+priority.percentile.to.fetch = 20
+
+# Length limit for the title and the text of a page. Anything beyond these limits will not be stored.
+page.title.max.length = 200
+page.text.max.length = 256000
+
+# Number of cycles between index optimizations. Zero if never.
+index.optimize.period = 0
+
+# If two pages or versions of the same page are more similar than this threshold, they are considered equal.
+page.similarity.threshold = 0.95
+
+# if true the urls of the pages linking to each page will be recorded.
+record.parents = false
+
+# if true, the underlying pagedb will be distributed, and the crawler.properties file must define the pagedb.node.list property, which is a comma-separated list of the IP address of each node, including the local node. This list has to be exactly the same in each node, and in the same order.
+pagedb.is.distributed = false
+pagedb.node.mapper = com.flaptor.hounder.crawler.pagedb.distributed.UrlHashMapper
+
+clustering.enable=yes
+clustering.node.type=crawler
+
+###
+### Used by the htmlparser on the crawler side
+###
+# Write an xpath expression, and matching nodes will be ignored
+HtmlParser.removedXPath=//SCRIPT | //SELECT | //STYLE
+# In HTML usually phrases are not ended with '.' or '\n' because an html tag is used for that 
+#   (ie: 'p' to define paragraphs). That might be a problem later (for the snippetSearcher) as 
+#   might be needed to know where a phrase ends. Tags appearing in the separatorTags will be 
+#   appended with a '.'.   
+HtmlParser.separatorTags=TD,TR,BR,P,LI,UL,OL,DIV,A,H1,H2,H3,H4,H5

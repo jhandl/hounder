@@ -1,0 +1,100 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="nutch-conf.xsl"?>
+
+<!-- Put site-specific property overrides in this file. -->
+
+<nutch-conf>
+
+<!-- Fetcher properties -->
+
+  <property>
+    <name>fetcher.server.delay</name>
+    <value>1.0</value>
+  </property>
+
+  <property>
+    <name>fetcher.threads.fetch</name>
+    <value>5</value>
+  </property>
+
+  <property>
+    <name>fetcher.threads.per.host</name>
+    <value>1</value>
+  </property>
+
+  <property>
+    <name>http.timeout</name>
+    <value>60000</value>
+  </property>
+
+  <property>
+    <name>http.max.delays</name>
+    <value>50</value>
+  </property>
+
+  <property>
+    <name>http.content.limit</name>
+    <value>262144</value>
+  </property>
+
+  <property>
+    <name>file.content.limit</name>
+    <value>262144</value>
+  </property>
+
+  <property>
+    <name>db.max.outlinks.per.page</name>
+    <value>999512</value>
+  </property>
+
+  <property>
+    <name>db.max.anchor.length</name>
+    <value>256</value>
+  </property>
+
+
+  <!-- Agent properties -->
+
+  <property>
+    <name>http.agent.name</name>
+    <value>HounderCrawl</value>
+  </property>
+
+  <property>
+    <name>http.robots.agents</name>
+    <value>HounderCrawl,*</value>
+  </property>
+
+  <property>
+    <name>http.agent.description</name>
+    <value>Hounder Search Bot</value>
+  </property>
+
+  <property>
+    <name>http.agent.url</name>
+    <value>http://www.flaptor.com/</value>
+  </property>
+
+  <property>
+    <name>http.agent.email</name>
+    <value>bot@flaptor.com</value>
+  </property>
+
+
+  <!-- Plugin properties -->
+
+
+  <property>
+    <name>plugin.folders</name>
+    <value>plugins</value>
+  </property>
+
+  <property>
+    <name>plugin.includes</name>
+    <value>nutch-extensionpoints|protocol-http|urlfilter-regex|parse-(text|html|msword|pdf|rss)|index-(basic|more)|query-(basic|site|url)</value>
+  </property>
+
+<!--
+-->
+
+</nutch-conf>

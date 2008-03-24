@@ -1,0 +1,67 @@
+#the indexer base dir, usually called <installation dir>/indexer
+indexer.dir=indexer
+
+# The default index descriptor string. If using an index that was
+# in the copies directory, its descriptor will be checked against
+# this value, to make sure that we continue indexing over the correct
+# index segment.
+IndexManager.indexDescriptor=0of1@defaultCluster
+
+
+docIdName=documentId
+
+
+#The size of the queues in-between modules. This parameter may be important when the multithreaded version of the ModulePipe is implemented.
+# Never make this value smaller than the maximum number of document any module returns, as it may cause deadlock. (In Hounder, no module return more than 1 document)
+ModulePipe.inter_module_queue_size=20
+
+#There is a queue before the first module where all the request can be stored while waiting to be processed. When this queue get full,
+# a "QUEUE_FULL" message is returned for all new requests (see the Indexer.java). This size should be large enough to hold all the received
+# data while an indexer optimize is in progress (around 10 minutes, depending on the size of the index), but must be samall enough not
+# to fill all the available memory of the javaVM.
+Indexer.maxQueueSize=1000
+Writer.compressedFields=
+# Payload fields that will be checked for in every document.
+Writer.payloads=
+
+#Regularly, the index should be close to flush it, and a copy of it made. This variable controls how often that happens (in milliseconds)
+IndexManager.updateInterval=300000
+
+#A comma separeted list of modules to process the input data before reaching the Index. The Writer module is always present at
+# the end of the pipe, and needs not to be specified. The first module in the list will be the first to process the input data.
+# While specifying the modules, use their full name. The "LoggerModule is useful while debugging, and may be present in several
+# places of the pipe.
+Indexer.modules=com.flaptor.hounder.indexer.LoggerModule,com.flaptor.hounder.indexer.Writer
+
+
+clustering.enable=yes
+clustering.node.type=indexer
+
+HtmlParser.inputTagNames=body
+HtmlParser.outputFieldNames=text
+HtmlParser.stored=true
+HtmlParser.indexed=true
+
+###
+### Used by the htmlparser on the crawler side
+###
+# Write an xpath expression, and matching nodes will be ignored
+HtmlParser.removedXPath=//SCRIPT|//SELECT|//STYLE
+# In HTML usually phrases are not ended with '.' or '\n' because an html tag is used for that 
+#   (ie: 'p' to define paragraphs). That might be a problem later (for the snippetSearcher) as 
+#   might be needed to know where a phrase ends. Tags appearing in the separatorTags will be 
+#   appended with a '.'.   
+HtmlParser.separatorTags=TD,TR,BR,P,LI,UL,OL,DIV,A,H1,H2,H3,H4,H5
+
+
+### This config variable is only read by com.flaptor.hounder.indexer.HtmlParser, and so
+### it is used when the HtmlParser is constructed as an Indexer Module.
+#
+# Pair List of fields and its xpath location. It is used to create a field on the output
+# with the content of the xpath. For example, if you need to extract the content of the
+# keyword meta tag of an html, and store it as "meta_keyword" on the HtmlParser.Output,
+# the line should be
+#HtmlParser.extraFieldMapping=meta_keyword://HEAD/META[@name="KEYWORDS"]/@content
+#
+# The format is fieldName://SOME/XPATH,otherFieldName:/SOME//OTHER[name="xpath"] .. 
+HtmlParser.extraFieldMapping=
