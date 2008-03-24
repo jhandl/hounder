@@ -749,9 +749,10 @@ limitations under the License.
     </target>
 
 	<target name="distbin" depends="prepareproduct" description="builds the product binary distribution tar ball">
-        <tar destfile="${product.output.dir}/${project}-${version}-bin.tgz" compression="gzip">
-            <tarfileset dir="${tmp.dir}"/>
-        </tar>
+        	<property name="prefix" value="${project}-${version}"/>
+        	<tar destfile="${product.output.dir}/${project}-${version}-bin.tgz" compression="gzip">
+            		<tarfileset dir="${tmp.dir}" prefix="${prefix}"/>
+        	</tar>
 	</target>
 	
     <!--******************************************************************************************************-->
