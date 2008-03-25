@@ -34,6 +34,7 @@ import com.flaptor.hounder.searcher.group.AResultsGrouper;
 import com.flaptor.hounder.searcher.group.GroupedSearchResultsDocumentProvider;
 import com.flaptor.hounder.searcher.query.AQuery;
 import com.flaptor.hounder.searcher.sort.ASort;
+import com.flaptor.util.CallableWithId;
 import com.flaptor.util.Config;
 import com.flaptor.util.Execute;
 import com.flaptor.util.Execution;
@@ -54,7 +55,7 @@ public class MultiSearcher implements ISearcher {
     private static Logger logger = Logger.getLogger(Execute.whoAmI());
 
     private List<IRemoteSearcher> searchers = new ArrayList<IRemoteSearcher>();
-    private MultiExecutor<Pair<Integer, GroupedSearchResults>> multiQueryExecutor;
+    private MultiExecutor<GroupedSearchResults> multiQueryExecutor;
     private List<String> searcherIPs = new ArrayList<String>();
     private long timeout;
     
@@ -68,7 +69,7 @@ public class MultiSearcher implements ISearcher {
             searcherIPs.add(host.first());
         }
         timeout = config.getLong("multiSearcher.timeout");
-        multiQueryExecutor = new MultiExecutor<Pair<Integer, GroupedSearchResults>>(config.getInt("multiSearcher.workerThreads"), "multiSearcher");
+        multiQueryExecutor = new MultiExecutor<GroupedSearchResults>(config.getInt("multiSearcher.workerThreads"), "multiSearcher");
     }
 
     /**
@@ -84,14 +85,14 @@ public class MultiSearcher implements ISearcher {
 
         final QueryParams queryParams = new QueryParams(query, 0, firstResult + count, group, 1, filter, sort);
         
-        Execution<Pair<Integer, GroupedSearchResults>> execution= new Execution<Pair<Integer, GroupedSearchResults>>();
+        Execution<GroupedSearchResults> execution= new Execution<GroupedSearchResults>();
         for (int i = 0; i < searchers.size(); ++i) {
         	final int numSearcher = i;
         	final IRemoteSearcher searcher = searchers.get(numSearcher);
-            execution.getTaskQueue().add(new Callable<Pair<Integer, GroupedSearchResults>>() {
-				public Pair<Integer, GroupedSearchResults> call() throws Exception {
-					return new Pair<Integer, GroupedSearchResults>(numSearcher, queryParams.executeInRemoteSearcher(searcher));
-				}
+            execution.getTaskQueue().add(new CallableWithId<GroupedSearchResults, Integer>(numSearcher) {
+                public GroupedSearchResults call() throws Exception {
+                    return queryParams.executeInRemoteSearcher(searcher);
+                }
             });
         }
         multiQueryExecutor.addExecution(execution);
@@ -120,24 +121,25 @@ public class MultiSearcher implements ISearcher {
         //a treeMap for sorting values according to the searcher number
         Map<Integer, GroupedSearchResults> goodResultsMap = new TreeMap<Integer, GroupedSearchResults>();
         List<GroupedSearchResults> goodResults = new ArrayList<GroupedSearchResults>();
-        List<Results<Pair<Integer, GroupedSearchResults>>> badResults = new ArrayList<Results<Pair<Integer, GroupedSearchResults>>>();
+        //List<Results<GroupedSearchResults>> badResults = new ArrayList<Results<GroupedSearchResults>>();
+        int badResults = 0;
         
         int totalDocuments = 0;
         //we take a snapshot of the results
         //other results may come after the timeout, a change in the size of the result set could cause problems
         synchronized(execution) {
             execution.forget();
-            for (Results<Pair<Integer, GroupedSearchResults>> result : execution.getResultsList()) {
-            	int numSearcher = result.getResults().first();
+            for (Results<GroupedSearchResults> result : execution.getResultsList()) {
+                int numSearcher = ((CallableWithId<GroupedSearchResults, Integer>)result.getTask()).getId();
                 if (result.isFinishedOk()) {
-                	GroupedSearchResults gsr = result.getResults().last();
+                	GroupedSearchResults gsr = result.getResults();
                 	goodResultsMap.put(numSearcher, gsr);
                     totalDocuments += gsr.totalGroupsEstimation();
                     // gather stats from the uni-searchers
                 	Statistics.getStatistics().notifyEventValue("averageTimes_"+searcherIPs.get(numSearcher), gsr.getResponseTime());
                 } else {
-                    badResults.add(result);
-                    logger.warn("Exception from remote search on searcher " + numSearcher, result.getException());
+                    badResults++;
+                    logger.warn("Exception from remote searcher " +  numSearcher, result.getException());
                 }
             }
         }
@@ -148,10 +150,10 @@ public class MultiSearcher implements ISearcher {
         	goodResults.add(entry.getValue());
         }
         int resultsSize = goodResults.size(); 
-        logger.debug("obtained " + totalDocuments + " documents in "+ resultsSize + " good responses and " +  badResults.size() + " exceptions in " + (now - start) + " ms ");
+        logger.debug("obtained " + totalDocuments + " documents in "+ resultsSize + " good responses and " +  badResults + " exceptions in " + (now - start) + " ms ");
 
         if (goodResults.size() == 0) {
-            logger.warn("No good results - " + badResults.size() + " exceptions");
+            logger.warn("No good results - " + badResults + " exceptions");
             return new GroupedSearchResults();
         }
 
