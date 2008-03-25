@@ -81,6 +81,7 @@ public class MultiSearcher implements ISearcher {
      * results on the head are returned.
      *
      */
+    @SuppressWarnings("unchecked")
     public GroupedSearchResults search(AQuery query, int firstResult, int count, AGroup group, int groupSize, AFilter filter, ASort sort) {
 
         final QueryParams queryParams = new QueryParams(query, 0, firstResult + count, group, 1, filter, sort);
