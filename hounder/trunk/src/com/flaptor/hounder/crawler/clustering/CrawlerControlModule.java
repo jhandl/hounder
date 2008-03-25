@@ -24,6 +24,7 @@ import com.flaptor.clusterfest.AbstractModule;
 import com.flaptor.clusterfest.NodeDescriptor;
 import com.flaptor.clusterfest.NodeUnreachableException;
 import com.flaptor.clusterfest.WebModule;
+import com.flaptor.util.Pair;
 import com.flaptor.util.remote.NoSuchRpcMethodException;
 import com.flaptor.util.remote.WebServer;
 import com.flaptor.util.remote.XmlrpcClient;
@@ -86,4 +87,14 @@ public class CrawlerControlModule extends AbstractModule<CrawlerControlNode> imp
 	}
 	public void setup(WebServer server) {
 	}
+
+    @Override
+    public List<Pair<String, String>> getSelectedNodesActions() {
+        return new ArrayList<Pair<String,String>>();
+    }
+
+    @Override
+    public String selectedNodesAction(String action, List<NodeDescriptor> nodes, HttpServletRequest request) {
+        return null;
+    }
 }

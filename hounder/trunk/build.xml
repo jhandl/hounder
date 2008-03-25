@@ -729,7 +729,7 @@ limitations under the License.
     <!--******************************************************************************************************-->
 	<target name="dist" depends="dist-searcher, dist-indexer, dist-crawler, dist-cache-server, dist-clustering-web, dist-learning-web, dist-loganalysis, dist-bin-all"/>
 
-    <target name="distsrc" depends="prepare, doc">
+    <target name="distsrc" depends="prepare, doc" description="builds the source distribution tar ball">
         <property name="prefix" value="${project}-${version}"/>
         <tar destfile="${product.output.dir}/${project}-${version}-src.tgz" compression="gzip">
         	
@@ -748,51 +748,58 @@ limitations under the License.
         </tar>
     </target>
 
+	<target name="distbin" depends="prepareproduct" description="builds the product binary distribution tar ball">
+        <tar destfile="${product.output.dir}/${project}-${version}-bin.tgz" compression="gzip">
+            <tarfileset dir="${tmp.dir}"/>
+        </tar>
+	</target>
+	
     <!--******************************************************************************************************-->
-   	<target name="product" depends="dist, installer-jar" description="Compiles and pakages hounder's distribution." >
-		<antcall target="prepare-dist"/>
+    <target name="prepareproduct" depends="dist, installer-jar" >
+        <antcall target="prepare-dist"/>
         <copy todir="${tmp.dir}">
             <fileset dir="${product.dir}"/>
             <fileset file="${docs.dir}/LICENSE"/>
-   	    </copy>
-   		
-   		<!-- dist -->
+        </copy>
+        
+        <!-- dist -->
         <copy todir="${tmp.dir}/dist">
             <fileset dir="${dist.dir}"/>
         </copy>
 
-   		<!-- installer -->
-		<mkdir dir="${tmp.dir}/installer"/>
-   		<copy todir="${tmp.dir}/installer" file="${output.dir}/hounder-installer.jar"/>
-   		<copy todir="${tmp.dir}/installer/conf">
+        <!-- installer -->
+        <mkdir dir="${tmp.dir}/installer"/>
+        <copy todir="${tmp.dir}/installer" file="${output.dir}/hounder-installer.jar"/>
+        <copy todir="${tmp.dir}/installer/conf">
             <fileset dir="${conf.dir}">
                 <include name="*.properties"/>
-   			</fileset>
+            </fileset>
             <fileset dir="${conf.dir}/crawler">
                 <exclude name="*.properties.defaults"/>
-   			</fileset>
+            </fileset>
             <fileset dir="${conf.dir}/indexer">
                 <exclude name="*.properties.defaults"/>
-   			</fileset>
+            </fileset>
             <fileset dir="${conf.dir}/searcher">
                 <exclude name="*.properties.defaults"/>
-  			</fileset>
+            </fileset>
             <fileset dir="${conf.dir}/cache-server">
                 <exclude name="*.properties.defaults"/>
-  			</fileset>
+            </fileset>
             <fileset dir="${conf.dir}/clustering-web">
                 <exclude name="*.properties.defaults"/>
-  			</fileset>
+            </fileset>
         </copy>
-   		<chmod perm="777" file="${tmp.dir}/installer/*.sh"/>
-   		
-		<!-- instead of this, should make a zip with the bundle -->   		
+        <chmod perm="777" file="${tmp.dir}/installer/*.sh"/>
+    </target>
+
+	<target name="product" depends="prepareproduct" description="creates the product (but doesnt tar it)" >
    		<copy todir="${product.output.dir}"> 
             <fileset dir="${tmp.dir}"/>
         </copy>
    		<chmod perm="777" file="${product.output.dir}/installer/*.sh"/>
-
    	</target>
+
 </project>
 
 	
