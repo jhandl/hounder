@@ -61,7 +61,12 @@ public class CompositeSearcher implements ISearcher {
         // start clustering first.
     	if (searcherConfig.getBoolean("clustering.enable")) {
         	int port = PortUtil.getPort("clustering.rpc.searcher");
-    		clusteringListener = new ClusterableListener(port, searcherConfig);
+        	if (searcherConfig.getBoolean("searcher.isMultiSearcher")) {
+        	    searcherConfig.set("clustering.node.type", "multisearcher");
+        	} else {
+        	    searcherConfig.set("clustering.node.type", "searcher");
+        	}
+        	clusteringListener = new ClusterableListener(port, searcherConfig);
     		MonitorModule.addMonitorListener(clusteringListener, new SearcherMonitoredNode(this));
     		ControllerModule.addControllerListener(clusteringListener, new ControllableImplementation());    		
         }

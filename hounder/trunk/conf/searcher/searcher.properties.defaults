@@ -96,7 +96,6 @@ IndexLibrary.indexDeleteDelay=60000
 
 #clustering
 clustering.enable=true
-clustering.node.type=searcher
 
 searcher.cachedVersion.showLink=false
 #host:baseport notation or host (using the same baseport as this installation)
