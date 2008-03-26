@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import com.flaptor.clusterfest.AbstractModule;
 import com.flaptor.clusterfest.NodeDescriptor;
@@ -88,13 +89,19 @@ public class CrawlerControlModule extends AbstractModule<CrawlerControlNode> imp
 	public void setup(WebServer server) {
 	}
 
-    @Override
     public List<Pair<String, String>> getSelectedNodesActions() {
         return new ArrayList<Pair<String,String>>();
     }
 
-    @Override
     public String selectedNodesAction(String action, List<NodeDescriptor> nodes, HttpServletRequest request) {
         return null;
+    }
+
+    public String doPage(String page, HttpServletRequest request, HttpServletResponse response) {
+        return null;
+    }
+
+    public List<String> getPages() {
+        return new ArrayList<String>();
     }
 }

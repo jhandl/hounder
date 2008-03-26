@@ -77,6 +77,11 @@ limitations under the License.
             <include name="xml-apis.jar" />
             <include name="xmlrpc-2.0.jar" />
             <include name="hsqldb.jar" />
+
+        	<include name="velocity-1.5.jar" />
+            <include name="velocity-deps-1.5.jar" />
+            <include name="velocity-tools-1.5.jar" />
+            <include name="commons-digester-1.8.jar" />
         </fileset>
     </path>
 
