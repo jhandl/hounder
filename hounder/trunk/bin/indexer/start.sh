@@ -6,7 +6,6 @@ then
     exit 1
 fi
 
-rm /tmp/lucene*
 rm -rf indexes/index
 
 LOG_DIR=logs
