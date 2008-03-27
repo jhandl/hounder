@@ -276,32 +276,31 @@ public class Indexer implements IRmiIndexer, IIndexer, Stoppable {
             logger.debug("Stopping QueueProcessorThread.");
             qpt.requestStop();
             while (!qpt.isStopped()) {
-                try {
-                    sleep(20);
-                } catch (InterruptedException e) {
-                    logger.warn("Interrupted while sleeping.");
-                }
+                Execute.sleep(20,logger);
             }
             logger.debug("QueueProccessorThread stopped.");
             logger.debug("Stopping the pipeline.");
             pipe.requestStop();
             while (!pipe.isStopped()) {
-                try {
-                    sleep(20);
-                } catch (InterruptedException e) {
-                    logger.warn("Interrupted while sleeping.");
-                }
+                Execute.sleep(20,logger);
             }
             logger.debug("Pipeline stopped.");
             logger.debug("Stopping the IndexManager.");
 			indexManager.requestStop();
             while (!indexManager.isStopped()) {
-                try {
-                    sleep(20);
-                } catch (InterruptedException e) {
-                    logger.warn("Interrupted while sleeping.");
-                }
+                Execute.sleep(20,logger);
             }            
+           
+            // Stop clustering if it was enabled
+            if (null != clusteringListener) {
+                logger.debug("Stopping clustering listener");
+                clusteringListener.requestStop();
+                while (!clusteringListener.isStopped()) {
+                    Execute.sleep(20,logger);
+                }
+                logger.debug("clustering listener stopped.");
+            }            
+
             logger.debug("IndexManager stopped.");
             logger.info("Stop sequence finished.");
             state = RunningState.STOPPED;
