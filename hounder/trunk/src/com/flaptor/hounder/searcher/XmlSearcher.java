@@ -228,6 +228,8 @@ public class XmlSearcher {
 				type = FieldSort.OrderType.FLOAT;
 			} else if (typeStr.equals("INT")) {
 				type = FieldSort.OrderType.INT;
+			} else if (typeStr.equals("LONG")) {
+				type = FieldSort.OrderType.LONG;
 			}
 			if (null == subSort) {
 				sort = new FieldSort(reverse.equals("true"), name, type);

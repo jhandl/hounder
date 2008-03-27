@@ -94,6 +94,9 @@ public final class FieldSort extends ASort {
 			case INT:
 				sf = new SortField(fieldName, SortField.INT, reversed.booleanValue());
 				break;
+			case LONG:
+				sf = new SortField(fieldName, SortField.LONG, reversed.booleanValue());
+				break;
 		}
 		return sf;
 	}
@@ -125,7 +128,7 @@ public final class FieldSort extends ASort {
 
 	//========================================================================================
 	//INTERNAL CLASSES
-	public static enum OrderType { FLOAT, INT, STRING};
+	public static enum OrderType { FLOAT, INT, LONG, STRING};
 
 
     private static class FieldSortDocumentComparator implements Comparator<Document> {
@@ -168,6 +171,18 @@ public final class FieldSort extends ASort {
                     throw new RuntimeException(nfe);
                 }
             }
+
+
+            if (sort.orderType == OrderType.LONG) {
+                try {
+                    Long l1 = Long.parseLong(str1);
+                    Long l2 = Long.parseLong(str2);
+                    myComparation = l1.compareTo(l2);
+                } catch (NumberFormatException nfe) {
+                    throw new RuntimeException(nfe);
+                }
+            }
+
 
             if (sort.orderType == OrderType.STRING) {
                 myComparation = str1.compareTo(str2);
