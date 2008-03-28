@@ -438,6 +438,9 @@ public class SnippetSearcher implements ISearcher{
         // if necessary, we use also backward
         for (int i=mid; totLength < requiredlength && i >= 0; i--){
             Fragment frag= frags.get(i);
+            if (frag.useIt){
+            	continue;
+            }
             frag.setUseIt(true);
             totLength += frag.getText().length();
             useIt.add(frag.pos);

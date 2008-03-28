@@ -39,7 +39,6 @@ Sort.cacheSize=20
 ## Now for each field in snippetOfFields there will be a new field called snippet_<snippetOfFields[i]>
 # (ie text --> snippet_text) 
 # snippetOfFields is a comma separated list of fields to snippet. (ie text,title).
-# If empty, no snippet is generated 
 Searcher.snippetOfFields=text,title
 Searcher.snippetLength=180,75
 Searcher.snippetFragmentSeparator=...
