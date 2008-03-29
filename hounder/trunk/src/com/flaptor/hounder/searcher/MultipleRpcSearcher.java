@@ -59,18 +59,21 @@ public class MultipleRpcSearcher implements ISearcher {
             server.start();
         }
         if (openSearch || web) {
+            Config config = Config.getConfig("searcher.properties");
             int webServerPort = PortUtil.getPort("searcher.webOpenSearch");
             WebServer server = new WebServer(webServerPort); 
 
             if (openSearch) {
-                logger.info("MultipleRpcSearcher constructor: starting OpenSearch searcher on port " + webServerPort + " context /opensearch/");
-                server.addHandler("/opensearch", new OpenSearchHandler(baseSearcher));
+                String context = config.getString("opensearch.conext");
+                logger.info("MultipleRpcSearcher constructor: starting OpenSearch searcher on port " + webServerPort + " context "+context);
+                server.addHandler(context, new OpenSearchHandler(baseSearcher));
             }
             if (web) {
-                logger.info("MultipleRpcSearcher constructor: starting web searcher on port " + webServerPort  + " context /websearch/");
+                String context = config.getString("websearch.conext");
+                logger.info("MultipleRpcSearcher constructor: starting web searcher on port " + webServerPort  + " context "+context);
                 WebSearchUtil.setSearcher(baseSearcher);
                 String webappPath = this.getClass().getClassLoader().getResource("web-searcher").getPath();
-                server.addWebAppHandler("/websearch", webappPath);
+                server.addWebAppHandler(context, webappPath);
             }
    			try {server.start(); } catch (Exception e) {throw new RuntimeException(e);}
         }

@@ -49,8 +49,11 @@ Searcher.emptySnippetsAllowed=true
 # Note that to use a '-' you must escape it: [\\-], else is considered range
 Searcher.snippetFragmentBoundary=[.!?\\n]
 
+# Context for the two http interfaces
+websearch.context="/websearch"
+opensearch.context="/opensearch"
 
-# Wheter to use payloads or not
+# Whether to use payloads or not
 Searcher.usePayloads=no
 # The name of the payload field.
 Searcher.payloadField=
