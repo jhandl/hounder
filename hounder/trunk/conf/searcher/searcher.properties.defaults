@@ -50,8 +50,8 @@ Searcher.emptySnippetsAllowed=true
 Searcher.snippetFragmentBoundary=[.!?\\n]
 
 # Context for the two http interfaces
-websearch.context="/websearch"
-opensearch.context="/opensearch"
+websearch.context=/websearch
+opensearch.context=/opensearch
 
 # Whether to use payloads or not
 Searcher.usePayloads=no
