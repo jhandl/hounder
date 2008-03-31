@@ -50,6 +50,9 @@ Searcher.emptySnippetsAllowed=true
 Searcher.snippetFragmentBoundary=[.!?\\n]
 
 # Context for the two http interfaces
+websearch.redirect=no
+websearch.redirect.from=/
+websearch.redirect.to=/websearch
 websearch.context=/websearch
 opensearch.context=/opensearch
 

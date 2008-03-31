@@ -172,21 +172,33 @@ public class OpenSearchHandler extends AbstractHandler {
             sort = new ScoreSort();
             for (int i = (sortingCriteria.length-1); i >= 0; i--) {
                 String sortingCriterion = sortingCriteria[i];
-                int colonPos = sortingCriterion.indexOf(":");
-                String sortField;
-                boolean reverse;
-                if (colonPos != -1) {
-                    sortField = sortingCriterion.substring(0,colonPos);
-                    reverse = "reversed".equals(sortingCriterion.substring(colonPos+1));
-                } else {
-                    sortField = sortingCriterion;
-                    reverse = false;
+                String parts[] = sortingCriterion.toLowerCase().split(":");
+                String sortField = parts[0];
+                FieldSort.OrderType orderType = FieldSort.OrderType.STRING;
+                boolean reverse = false;
+                for (int p = 1; p < parts.length; p++) {
+                	String part = parts[p];
+                	if ("reverse".equals(part) || "reversed".equals(part)) {
+                		reverse = true;
+                		continue;
+                	}
+                	if ("int".equals(part)) {
+                		orderType = FieldSort.OrderType.INT;
+                		continue;
+                	}
+                	if ("long".equals(part)) {
+                		orderType = FieldSort.OrderType.LONG;
+                		continue;
+                	}
+                    if ("float".equals(part)) {
+                		orderType = FieldSort.OrderType.FLOAT;
+                		continue;
+                	}
                 }
-                if ("SCORE".equals(sortField)) {
+                if ("score".equals(sortField)) {
                     sort = new ScoreSort();
                 } else {
-
-                    sort = new FieldSort(reverse, sortField, FieldSort.OrderType.STRING, sort);
+                    sort = new FieldSort(reverse, sortField, orderType, sort);
                 }
             }
         }
