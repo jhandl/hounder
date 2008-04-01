@@ -62,7 +62,7 @@ public class Index {
     
     private final MergeScheduler mergeScheduler;
     private final MergePolicy mergePolicy;
-
+    private final double smallSegmentSize;
     private IndexDescriptor indexDescriptor;
 
     /**
@@ -123,6 +123,8 @@ public class Index {
             IndexWriter writer = new IndexWriter(directory, analyzer, false);
             writer.setMergePolicy(mergePolicy);
             writer.setMergeScheduler(mergeScheduler);
+            writer.setMaxBufferedDocs(IndexWriter.DISABLE_AUTO_FLUSH);
+            writer.setRAMBufferSizeMB(smallSegmentSize);
             return writer;
         } catch (IOException e) {
             logger.fatal(e);
@@ -255,7 +257,8 @@ public class Index {
         this.mergeScheduler = cms;
         
         LogByteSizeMergePolicy mp = new LogByteSizeMergePolicy();
-        mp.setMinMergeMB(config.getFloat("Index.smallSegmentSizeMB"));
+        smallSegmentSize = config.getFloat("Index.smallSegmentSizeMB");
+        mp.setMinMergeMB(smallSegmentSize);
         mp.setMergeFactor(config.getInt("Index.mergeFactor"));
         mergePolicy = mp;
         
