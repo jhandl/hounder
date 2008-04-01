@@ -26,8 +26,12 @@ import java.util.Properties;
 import org.apache.log4j.Logger;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
+import org.apache.lucene.index.ConcurrentMergeScheduler;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexWriter;
+import org.apache.lucene.index.LogByteSizeMergePolicy;
+import org.apache.lucene.index.MergePolicy;
+import org.apache.lucene.index.MergeScheduler;
 import org.apache.lucene.store.FSDirectory;
 
 import com.flaptor.util.CommandUtil;
@@ -54,10 +58,10 @@ public class Index {
     protected final File path;
     private FSDirectory directory;
     private Analyzer analyzer;
-    private final int luceneMergeFactor;
-    private final int luceneMinMergeDocs;
-    private final int luceneMaxMergeDocs;
     private final Properties properties;
+    
+    private final MergeScheduler mergeScheduler;
+    private final MergePolicy mergePolicy;
 
     private IndexDescriptor indexDescriptor;
 
@@ -117,9 +121,8 @@ public class Index {
         }
         try {
             IndexWriter writer = new IndexWriter(directory, analyzer, false);
-            writer.setMergeFactor(luceneMergeFactor);
-            writer.setMaxBufferedDocs(luceneMinMergeDocs);
-            writer.setMaxMergeDocs(luceneMaxMergeDocs);
+            writer.setMergePolicy(mergePolicy);
+            writer.setMergeScheduler(mergeScheduler);
             return writer;
         } catch (IOException e) {
             logger.fatal(e);
@@ -243,14 +246,54 @@ public class Index {
             }
         }
         Config config = Config.getConfig("common.properties");
-        luceneMergeFactor = config.getInt("IndexManager.luceneMergeFactor");
-        logger.info("Using a merge factor of " + luceneMergeFactor);
-        luceneMinMergeDocs = config.getInt("IndexManager.luceneMinMergeDocs");
-        logger.info("Using a min. merge documents of " + luceneMinMergeDocs);
-        luceneMaxMergeDocs = config.getInt("IndexManager.luceneMaxMergeDocs");
-        logger.info("Using a max. merge document of " + luceneMaxMergeDocs);
+
+        failOnLegacyParameters(config);
+        
+        ConcurrentMergeScheduler cms = new ConcurrentMergeScheduler();
+        cms.setMaxThreadCount(12);
+        cms.setMergeThreadPriority(Thread.MIN_PRIORITY);
+        this.mergeScheduler = cms;
+        
+        LogByteSizeMergePolicy mp = new LogByteSizeMergePolicy();
+        mp.setMinMergeMB(config.getFloat("Index.smallSegmentSizeMB"));
+        mp.setMergeFactor(config.getInt("Index.mergeFactor"));
+        mergePolicy = mp;
+        
+        
+        
         createAnalyzer();
         setUpDirectory(create);
+    }
+    
+    /**
+     * This is to force users to update the configuration files.
+     * All this code can be removed after 1May2008.
+     * @param config
+     * @throws IllegalArgumentException if some of the old configuration
+     * variables is found.
+     */
+    void failOnLegacyParameters(Config config) {
+    	int ok = 0;
+    	try {
+    		config.getInt("IndexManager.luceneMergeFactor");
+    	} catch (IllegalStateException e) {
+    		ok++;
+    	}
+    	try {
+    		config.getInt("IndexManager.luceneMinMergeDocs");
+    	} catch (IllegalStateException e) {
+    		ok++;
+    	}
+    	try {
+    		config.getInt("IndexManager.luceneMaxMergeDocs");
+    	} catch (IllegalStateException e) {
+    		ok++;
+    	}
+    	if (ok < 3) {
+    		throw new IllegalArgumentException("the configuration variables IndexManager.luceneMergeFactor," +
+    				" IndexManager.luceneMinMergeDocs and IndexManager.luceneMaxMergeDocs are obsolete. Please" +
+    				" update the configuration files.");
+    	}
     }
     
     /**

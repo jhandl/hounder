@@ -3,9 +3,8 @@
 stopwords=a,an,and,are,as,at,be,but,by,for,if,in,into,is,it,no,not,of,on,or,s,such,t,that,the,their,then,there,these,they,this,to,was,will,with,un,una,unas,unos,uno,sobre,todo,tambien,tras,otro,algun,alguno,alguna,algunos,algunas,ser,es,soy,eres,somos,estoy,esta,estamos,estan,como,en,para,porque,siendo,pero,por,ir,ha,el,la,lo,las,los,su,entonces,cierto,ciertos,cierta,ciertas,dos,usar,uso,usa,usan,muy,era,eras,eran,modo,bien,cual,cuando,donde,mientras,que,quien,con,entre,sin,yo,aquel,de,a,y,e,o,u,un,una
 
 #This parameters control the way the index is handled by lucene. See the lucene documentation.
-IndexManager.luceneMergeFactor= 10
-IndexManager.luceneMinMergeDocs= 2000
-IndexManager.luceneMaxMergeDocs= 1000000
+Index.smallSegmentSizeMB=32
+Index.mergeFactor=10
 
 statistics.period=60000
 
