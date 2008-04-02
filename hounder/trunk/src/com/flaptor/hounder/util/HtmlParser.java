@@ -216,7 +216,9 @@ public class HtmlParser {
         public void addLink(String url, String anchor) throws URISyntaxException {
             URI target = getURI(url);
             if (null != baseUri) {
-                target = baseUri.resolve(target);
+                if (baseUri.getPath() == null || baseUri.getPath().length() == 0) {
+                    target = baseUri.resolve(URI.create("/")).resolve(target);
+                }
             }
             links.add(new Pair<String,String>(target.toString(),anchor.trim()));
         }
