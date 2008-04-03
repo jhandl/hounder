@@ -99,28 +99,34 @@ public class HtmlParserTest extends TestCase {
             " </body> </html>";
         HtmlParser.Output out = parse("http://domain.com/dir/test.html", text, null);
         List<Pair<String,String>> links = out.getLinks();
-        assertTrue("Didn't extract the right number or links", links.size() == 7);
+        assertEquals("Didn't extract the right number or links", 7, links.size());
 
-        assertTrue("Didn't get the 1st link url right", "http://domain.com/dir/first.html".equals(links.get(0).first()));
-        assertTrue("Didn't get the 1st link anchor right", "first".equals(links.get(0).last()));
+        assertEquals("Didn't get the 1st link url right", "http://domain.com/dir/first.html", links.get(0).first());
+        assertEquals("Didn't get the 1st link anchor right", "first", links.get(0).last());
 
-        assertTrue("Didn't get the 2nd link url right", "http://domain.com/dir/second%20page.html".equals(links.get(1).first()));
-        assertTrue("Didn't get the 2nd link anchor right", "second link".equals(links.get(1).last()));
+        assertEquals("Didn't get the 2nd link url right", "http://domain.com/dir/second%20page.html", links.get(1).first());
+        assertEquals("Didn't get the 2nd link anchor right", "second link", links.get(1).last());
 
-        assertTrue("Didn't get the 3nd link url right", "http://domain.com/dir/three.html?one=1&two=2".equals(links.get(2).first()));
-        assertTrue("Didn't get the 3nd link anchor right", "three".equals(links.get(2).last()));
+        assertEquals("Didn't get the 3rd link url right", "http://domain.com/dir/three.html?one=1&two=2", links.get(2).first());
+        assertEquals("Didn't get the 3rd link anchor right", "three", links.get(2).last());
 
-        assertTrue("Didn't get the 4nd link url right", "http://domain.com/dir/four.html?query=abc+def".equals(links.get(3).first()));
-        assertTrue("Didn't get the 4nd link anchor right", "four".equals(links.get(3).last()));
+        assertEquals("Didn't get the 4th link url right", "http://domain.com/dir/four.html?query=abc+def", links.get(3).first());
+        assertEquals("Didn't get the 4th link anchor right", "four", links.get(3).last());
 
-        assertTrue("Didn't get the 5nd link url right", "http://domain.com/dir/five.html?query=abc".equals(links.get(4).first()));
-        assertTrue("Didn't get the 5nd link anchor right", "five".equals(links.get(4).last()));
+        assertEquals("Didn't get the 5th link url right", "http://domain.com/dir/five.html?query=abc", links.get(4).first());
+        assertEquals("Didn't get the 5th link anchor right", "five", links.get(4).last());
 
-        assertTrue("Didn't get the 6nd link url right", "http://domain.com/dir/six.html".equals(links.get(5).first()));
-        assertTrue("Didn't get the 6nd link anchor right", "six".equals(links.get(5).last()));
+        assertEquals("Didn't get the 6th link url right: ", "http://domain.com/dir/six.html", links.get(5).first());
+        assertEquals("Didn't get the 6th link anchor right", "six", links.get(5).last());
 
-        assertTrue("Didn't get the 7nd link url right", "http://domain.com/dir/seven.html".equals(links.get(6).first()));
-        assertTrue("Didn't get the 7nd link anchor right", "seven".equals(links.get(6).last()));
+        assertEquals("Didn't get the 7th link url right", "http://domain.com/dir/seven.html", links.get(6).first());
+        assertEquals("Didn't get the 7th link anchor right", "seven", links.get(6).last());
+        
+        out = parse("http://domain.com", "<html><body><a href='relative.html'>anchor</a></body></html>", null);
+        links = out.getLinks();
+        
+        assertEquals("Didn't get the 8th link url right", "http://domain.com/relative.html", links.get(0).first());
+
     }
 
     @TestInfo(testType = TestInfo.TestType.UNIT)

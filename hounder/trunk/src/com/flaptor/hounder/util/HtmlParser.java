@@ -217,8 +217,9 @@ public class HtmlParser {
             URI target = getURI(url);
             if (null != baseUri) {
                 if (baseUri.getPath() == null || baseUri.getPath().length() == 0) {
-                    target = baseUri.resolve(URI.create("/")).resolve(target);
+                    baseUri = baseUri.resolve(URI.create("/"));
                 }
+                target = baseUri.resolve(target);
             }
             links.add(new Pair<String,String>(target.toString(),anchor.trim()));
         }
