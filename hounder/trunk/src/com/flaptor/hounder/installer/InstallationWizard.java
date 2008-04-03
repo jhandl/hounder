@@ -433,20 +433,22 @@ public class InstallationWizard {
         	installprogress.setExplanation("");
         	installprogress.setProgress(100);
         	ui.elementUpdated(installprogress);
-            if (searcherConfig.install) {
-            	addComponentSummary("Searcher", searcherConfig);
-            	addComponentSummary("Indexer", indexerConfig);
-            	addComponentSummary("Crawler", crawlerConfig);
-            	addComponentSummary("Cache Server", cacheServerConfig);
-            	addComponentSummary("Clustering Web", clusteringWebConfig);
+            if (searcherConfig.install)     addComponentSummary("Searcher", searcherConfig); 
+            if (indexerConfig.install)      addComponentSummary("Indexer", indexerConfig); 
+            if (crawlerConfig.install)      addComponentSummary("Crawler", indexerConfig); 
+            if (cacheServerConfig.install)  addComponentSummary("Cache Server", cacheServerConfig); 
+            if (clusteringWebConfig.install) {
+                addComponentSummary("Clustering Web", clusteringWebConfig);
             }
+
             if (multiMachine && oneRemote) {
             	if (commonConfig.copyViaSSH) summary.add(new PageElement("Files have been copied via SSH"));
             	else summary.add(new PageElement(".TGZ files have been written to " + commonConfig.outputDir, "copy these files to the host:dir indicated and uncompress them there"));
             }
-            summary
-            	.add(new PageElement("To start Hounder, go to the base dir and run start.sh"));
-            
+            summary.add(new PageElement("To start Hounder, go to the base dir and run start-all.sh", 
+                    clusteringWebConfig.install ?
+                            "Once the clustering web is started, you can administer Hounder by pointing your browser to http://" + clusteringWebConfig.installOnHost + ":" + PortUtil.getPort(clusteringWebConfig.installOnBasePort, "clustering.web") +"/"
+                            :null));
         } catch (Throwable e) {
             errorReport.setText("There has been an error");
             errorReport.setExplanation(e.getMessage());

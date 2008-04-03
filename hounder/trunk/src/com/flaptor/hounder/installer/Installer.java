@@ -254,7 +254,7 @@ public class Installer {
     		//if not in this machine, install it in a temp dir
     		String host = componentConfig.installOnHost;
     		File hostDir = new File(tempDestDir, host);
-    		componentDir = new File(hostDir, componentConfig.installOnBaseDir.getPath());
+            componentDir = new File(hostDir, componentConfig.installOnBaseDir.getPath());
         	hosts.add(host);
         	hostDirs.put(host, hostDir);
         	FileUtil.createIfDoesntExist(componentDir, true, true);
@@ -278,10 +278,14 @@ public class Installer {
 	}
 
 	/**
-	 * sets common properties, should be called for all components
+	 * sets common properties, and creates the logs directory
+	 * should be called for all components
 	 * @throws IOException
 	 */
-	private static void setCommonProperties(File confDir, ComponentConfig componentConfig) throws IOException {
+	private static void doCommonTasks(File componentDir, ComponentConfig componentConfig) throws IOException {
+        File confDir = new File(componentDir, "conf");
+        File logsDir = new File(componentDir, "logs");
+	    FileUtil.createIfDoesntExist(logsDir, true, true);
 		Config commonProperties = Config.getConfig("common.properties");
 		commonProperties.set("port.base", String.valueOf(componentConfig.installOnBasePort));
 		commonProperties.set("baseDir", componentConfig.installOnBaseDir.getPath());
@@ -291,7 +295,7 @@ public class Installer {
 	private static void installSearcher(String distDir, File installBasePath, SearcherConfig searcherConfig, CacheServerConfig cacheServerConfig) throws IOException {
         logger.info("installing searcher");
         TarUtil.untarFile(FileUtil.getExistingFile(distDir+"/searcher.tgz", true, false, false), installBasePath);
-		setCommonProperties(new File(installBasePath,"/searcher/conf"), searcherConfig);
+		doCommonTasks(new File(installBasePath,"/searcher"), searcherConfig);
 
 		Config properties = Config.getConfig("searcher.properties");
 		
@@ -304,7 +308,7 @@ public class Installer {
 	private static void installCrawler(String distDir, File installBasePath, CrawlerConfig crawlerConfig, IndexerConfig indexerConfig) throws IOException {
         logger.info("installing crawler");
         TarUtil.untarFile(FileUtil.getExistingFile(distDir+"/crawler.tgz", true, false, false), installBasePath);
-		setCommonProperties(new File(installBasePath,"/crawler/conf"), crawlerConfig);
+		doCommonTasks(new File(installBasePath,"/crawler"), crawlerConfig);
 
 		Config indexerModuleProperties = Config.getConfig("indexerModule.properties");
 		indexerModuleProperties.set("remoteRmiIndexer.host", indexerConfig.installOnHost + ":" + indexerConfig.installOnBasePort);
@@ -338,7 +342,7 @@ public class Installer {
 	private static void installIndexer(String distDir, File installBasePath, IndexerConfig indexerConfig, SearcherConfig searcherConfig) throws IOException {
 		logger.info("installing indexer");
 		TarUtil.untarFile(FileUtil.getExistingFile(distDir+"/indexer.tgz", true, false, false), installBasePath);
-		setCommonProperties(new File(installBasePath,"/indexer/conf"), indexerConfig);
+		doCommonTasks(new File(installBasePath,"/indexer"), indexerConfig);
 
 		Config indexerProperties = Config.getConfig("indexer.properties");
 		indexerProperties.set("IndexLibrary.rsyncAccessString", indexerConfig.installOnHost);
@@ -349,7 +353,7 @@ public class Installer {
 	private static void installCacheServer(String distDir, File installBasePath, CacheServerConfig cacheServerConfig, CrawlerConfig crawlerConfig) throws IOException {
         logger.info("installing cache-server");
         TarUtil.untarFile(FileUtil.getExistingFile(distDir+"/cache-server.tgz", true, false, false), installBasePath);
-		setCommonProperties(new File(installBasePath,"/cache-server/conf"), cacheServerConfig);
+		doCommonTasks(new File(installBasePath,"/cache-server"), cacheServerConfig);
         
         Config indexerProperties = Config.getConfig("multiCache.properties");
 		indexerProperties.set("multiCache.hosts", crawlerConfig.installOnHost + ":" + crawlerConfig.installOnBasePort);
@@ -360,7 +364,7 @@ public class Installer {
 	private static void installClusteringWeb(String distDir,File installBasePath,SearcherConfig searcherConfig,IndexerConfig indexerConfig,CrawlerConfig crawlerConfig,CacheServerConfig cacheServerConfig,ClusteringWebConfig clusteringWebConfig) throws IOException {
         logger.info("installing clustering-web");
         TarUtil.untarFile(FileUtil.getExistingFile(distDir+"/clustering-web.tgz", true, false, false), installBasePath);	
-		setCommonProperties(new File(installBasePath,"/clustering-web/conf"), clusteringWebConfig);
+		doCommonTasks(new File(installBasePath,"/clustering-web"), clusteringWebConfig);
 		
 		String hosts = "";
 		if (searcherConfig.install) hosts += searcherConfig.installOnHost + ":" + (searcherConfig.installOnBasePort + PortUtil.getOffset("clustering.rpc.searcher")) + ":" + searcherConfig.installOnBaseDir+"/searcher";
