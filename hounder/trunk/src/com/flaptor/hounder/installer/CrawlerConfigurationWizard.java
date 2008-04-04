@@ -145,15 +145,15 @@ public class CrawlerConfigurationWizard {
         try {
         	
         	if (pageSeedsType.getProperty("seedsType").equals("0")) {
-            	crawlerConfig.pagedbSeeds = pageSeedsManual.getProperty("seeds");
+                crawlerConfig.pagedbSeeds = IOUtil.readAll(new FileReader(pageSeedsFile.getProperty("seeds"))); 
             } else {
-            	crawlerConfig.pagedbSeeds = IOUtil.readAll(new FileReader(pageSeedsFile.getProperty("seeds"))); 
+                crawlerConfig.pagedbSeeds = pageSeedsManual.getProperty("seeds");
             }
 
         	if (hotspotsType.getProperty("hotspotsType").equals("0")) {
-            	crawlerConfig.hotspots = hotspotsManual.getProperty("hotspots");
+                crawlerConfig.hotspots = IOUtil.readAll(new FileReader(hotspotsFile.getProperty("hotspots"))); 
             } else {
-            	crawlerConfig.hotspots = IOUtil.readAll(new FileReader(hotspotsFile.getProperty("hotspots"))); 
+                crawlerConfig.hotspots = hotspotsManual.getProperty("hotspots");
             }
 
         	Installer.configureCrawler(crawlerDir, crawlerConfig);

@@ -422,8 +422,8 @@ public class InstallationWizard {
 		} 
 
         try {
-		crawlerConfig.pagedbSeeds = IOUtil.readAll(ClassLoader.getSystemClassLoader().getResourceAsStream("pagedb.seeds"));
-		crawlerConfig.hotspots = IOUtil.readAll(ClassLoader.getSystemClassLoader().getResourceAsStream("hotspots.regex"));
+            crawlerConfig.pagedbSeeds = IOUtil.readAll(ClassLoader.getSystemClassLoader().getResourceAsStream("pagedb.seeds"));
+            crawlerConfig.hotspots = IOUtil.readAll(ClassLoader.getSystemClassLoader().getResourceAsStream("hotspots.regex"));
         	Installer installer = new Installer(distDir, commonConfig, indexerConfig, searcherConfig, crawlerConfig, cacheServerConfig, clusteringWebConfig, installprogress, ui);
         	installer.install();
         	File crawlerDir = new File(installer.getCrawlerBaseDir(), "crawler");
