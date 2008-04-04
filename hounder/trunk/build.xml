@@ -773,9 +773,8 @@ limitations under the License.
         </copy>
 
         <!-- installer -->
-        <mkdir dir="${tmp.dir}/installer"/>
-        <copy todir="${tmp.dir}/installer" file="${output.dir}/hounder-installer.jar"/>
-        <copy todir="${tmp.dir}/installer/conf">
+        <copy todir="${tmp.dir}" file="${output.dir}/hounder-installer.jar"/>
+        <copy todir="${tmp.dir}/conf">
             <fileset dir="${conf.dir}">
                 <include name="*.properties"/>
             </fileset>
@@ -795,14 +794,14 @@ limitations under the License.
                 <exclude name="*.properties.defaults"/>
             </fileset>
         </copy>
-        <chmod perm="777" file="${tmp.dir}/installer/*.sh"/>
+        <chmod perm="777" file="${tmp.dir}/*.sh"/>
     </target>
 
 	<target name="product" depends="prepareproduct" description="creates the product (but doesnt tar it)" >
    		<copy todir="${product.output.dir}"> 
             <fileset dir="${tmp.dir}"/>
         </copy>
-   		<chmod perm="777" file="${product.output.dir}/installer/*.sh"/>
+   		<chmod perm="777" file="${product.output.dir}/*.sh"/>
    	</target>
 
 </project>
