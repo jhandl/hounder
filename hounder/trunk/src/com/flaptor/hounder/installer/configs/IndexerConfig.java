@@ -21,5 +21,8 @@ package com.flaptor.hounder.installer.configs;
  * @author Martin Massera
  */
 public class IndexerConfig extends ComponentConfig{
-	//nothing yet	
+    public IndexerConfig() {
+        super();
+        clusteringType = "indexer";
+    }
 }

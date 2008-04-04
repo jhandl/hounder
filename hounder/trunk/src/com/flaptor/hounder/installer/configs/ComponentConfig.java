@@ -25,6 +25,7 @@ import java.io.File;
 abstract public class ComponentConfig {
 	public boolean install = true;
 	public boolean installOnThisMachine = true;
+	public String clusteringType = null;
 	
 	//when not installing in this computer, override CommonConfig
 	public String installOnHost = null;

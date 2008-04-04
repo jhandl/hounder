@@ -24,4 +24,9 @@ package com.flaptor.hounder.installer.configs;
 public class CrawlerConfig extends ComponentConfig{
 	public String pagedbSeeds;
 	public String hotspots;
+
+    public CrawlerConfig() {
+        super();
+        clusteringType = "crawler";
+    }
 }

@@ -367,10 +367,10 @@ public class Installer {
 		doCommonTasks(new File(installBasePath,"/clustering-web"), clusteringWebConfig);
 		
 		String hosts = "";
-		if (searcherConfig.install) hosts += searcherConfig.installOnHost + ":" + (searcherConfig.installOnBasePort + PortUtil.getOffset("clustering.rpc.searcher")) + ":" + searcherConfig.installOnBaseDir+"/searcher";
-		if (indexerConfig.install) hosts += (hosts.length() == 0?"":",") + indexerConfig.installOnHost + ":" + (indexerConfig.installOnBasePort + PortUtil.getOffset("clustering.rpc.indexer")) + ":" + searcherConfig.installOnBaseDir+"/indexer";
-		if (crawlerConfig.install) hosts += (hosts.length() == 0?"":",") + crawlerConfig.installOnHost + ":" + (crawlerConfig.installOnBasePort + PortUtil.getOffset("clustering.rpc.crawler")) + ":" + searcherConfig.installOnBaseDir+"/crawler"; 
-		if (cacheServerConfig.install) hosts += (hosts.length() == 0?"":",") + cacheServerConfig.installOnHost + ":" + (cacheServerConfig.installOnBasePort + PortUtil.getOffset("clustering.rpc.cacheServer")) + ":" + searcherConfig.installOnBaseDir+"/cache-server"; 
+		if (searcherConfig.install) hosts += searcherConfig.installOnHost + ":" + (searcherConfig.installOnBasePort + PortUtil.getOffset("clustering.rpc.searcher")) + ":" + searcherConfig.installOnBaseDir+"/searcher" + ":" + searcherConfig.clusteringType;
+		if (indexerConfig.install) hosts += (hosts.length() == 0?"":",") + indexerConfig.installOnHost + ":" + (indexerConfig.installOnBasePort + PortUtil.getOffset("clustering.rpc.indexer")) + ":" + searcherConfig.installOnBaseDir+"/indexer" + ":" + indexerConfig.clusteringType;
+		if (crawlerConfig.install) hosts += (hosts.length() == 0?"":",") + crawlerConfig.installOnHost + ":" + (crawlerConfig.installOnBasePort + PortUtil.getOffset("clustering.rpc.crawler")) + ":" + searcherConfig.installOnBaseDir+"/crawler" + ":" + crawlerConfig.clusteringType; 
+		if (cacheServerConfig.install) hosts += (hosts.length() == 0?"":",") + cacheServerConfig.installOnHost + ":" + (cacheServerConfig.installOnBasePort + PortUtil.getOffset("clustering.rpc.cacheServer")) + ":" + searcherConfig.installOnBaseDir+"/cache-server" + ":" + cacheServerConfig.clusteringType; 
 		
 		Config clusteringProperties = Config.getConfig("clustering.properties");
 		clusteringProperties.set("clustering.nodes", hosts);

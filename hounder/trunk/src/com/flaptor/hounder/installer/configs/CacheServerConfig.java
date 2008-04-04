@@ -23,4 +23,9 @@ package com.flaptor.hounder.installer.configs;
 public class CacheServerConfig extends ComponentConfig{
 
 	public String externalHostName; //to access it through HTTP
+	
+   public CacheServerConfig() {
+        super();
+        clusteringType = "cacheServer";
+    }
 }

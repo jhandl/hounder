@@ -31,5 +31,11 @@ ARGUS="-server"
 CMND="java ${ARGUS} -cp ${CP} ${MAIN} ${PORT}"
 #echo ${CMND}
 nohup  ${CMND} > ${LOUT} 2> ${LERR} &
-
 echo $! >pid
+if ./status.sh | grep -q "is running"
+then
+    echo Access the webapp at http://localhost:${PORT}/
+else
+    echo The clustering web did not start correctly, check logs
+fi
+
