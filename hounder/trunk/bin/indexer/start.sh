@@ -18,6 +18,7 @@ HOUNDER=$LIBS/hounder-trunk.jar
 DEPS=$LIBS/hounder-trunk-deps.jar
 
 CP=${CONF}:.:${HOUNDER}:${DEPS}
+GET_PORT="java -cp ${CP} com.flaptor.util.PortUtil"
 MAIN=com.flaptor.hounder.indexer.MultipleRpcIndexer
 
 if [ ! -d ${LOG_DIR} ]; then
@@ -36,3 +37,15 @@ CMND="java ${ARGUS} -cp ${CP} ${MAIN}"
 nohup  ${CMND} > ${LOUT} 2> ${LERR} &
 
 echo $! >pid
+
+if ./status.sh | grep -q "is running"
+then
+	RMI=`${GET_PORT} getPort indexer.rmi`
+	XMLRPC=`${GET_PORT} getPort indexer.xml`
+	
+    echo Indexer started, listening:
+	echo       * rmi          ${RMI}
+	echo       * xmlrpc       ${XMLRPC}
+else
+    echo Indexer did not start correctly, check logs
+fi

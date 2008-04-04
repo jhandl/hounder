@@ -6,9 +6,6 @@ then
     exit 1
 fi
 
-
-
-
 LOG_DIR=logs
 LERR=${LOG_DIR}/searcher.err
 LOUT=${LOG_DIR}/searcher.out
@@ -19,6 +16,7 @@ LIBS=../lib
 HOUNDER=$LIBS/hounder-trunk.jar
 DEPS=$LIBS/hounder-trunk-deps.jar
 CP=${CONF}:.:${HOUNDER}:${DEPS}:${NUTCH_PLUGIN_BASE}
+GET_PORT="java -cp ${CP} com.flaptor.util.PortUtil"
 MAIN=com.flaptor.hounder.searcher.MultipleRpcSearcher
 
 if [ ! -d ${LOG_DIR} ]; then
@@ -35,3 +33,19 @@ CMND="java ${ARGUS} -cp ${CP} -Djava.rmi.server.hostname=${HOST} ${MAIN}"
 #echo ${CMND}
 nohup  ${CMND} > ${LOUT} 2> ${LERR} &
 echo $! >pid
+
+if ./status.sh | grep -q "is running"
+then
+	RMI=`${GET_PORT} getPort searcher.rmi`
+	XMLRPC=`${GET_PORT} getPort searcher.xml`
+	WEB=`${GET_PORT} getPort searcher.xml`
+	
+    echo Searcher started, listening:
+	echo       * web:         http://localhost:${WEB}/websearch  
+	echo       * opensearch:  http://localhost:${WEB}/opensearch
+	echo       * rmi          ${RMI}
+	echo       * xmlrpc       ${XMLRPC}
+else
+    echo Searcher did not start correctly, check logs
+fi
+
