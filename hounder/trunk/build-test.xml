@@ -97,6 +97,7 @@ limitations under the License.
     </target>
 
 	<target name="test" description="Runs all tests." >
+		<mkdir dir="logs"/>
        	<antcall target="test-unit"/>
        	<antcall target="test-integration"/>
        	<antcall target="test-system"/>
