@@ -1,3 +1,5 @@
+#!/bin/sh
+
 pid=`cat pid`
 if [ -z "$pid" ]; then
   echo The indexer is not running.
