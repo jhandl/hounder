@@ -39,12 +39,14 @@ then
 	RMI=`${GET_PORT} getPort searcher.rmi`
 	XMLRPC=`${GET_PORT} getPort searcher.xml`
 	WEB=`${GET_PORT} getPort searcher.xml`
-	
-    echo Searcher started, listening:
-	echo       * web:         http://localhost:${WEB}/websearch  
-	echo       * opensearch:  http://localhost:${WEB}/opensearch
-	echo       * rmi          ${RMI}
-	echo       * xmlrpc       ${XMLRPC}
+
+    echo
+    echo    Searcher started, listening:
+    echo        web:         http://localhost:${WEB}/websearch  
+    echo        opensearch:  http://localhost:${WEB}/opensearch
+    echo        rmi          ${RMI}
+    echo        xmlrpc       ${XMLRPC}
+    echo
 else
     echo Searcher did not start correctly, check logs
 fi

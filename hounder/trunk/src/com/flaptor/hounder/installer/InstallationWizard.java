@@ -27,6 +27,7 @@ import com.flaptor.hounder.installer.configs.ComponentConfig;
 import com.flaptor.hounder.installer.configs.CrawlerConfig;
 import com.flaptor.hounder.installer.configs.IndexerConfig;
 import com.flaptor.hounder.installer.configs.SearcherConfig;
+import com.flaptor.util.IOUtil;
 import com.flaptor.util.Config;
 import com.flaptor.util.Execute;
 import com.flaptor.util.FileUtil;
@@ -421,8 +422,8 @@ public class InstallationWizard {
 		} 
 
         try {
-    		crawlerConfig.pagedbSeeds = FileUtil.readFile(new File("pagedb.seeds"));
-    		crawlerConfig.hotspots = FileUtil.readFile(new File("conf/hotspots.regex"));
+		crawlerConfig.pagedbSeeds = IOUtil.readAll(ClassLoader.getSystemClassLoader().getResourceAsStream("pagedb.seeds"));
+		crawlerConfig.hotspots = IOUtil.readAll(ClassLoader.getSystemClassLoader().getResourceAsStream("hotspots.regex"));
         	Installer installer = new Installer(distDir, commonConfig, indexerConfig, searcherConfig, crawlerConfig, cacheServerConfig, clusteringWebConfig, installprogress, ui);
         	installer.install();
         	File crawlerDir = new File(installer.getCrawlerBaseDir(), "crawler");

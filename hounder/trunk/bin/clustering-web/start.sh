@@ -34,7 +34,9 @@ nohup  ${CMND} > ${LOUT} 2> ${LERR} &
 echo $! >pid
 if ./status.sh | grep -q "is running"
 then
-    echo Access the webapp at http://localhost:${PORT}/
+    echo
+    echo    Access the admin webapp at http://localhost:${PORT}/
+    echo
 else
     echo The clustering web did not start correctly, check logs
 fi

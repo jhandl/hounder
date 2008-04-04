@@ -42,10 +42,11 @@ if ./status.sh | grep -q "is running"
 then
 	RMI=`${GET_PORT} getPort indexer.rmi`
 	XMLRPC=`${GET_PORT} getPort indexer.xml`
-	
-    echo Indexer started, listening:
-	echo       * rmi          ${RMI}
-	echo       * xmlrpc       ${XMLRPC}
+    echo
+    echo    Indexer started, listening:
+    echo        rmi          ${RMI}
+    echo        xmlrpc       ${XMLRPC}
+    echo
 else
     echo Indexer did not start correctly, check logs
 fi

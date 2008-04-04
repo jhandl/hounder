@@ -225,33 +225,27 @@ limitations under the License.
 				<include name="com/flaptor/hounder/installer/**/*.class" />
 			</fileset>
 			<fileset dir="${conf.dir}" >
-				<include name="common.properties" />
-				<include name="*.properties.defaults" />
 			</fileset>
 			<fileset dir="${conf.dir}/crawler" >
-				<include name="*.properties.defaults" />
 			</fileset>
 			<fileset dir="${conf.dir}/searcher" >
-				<include name="*.properties.defaults" />
 			</fileset>
 			<fileset dir="${conf.dir}/indexer" >
-				<include name="*.properties.defaults" />
 			</fileset>
 			<fileset dir="${conf.dir}/learning" >
-				<include name="*.properties.defaults" />
 			</fileset>
 			<fileset dir="${conf.dir}/cache-server" >
-				<include name="*.properties.defaults" />
 			</fileset>
 			<fileset dir="${conf.dir}/clustering-web" >
-				<include name="*.properties.defaults" />
+			</fileset>
+			<fileset dir="${conf.dir}/installer" >
 			</fileset>
 
 			<zipgroupfileset dir="${lib.dir}">
-                <include name="log4j*.jar" />
-                <include name="flaptor-util-*.jar" />
-                <include name="clusterfest-*.jar" />
-	            <include name="wiz4j-*.jar" />
+				<include name="log4j*.jar" />
+                		<include name="flaptor-util-*.jar" />
+                		<include name="clusterfest-*.jar" />
+	            		<include name="wiz4j-*.jar" />
 			</zipgroupfileset>
 		</jar>
     </target>
@@ -762,38 +756,18 @@ limitations under the License.
     <!--******************************************************************************************************-->
     <target name="prepareproduct" depends="dist, installer-jar" >
         <antcall target="prepare-dist"/>
-        <copy todir="${tmp.dir}">
-            <fileset dir="${product.dir}"/>
-            <fileset file="${docs.dir}/LICENSE"/>
-        </copy>
-        
+
         <!-- dist -->
         <copy todir="${tmp.dir}/dist">
             <fileset dir="${dist.dir}"/>
         </copy>
 
         <!-- installer -->
-        <copy todir="${tmp.dir}" file="${output.dir}/hounder-installer.jar"/>
-        <copy todir="${tmp.dir}/conf">
-            <fileset dir="${conf.dir}">
-                <include name="*.properties"/>
-            </fileset>
-            <fileset dir="${conf.dir}/crawler">
-                <exclude name="*.properties.defaults"/>
-            </fileset>
-            <fileset dir="${conf.dir}/indexer">
-                <exclude name="*.properties.defaults"/>
-            </fileset>
-            <fileset dir="${conf.dir}/searcher">
-                <exclude name="*.properties.defaults"/>
-            </fileset>
-            <fileset dir="${conf.dir}/cache-server">
-                <exclude name="*.properties.defaults"/>
-            </fileset>
-            <fileset dir="${conf.dir}/clustering-web">
-                <exclude name="*.properties.defaults"/>
-            </fileset>
+        <copy todir="${tmp.dir}">
+            <fileset dir="${bin.dir}/installer"/>
+            <fileset file="${docs.dir}/LICENSE"/>
         </copy>
+        <copy todir="${tmp.dir}" file="${output.dir}/hounder-installer.jar"/>
         <chmod perm="777" file="${tmp.dir}/*.sh"/>
     </target>
 
@@ -806,5 +780,3 @@ limitations under the License.
 
 </project>
 
-	
-	
