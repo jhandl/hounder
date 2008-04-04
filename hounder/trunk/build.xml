@@ -35,7 +35,6 @@ limitations under the License.
 	<property name="tmp.conf.dir" location="${tmp.dir}/conf"/>
 
 	<property name="dist.dir" location="${basedir}/dist"/>
-	<property name="product.dir" location="${basedir}/product"/>
 	<property name="product.output.dir" location="${basedir}/product-output"/>
 
 	<tstamp>
@@ -743,12 +742,11 @@ limitations under the License.
             <tarfileset dir="${lib.dir}" prefix="${prefix}/lib"/>            
             <tarfileset dir="${tools.dir}" prefix="${prefix}/tools"/>
             <tarfileset dir="${plugins.dir}" prefix="${prefix}/plugins"/>
-            <tarfileset dir="${product.dir}" prefix="${prefix}/product"/>
         </tar>
     </target>
 
 	<target name="distbin" depends="prepareproduct" description="builds the product binary distribution tar ball">
-        <tar destfile="${product.output.dir}/${project}-${version}-bin.tgz" compression="gzip">
+        <tar destfile="${product.output.dir}/${project}-${version}-binary_installer.tgz" compression="gzip">
             <tarfileset dir="${tmp.dir}"/>
         </tar>
 	</target>
