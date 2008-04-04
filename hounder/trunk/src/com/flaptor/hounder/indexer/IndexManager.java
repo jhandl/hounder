@@ -66,7 +66,8 @@ public final class IndexManager implements IndexWriteProvider, Stoppable {
     //index segment. Useful for cluster installations only.
     private final Hash hashFunction;
 
-
+    private Indexer indexer;
+    
 	//Lucene related variables.
     private Index workIndex;
     private IndexWriter writer;
@@ -110,7 +111,8 @@ public final class IndexManager implements IndexWriteProvider, Stoppable {
      *          when the filesystem is not ready to be set up (permissions,
 	 * 		    space?)
 	 */
-	public IndexManager() {
+	public IndexManager(Indexer indexer) {
+	    this.indexer = indexer;
         config = Config.getConfig("indexer.properties");
         workingDirPath = Config.getConfig("common.properties").getString("baseDir")  
                          + File.separator 
@@ -122,7 +124,7 @@ public final class IndexManager implements IndexWriteProvider, Stoppable {
         workingDirectory = new File(workingDirPath);
 		indexDirectory = new File(workingDirectory, "index");
         indexDescriptor = new IndexDescriptor(config.getString("IndexManager.indexDescriptor"));
-        library = new IndexLibrary();
+        library = new IndexLibrary(indexer);
 
 
 		setBaseDirectory();

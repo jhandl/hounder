@@ -74,17 +74,17 @@ public class CommandsModule extends AInternalModule {
 
 	private void optimize() {
 		logger.info("Optimize command received.");
-		indexer.getIndexManager().scheduleOptimize();
+		IndexerCommands.optimize(indexer);
 	}
 
 	private void close() {
 		logger.info("Close command received.");
-		indexer.requestStop();
+		IndexerCommands.close(indexer);
 	}
 
 	private void checkpoint() {
 		logger.info("Checkpoint command received.");
-		indexer.getIndexManager().makeDirectoryCheckpoint();
+		IndexerCommands.checkpoint(indexer);
 	}
 }
 

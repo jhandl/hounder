@@ -50,7 +50,7 @@ public class CrawlerControlModule extends AbstractModule<CrawlerControlNode> imp
 		} catch (NoSuchRpcMethodException e) {
 			return false;
 		} catch (Exception e) {
-			throw new NodeUnreachableException(e);
+			throw new NodeUnreachableException(e, node);
 		}
 	}
     @Override

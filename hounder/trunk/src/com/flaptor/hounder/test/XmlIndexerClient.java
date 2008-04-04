@@ -78,15 +78,23 @@ public class XmlIndexerClient {
             }
 
             String toSend = buf.toString();
-            System.out.println(xmlrpc.execute("indexer", "index", new Object[]{toSend}).toString());
+            send(toSend);
         }
         catch (Exception e) {
             System.err.println(e);
         }
-
-
     }
 
+    public void send(final String message) {
+        try {
+            System.out.println("sending : " + message);
+            System.out.println(xmlrpc.execute("indexer", "index", new Object[]{message}).toString());
+        }
+        catch (Exception e) {
+            System.err.println(e);
+        }
+    }
+    
     /**
      * Recursively sends a directory or sends a single file.
      * @param file a file or directory. If it's a file, it sends it's content. If it's a directory

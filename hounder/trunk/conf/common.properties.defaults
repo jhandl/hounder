@@ -1,3 +1,6 @@
+#rmi sometimes binds to the wrong interface. This variable should be set to the interface
+#which we want rmi to listen at. 0.0.0.0 means all interfaces
+rmiServer.host=0.0.0.0
 
 #This is a list of words that are considered too common and will be filtered before indexing.
 stopwords=a,an,and,are,as,at,be,but,by,for,if,in,into,is,it,no,not,of,on,or,s,such,t,that,the,their,then,there,these,they,this,to,was,will,with,un,una,unas,unos,uno,sobre,todo,tambien,tras,otro,algun,alguno,alguna,algunos,algunas,ser,es,soy,eres,somos,estoy,esta,estamos,estan,como,en,para,porque,siendo,pero,por,ir,ha,el,la,lo,las,los,su,entonces,cierto,ciertos,cierta,ciertas,dos,usar,uso,usa,usan,muy,era,eras,eran,modo,bien,cual,cuando,donde,mientras,que,quien,con,entre,sin,yo,aquel,de,a,y,e,o,u,un,una

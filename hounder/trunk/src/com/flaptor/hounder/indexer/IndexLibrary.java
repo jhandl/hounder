@@ -17,6 +17,8 @@ package com.flaptor.hounder.indexer;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.log4j.Logger;
 
@@ -48,6 +50,7 @@ import com.flaptor.util.Stoppable;
 public class IndexLibrary implements Stoppable {
 
     private static Logger logger = Logger.getLogger(Execute.whoAmI());
+
     // How many copies to keep
     private static int MAX_COPIES = 10;
     // Seconds to wait for previous updater to finish.
@@ -66,7 +69,8 @@ public class IndexLibrary implements Stoppable {
     // True if requested to stop.
     private boolean stopping;
 
-
+    private Indexer indexer;
+    
     /**
      * Constructor.
      * Configuration file: indexer.properties
@@ -87,7 +91,8 @@ public class IndexLibrary implements Stoppable {
      * under the same directory, but it is "nice"
      *
      */
-    public IndexLibrary() {
+    public IndexLibrary(Indexer indexer) {
+        this.indexer = indexer;
         File baseDir = new File(Config.getConfig("common.properties").getString("baseDir"));
         config = Config.getConfig("indexer.properties");
         String copiesPath = config.getString("indexer.dir") + File.separator + "indexes" + File.separator + "copies";
@@ -165,17 +170,19 @@ public class IndexLibrary implements Stoppable {
             synchronized(updaters) {
                 inited = 0;
             }
-
+            
+            List<String> problems = new ArrayList<String>();
             // Now, send the index to the updaters.
             for (IRemoteIndexUpdater updater : updaters) {
                 // Send the index with a thread so we don't have to serialize the sending process.
-                new IndexUpdaterThread(updater, newIndexCopy).start();
+                new IndexUpdaterThread(updater, newIndexCopy, problems).start();
             }
 
             // Wait until all threads have started.
             while (inited < updaters.length) {
                 Execute.sleep(50, logger);
             }
+            indexer.getIndexerMonitoredNode().setProperty("indexUpdateProblems", problems);
         }
 
         return true;
@@ -187,10 +194,12 @@ public class IndexLibrary implements Stoppable {
     private class IndexUpdaterThread extends Thread {
         private IRemoteIndexUpdater updater;
         private Index index;
-        public IndexUpdaterThread(IRemoteIndexUpdater updater, Index index) {
+        private List<String> problems;
+        public IndexUpdaterThread(IRemoteIndexUpdater updater, Index index, List<String> problems) {
             setName(Execute.whatIsMyName());
             this.updater = updater;
             this.index = index;
+            this.problems = problems;
         }
         @Override
         public void run() {
@@ -201,10 +210,18 @@ public class IndexLibrary implements Stoppable {
             try {
                 boolean updated = updater.setNewIndex(index.getIndexDescriptor());
                 if (!updated) {
-                    logger.warn("Could not set new index " + index.getIndexDescriptor().toString() + " on " + updater.toString());
+                    String problem = "Could not set new index " + index.getIndexDescriptor().toString() + " on " + updater.toString();
+                    logger.warn(problem);
+                    synchronized (problems) {
+                        problems.add(problem);
+                    }
                 }
             } catch (Exception e) {
-                logger.error("While sending index (" +index.getIndexDescriptor().getRemotePath()+ ") : " +e,e);
+                String problem = "While sending index (" +index.getIndexDescriptor().getRemotePath()+ ") : " +e;
+                logger.error(problem,e);
+                synchronized (problems) {
+                    problems.add(problem);
+                }
             } finally {
                 synchronized (updaters) {
                     updating--;

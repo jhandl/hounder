@@ -43,7 +43,7 @@ public class IndexManagerTest extends TestCase {
         config.set("IndexManager.updateInterval", "1000");
         config.set("IndexLibrary.remoteIndexUpdaters","");
         config.set("IndexLibrary.rsyncAccessString","");
-        man = new IndexManager();
+        man = new IndexManager(null);
     }
 
     @Override

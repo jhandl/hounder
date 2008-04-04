@@ -28,9 +28,18 @@ import com.flaptor.clusterfest.monitoring.NodeState;
  */
 public class IndexerChecker implements NodeChecker{
 
+    @SuppressWarnings("unchecked")
     public NodeChecker.Result checkNode(MonitorNodeDescriptor node, NodeState state) {
+        Sanity sanity = Sanity.GOOD;
         List<String> remarks = new ArrayList<String>();
-        remarks.add("This is a stub checker, please write a sanity checker for this type of node.");
-        return new Result(Sanity.GOOD, remarks);
+        
+        List<String> indexUpdateProblems = (List<String>)state.getProperties().get("indexUpdateProblems");
+        if (indexUpdateProblems != null && indexUpdateProblems.size() > 0) {
+            sanity = Sanity.BAD;
+            for (String problem: indexUpdateProblems) {
+                remarks.add(problem);
+            }
+        }
+        return new Result(sanity, remarks);
     }
 }

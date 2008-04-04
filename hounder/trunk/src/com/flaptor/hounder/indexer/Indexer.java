@@ -21,9 +21,11 @@ import org.apache.log4j.Logger;
 import org.dom4j.Document;
 
 import com.flaptor.clusterfest.ClusterableListener;
+import com.flaptor.clusterfest.action.ActionModule;
 import com.flaptor.clusterfest.controlling.ControllerModule;
 import com.flaptor.clusterfest.controlling.node.ControllableImplementation;
 import com.flaptor.clusterfest.monitoring.MonitorModule;
+import com.flaptor.hounder.indexer.clustering.IndexerActionReceiver;
 import com.flaptor.util.AStoppableThread;
 import com.flaptor.util.Config;
 import com.flaptor.util.DocumentParser;
@@ -47,7 +49,10 @@ import com.flaptor.util.Stoppable;
 public class Indexer implements IRmiIndexer, IIndexer, Stoppable {
     
     private static final Logger logger = Logger.getLogger(Execute.whoAmI());
+    
+    //clusterfest
     private ClusterableListener clusteringListener;
+    private IndexerMonitoredNode indexerMonitoredNode; 
     
     /**
      * Possible return values for the index method.
@@ -82,12 +87,14 @@ public class Indexer implements IRmiIndexer, IIndexer, Stoppable {
         if (config.getBoolean("clustering.enable")) {
         	int port = PortUtil.getPort("clustering.rpc.indexer");
     		clusteringListener = new ClusterableListener(port, config);
+    		indexerMonitoredNode = IndexerMonitoredNode.getInstance();
     		MonitorModule.addMonitorListener(clusteringListener, IndexerMonitoredNode.getInstance());
-    		ControllerModule.addControllerListener(clusteringListener, new ControllableImplementation());    		
+    		ControllerModule.addControllerListener(clusteringListener, new ControllableImplementation());
+    		ActionModule.setActionReceiver(clusteringListener, new IndexerActionReceiver(this));
         }
 
 
-		indexManager = new IndexManager();
+		indexManager = new IndexManager(this);
         maxQueueSize = config.getInt("Indexer.maxQueueSize");
         logger.info("Maximum queue size set to " + maxQueueSize);
         // create all the modules requested in the configuration file AND
@@ -307,5 +314,11 @@ public class Indexer implements IRmiIndexer, IIndexer, Stoppable {
         }
     }
 
+    public ClusterableListener getClusteringListener() {
+        return clusteringListener;
+    }
 
+    public IndexerMonitoredNode getIndexerMonitoredNode() {
+        return indexerMonitoredNode;
+    }
 }

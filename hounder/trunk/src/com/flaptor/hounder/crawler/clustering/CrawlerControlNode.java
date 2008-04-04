@@ -37,8 +37,7 @@ public class CrawlerControlNode extends ModuleNodeDescriptor {
 			return crawlerControllable.getBoostConfig();
 		}
 		catch (Exception e) {
-			getNodeDescriptor().setUnreachable(e); //this throws an exception
-			return null;
+		    throw new NodeUnreachableException(e, getNodeDescriptor());
 		}
 	}
 }
