@@ -466,35 +466,6 @@ limitations under the License.
 	    </war>
 	</target>
 	
-    <target name="clustering-war" description="creates the clustering webapp" depends="compile">
-        <property name="webapp.dir" value="${src.dir}/web-clusterfest/"/>
-        <!--antcall target="check-jsp"/-->
-        <war warfile="output/clustering.war" webxml="${src.dir}/web-clusterfest/WEB-INF/web.xml">
-		
-            <classes dir="${build.dir}">
-                <include name="com/flaptor/util/**/*.class"/>
-                <include name="com/flaptor/clustering/**/*.class"/>
-                <include name="com/flaptor/hounder/**/*.class"/>
-            </classes>
-
-        	<classes dir="${conf.dir}" >
-				<include name="log4j.properties" />
-			</classes>	        		    
-        	<classes dir="${conf.dir}/clustering-web" >
-				<include name="*.properties" />
-				<include name="*.properties.defaults" />
-			</classes>
-
-            <fileset dir="${src.dir}/web-clusterfest/">
-                <include name="*jsp"/>
-                <include name="*css"/>
-            </fileset>
-	
-            <lib dir="${lib.dir}">
-                <include name="*jar"/>
-            </lib>
-	    </war>
-	</target>
 	
     <!--**************************************************************************************************-->
     <!--DIST *********************************************************************************************-->

@@ -1,5 +1,8 @@
 VERSION=1.0
 
 ant distsrc distbin
-scp product-output/hounder-trunk-binary_installer.tgz root@bonoki.com:/var/www/lighttpd/hounder.org/htdocs/downloads/hounder-${VERSION}-binary_installer.tgz
-scp product-output/hounder-trunk-src.tgz root@bonoki.com:/var/www/lighttpd/hounder.org/htdocs/downloads/hounder-${VERSION}-binary_installer.tgz
+cd product-output
+mv hounder-trunk-binary_installer.tgz hounder-${VERSION}-binary_installer.tgz
+mv hounder-trunk-src.tgz hounder-${VERSION}-src.tgz
+cd ..
+scp product-output/hounder-*.tgz root@bonoki.com:/var/www/lighttpd/hounder.org/htdocs/downloads/
