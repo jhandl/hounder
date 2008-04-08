@@ -23,11 +23,11 @@ public class IndexerActionReceiver extends ActionReceiverImplementation{
     }
     public boolean action(String action, Object[] params) throws Exception {
         logger.info("received action " + action + " params " + params);
-        if ("close".equals("action")) {
+        if ("close".equals(action)) {
             IndexerCommands.close(indexer);
-        } else if ("checkpoint".equals("action")) {
+        } else if ("checkpoint".equals(action)) {
             IndexerCommands.checkpoint(indexer);
-        } else if ("optimize".equals("action")) {
+        } else if ("optimize".equals(action)) {
             IndexerCommands.optimize(indexer);
         }
         return true;
