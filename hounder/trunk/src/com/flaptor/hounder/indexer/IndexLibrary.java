@@ -182,7 +182,9 @@ public class IndexLibrary implements Stoppable {
             while (inited < updaters.length) {
                 Execute.sleep(50, logger);
             }
-            indexer.getIndexerMonitoredNode().setProperty("indexUpdateProblems", problems);
+            if (indexer.getIndexerMonitoredNode() != null) {
+                indexer.getIndexerMonitoredNode().setProperty("indexUpdateProblems", problems);
+            }
         }
 
         return true;
