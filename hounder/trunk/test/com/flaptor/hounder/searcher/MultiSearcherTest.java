@@ -17,6 +17,7 @@ package com.flaptor.hounder.searcher;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Callable;
 
 import org.antlr.stringtemplate.StringTemplate;
 
@@ -29,7 +30,9 @@ import com.flaptor.hounder.searcher.query.LazyParsedQuery;
 import com.flaptor.hounder.searcher.query.MatchAllQuery;
 import com.flaptor.util.Config;
 import com.flaptor.util.Execute;
+import com.flaptor.util.Execution;
 import com.flaptor.util.FileUtil;
+import com.flaptor.util.MultiExecutor;
 import com.flaptor.util.TestCase;
 import com.flaptor.util.TestInfo;
 
@@ -42,14 +45,39 @@ public class MultiSearcherTest extends TestCase {
 
     private StringTemplate addTemplate = new StringTemplate("<documentAdd><documentId>$documentId$</documentId><field name=\"content\" stored=\"true\" indexed=\"true\" tokenized=\"true\">$content$</field><field name=\"group\" stored=\"true\" indexed=\"true\" tokenized=\"true\">$group$</field></documentAdd>");
     private int startPort = 30000;
-    private int numServers = 2;
+    private int numServers = 3;
     private int docsPerSearcher = 10;
     private int docsPerGroup = 2;
     
     private List<ISearcher> searchers; 
-    private List<Indexer> indexers; 
+    private List<Indexer> indexers;
     private List<String> tmpDirs;
+    private MultiExecutor<Void> executor = new MultiExecutor<Void>(10, "testMultiSearcher");
     
+    public void setUp() {
+        Config.getConfig("searcher.properties").set("multiSearcher.workerThreads", "10");
+        indexers = new ArrayList<Indexer>(numServers);
+        searchers = new ArrayList<ISearcher>(numServers);
+        tmpDirs = new ArrayList<String>(numServers * 2);
+    } 
+
+    public void tearDown() {
+        // request stops
+        for (Indexer indexer: indexers) {
+            indexer.requestStop();
+        }
+        // wait for them
+        for (Indexer indexer: indexers) {
+            while (!indexer.isStopped()) {
+                Execute.sleep(30);
+            }
+        }
+        // delete temp dirs
+        for (String tmpDir: tmpDirs) {
+            FileUtil.deleteDir(tmpDir);
+        }
+    }
+
     private void setUpSearcher(int numServer) throws Exception {
    	
     	Config searcherConfig = Config.getConfig("searcher.properties");
@@ -99,37 +127,13 @@ public class MultiSearcherTest extends TestCase {
         tmpDirs.add(searcherTmpDir);
     }
 
-
-    public void setUp() {
-        indexers = new ArrayList<Indexer>(numServers);
-        searchers = new ArrayList<ISearcher>(numServers);
-        tmpDirs = new ArrayList<String>(numServers * 2);
-    } 
-
-    public void tearDown() {
-        // request stops
-        for (Indexer indexer: indexers) {
-            indexer.requestStop();
-        }
-        // wait for them
-        for (Indexer indexer: indexers) {
-            while (!indexer.isStopped()) {
-                Execute.sleep(30);
-            }
-        }
-        // delete temp dirs
-        for (String tmpDir: tmpDirs) {
-            FileUtil.deleteDir(tmpDir);
-        }
-    }
-
     private int getBasePort(int numServer) {
         return startPort + 1000 * numServer;
     }
 
-    //just test that there are no exceptions searching through rmi
     @TestInfo(testType = TestInfo.TestType.INTEGRATION,
             requiresPort = {30000})
+//just test that there are no exceptions searching through rmi
     public void testRmiSearch() throws Exception {
         int basePort = getBasePort(0);
         setUpSearcher(0);
@@ -171,18 +175,26 @@ public class MultiSearcherTest extends TestCase {
     }
 
     private void doQueries(boolean withComposite)  throws SearcherException {
-        ISearcher multiSearcher = withComposite ? new CompositeSearcher() : new MultiSearcher();
+        final ISearcher multiSearcher = withComposite ? new CompositeSearcher() : new MultiSearcher();
 
-        //repeat 100 times
-        for (int times = 0; times < 100; ++times) {
-            GroupedSearchResults results = multiSearcher.search(new LazyParsedQuery("content"), 0, numServers, new NoGroup(), 1, null, null);
-            assertEquals(numServers * docsPerSearcher, results.totalGroupsEstimation());
-
+        Execution<Void> execution = new Execution<Void>();
+        GroupedSearchResults results = multiSearcher.search(new LazyParsedQuery("content"), 0, numServers, new NoGroup(), 1, null, null);
+        assertEquals(numServers * docsPerSearcher, results.totalGroupsEstimation());
+        for (int times = 0; times < 50; times++){
             for (int i = 0; i < numServers; ++i) {
-                results = multiSearcher.search(new LazyParsedQuery(String.valueOf(i)), 0, numServers, new NoGroup(), 1, null, null);
-                assertEquals(docsPerSearcher, results.totalGroupsEstimation());            
+                final int numSearcher= i;
+                execution.addTask(new Callable<Void>() {
+                    public Void call() throws Exception {
+                        GroupedSearchResults results = multiSearcher.search(new LazyParsedQuery(String.valueOf(numSearcher)), 0, numServers, new NoGroup(), 1, null, null);
+                        if (docsPerSearcher != results.totalGroupsEstimation()) throw new Exception("not equals");
+                        return null;
+                    }
+                });
             }
         }
+        executor.addExecution(execution);
+        execution.waitFor();
+        assertEquals(0, execution.getProblems().size());
     }
 
     @TestInfo(testType = TestInfo.TestType.INTEGRATION,
@@ -204,13 +216,26 @@ public class MultiSearcherTest extends TestCase {
 
         Config.getConfig("multiSearcher.properties").set("multiSearcher.hosts", hosts);
 
-        ISearcher multiSearcher = new MultiSearcher();
-        GroupedSearchResults gsr = multiSearcher.search(new MatchAllQuery(),0,docsPerSearcher*numServers,new StoredFieldGroup("group"),docsPerGroup,null,null);
-    
-        assertEquals("Not the same count of groups.", docsPerSearcher / docsPerGroup, gsr.groups());
-        
-        for (int i = 0; i < gsr.groups(); i++) {
-            assertEquals("Wrong count of results per group.",docsPerGroup, gsr.getGroup(i).last().size());
+        final ISearcher multiSearcher = new MultiSearcher();
+        Execution<Void> execution = new Execution<Void>();
+        for (int times = 0; times < 50; times++) {
+            execution.addTask(new Callable<Void>() {
+                public Void call() throws Exception {
+                    GroupedSearchResults gsr = multiSearcher.search(new MatchAllQuery(),0,docsPerSearcher*numServers,new StoredFieldGroup("group"),docsPerGroup,null,null);
+                    
+                    assertEquals("Not the same count of groups.", docsPerSearcher / docsPerGroup, gsr.groups());
+                    
+                    for (int i = 0; i < gsr.groups(); i++) {
+                        if (docsPerGroup != gsr.getGroup(i).last().size()) {
+                            throw new Exception("Wrong count of results per group.");
+                        }
+                    }
+                    return null;
+                }
+            });
         }
+        executor.addExecution(execution);
+        execution.waitFor();
+        assertEquals(0, execution.getProblems().size());
     }
 }

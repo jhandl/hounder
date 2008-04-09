@@ -90,7 +90,7 @@ public class MultiSearcher implements ISearcher {
         for (int i = 0; i < searchers.size(); ++i) {
         	final int numSearcher = i;
         	final IRemoteSearcher searcher = searchers.get(numSearcher);
-            execution.getTaskQueue().add(new CallableWithId<GroupedSearchResults, Integer>(numSearcher) {
+            execution.addTask(new CallableWithId<GroupedSearchResults, Integer>(numSearcher) {
                 public GroupedSearchResults call() throws Exception {
                     return queryParams.executeInRemoteSearcher(searcher);
                 }
@@ -99,24 +99,11 @@ public class MultiSearcher implements ISearcher {
         multiQueryExecutor.addExecution(execution);
 
         long start = System.currentTimeMillis();
-        long now = start;
-        while(true) {
-            synchronized(execution) {
-                if (execution.getResultsList().size() == searchers.size()) break;
-                
-                now = System.currentTimeMillis();
-                long toWait = timeout - (now - start);
-                if (toWait > 0) {
-                    try {
-                        execution.wait(toWait);
-                    } catch (InterruptedException e) {
-                        logger.warn("multiqueryExecutor: interrupted while waiting for the responses to return. I will continue...");
-                    }
-                } else {
-                    logger.warn("timeout of some searchers");
-                    break;
-                }
-            }
+        try {
+            execution.waitFor(timeout);
+        } catch (InterruptedException e) {
+            logger.warn("timeout of some searchers");
+            execution.forget();
         }
         
         //a treeMap for sorting values according to the searcher number
@@ -129,7 +116,6 @@ public class MultiSearcher implements ISearcher {
         //we take a snapshot of the results
         //other results may come after the timeout, a change in the size of the result set could cause problems
         synchronized(execution) {
-            execution.forget();
             for (Results<GroupedSearchResults> result : execution.getResultsList()) {
                 int numSearcher = ((CallableWithId<GroupedSearchResults, Integer>)result.getTask()).getId();
                 if (result.isFinishedOk()) {
@@ -151,7 +137,7 @@ public class MultiSearcher implements ISearcher {
         	goodResults.add(entry.getValue());
         }
         int resultsSize = goodResults.size(); 
-        logger.debug("obtained " + totalDocuments + " documents in "+ resultsSize + " good responses and " +  badResults + " exceptions in " + (now - start) + " ms ");
+        logger.debug("obtained " + totalDocuments + " documents in "+ resultsSize + " good responses and " +  badResults + " exceptions in " + (System.currentTimeMillis() - start) + " ms ");
 
         if (goodResults.size() == 0) {
             logger.warn("No good results - " + badResults + " exceptions");
