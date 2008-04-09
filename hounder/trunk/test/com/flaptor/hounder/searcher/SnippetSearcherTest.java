@@ -155,11 +155,218 @@ public class SnippetSearcherTest extends TestCase{
         addTemplate.setAttribute("documentId", "doc-6");
         indexer.index(addTemplate.toString());
         addTemplate.reset();
+        // ------ document-7 ---------------
+        addTemplate.setAttribute("text", "two words");
+        addTemplate.setAttribute("documentId", "doc-7");
+        indexer.index(addTemplate.toString());
+        addTemplate.reset();
+        // ------ document-8 ---------------
+        addTemplate.setAttribute("text", "last dot.");
+        addTemplate.setAttribute("documentId", "doc-8");
+        indexer.index(addTemplate.toString());
+        addTemplate.reset();
 
-
+        addTemplate.setAttribute("text", "word1 word2. word3 word4.  word5 word51 hlght word6. word7 word8. word9 word10. word11 hlght hlght word12. word13 word14. word15 hlght hlght hlght word16. word17.");
+        addTemplate.setAttribute("documentId", "doc-9");
+        indexer.index(addTemplate.toString());
+        addTemplate.reset();
             
         tmpDirs.add(tmpDir);
         tmpDirs.add(searcherTmpDir);
+    }
+
+    @TestInfo(testType = TestInfo.TestType.INTEGRATION)
+    public void testSurrounding() throws SearcherException {
+        int[] lenA={40}; // >= "bla bla surrounding bla bla.".length()
+        String[] fieldA={"text"};
+        snippetSearcher= new SnippetSearcher(new CompositeSearcher(searcherConfig), fieldA, lenA, FRAG_SEP, PHRASE_BOUND, false);
+
+        GroupedSearchResults results;        
+        results = snippetSearcher.search(new LazyParsedQuery("surrounding"), 0, 10, new NoGroup(), 1, null, null);
+        assertEquals("We get a bad number of groups", 1, results.groups());
+        assertEquals("We get a bad number of results within the group", 1, results.getGroup(0).last().size());
+        org.apache.lucene.document.Document doc= results.getGroup(0).last().get(0);
+        String content= StringUtil.nullToEmpty(doc.get(SnippetSearcher.SNIPPET_FIELDNAME_PREFIX + "text")).trim();
+        assertEquals("The returned snippet is not as expected", "bla bla <B>surrounding</B> bla bla. bar bar bar bar.", content);
+        
+
+        lenA[0]=54; // lenA + "bar bar bar bar.".length()        
+        snippetSearcher= new SnippetSearcher(new CompositeSearcher(searcherConfig), fieldA, lenA, FRAG_SEP, PHRASE_BOUND, false);                
+        results = snippetSearcher.search(new LazyParsedQuery("surrounding"), 0, 10, new NoGroup(), 1, null, null);
+        assertEquals("We get a bad number of groups", 1, results.groups());
+        assertEquals("We get a bad number of results within the group", 1, results.getGroup(0).last().size());
+        doc= results.getGroup(0).last().get(0);
+        content= StringUtil.nullToEmpty(doc.get(SnippetSearcher.SNIPPET_FIELDNAME_PREFIX + "text")).trim();
+        assertEquals("The returned snippet is not as expected", "foo foo foo foo. bla bla <B>surrounding</B> bla bla. bar bar bar bar.", content);            
+
+        lenA[0]=80;         
+        snippetSearcher= new SnippetSearcher(new CompositeSearcher(searcherConfig), fieldA, lenA, FRAG_SEP, PHRASE_BOUND, false);                
+        results = snippetSearcher.search(new LazyParsedQuery("surrounding"), 0, 10, new NoGroup(), 1, null, null);
+        assertEquals("We get a bad number of groups", 1, results.groups());
+        assertEquals("We get a bad number of results within the group", 1, results.getGroup(0).last().size());
+        doc= results.getGroup(0).last().get(0);
+        content= StringUtil.nullToEmpty(doc.get(SnippetSearcher.SNIPPET_FIELDNAME_PREFIX + "text")).trim();
+        assertEquals("The returned snippet is not as expected", "foo foo foo foo. bla bla <B>surrounding</B> bla bla. bar bar bar bar. fiz fiz fiz fiz", content);
+
+        lenA[0]=95;         
+        snippetSearcher= new SnippetSearcher(new CompositeSearcher(searcherConfig), fieldA, lenA, FRAG_SEP, PHRASE_BOUND, false);                
+        results = snippetSearcher.search(new LazyParsedQuery("surrounding"), 0, 10, new NoGroup(), 1, null, null);
+        assertEquals("We get a bad number of groups", 1, results.groups());
+        assertEquals("We get a bad number of results within the group", 1, results.getGroup(0).last().size());
+        doc= results.getGroup(0).last().get(0);
+        content= StringUtil.nullToEmpty(doc.get(SnippetSearcher.SNIPPET_FIELDNAME_PREFIX + "text")).trim();
+        assertEquals("The returned snippet is not as expected", "no no no no. foo foo foo foo. bla bla <B>surrounding</B> bla bla. bar bar bar bar. fiz fiz fiz fiz", content);            
+
+    }
+    @TestInfo(testType = TestInfo.TestType.INTEGRATION)
+    public void testManyPhrases() throws SearcherException {
+        int[] lenA={0};  
+        String[] fieldA={"text"};
+        GroupedSearchResults results;
+        org.apache.lucene.document.Document doc9;
+        String content9;
+
+        lenA[0]=10;
+        snippetSearcher= new SnippetSearcher(new CompositeSearcher(searcherConfig), fieldA, lenA, FRAG_SEP, PHRASE_BOUND, false);
+        results = snippetSearcher.search(new LazyParsedQuery("hlght"), 0, 10, new NoGroup(), 1, null, null);
+        assertEquals("We get a bad number of groups", 1, results.groups());
+        assertEquals("We get a bad number of results within the group", 1, results.getGroup(0).last().size());
+        doc9= results.getGroup(0).last().get(0);
+        content9= StringUtil.nullToEmpty(doc9.get(SnippetSearcher.SNIPPET_FIELDNAME_PREFIX + "text")).trim();
+        assertEquals("The returned snippet is not as expected", "word15 <B>hlght</B> <B>hlght</B> <B>hlght</B> word16.", content9);
+
+        lenA[0]=60;
+        snippetSearcher= new SnippetSearcher(new CompositeSearcher(searcherConfig), fieldA, lenA, FRAG_SEP, PHRASE_BOUND, false);
+        results = snippetSearcher.search(new LazyParsedQuery("hlght"), 0, 10, new NoGroup(), 1, null, null);
+        assertEquals("We get a bad number of groups", 1, results.groups());
+        assertEquals("We get a bad number of results within the group", 1, results.getGroup(0).last().size());
+        doc9= results.getGroup(0).last().get(0);
+        content9= StringUtil.nullToEmpty(doc9.get(SnippetSearcher.SNIPPET_FIELDNAME_PREFIX + "text")).trim();
+        assertEquals("The returned snippet is not as expected", "word11 <B>hlght</B> <B>hlght</B> word12. ... word15 <B>hlght</B> <B>hlght</B> <B>hlght</B> word16.", content9);
+
+        lenA[0]=100;
+        snippetSearcher= new SnippetSearcher(new CompositeSearcher(searcherConfig), fieldA, lenA, FRAG_SEP, PHRASE_BOUND, false);
+        results = snippetSearcher.search(new LazyParsedQuery("hlght"), 0, 10, new NoGroup(), 1, null, null);
+        assertEquals("We get a bad number of groups", 1, results.groups());
+        assertEquals("We get a bad number of results within the group", 1, results.getGroup(0).last().size());
+        doc9= results.getGroup(0).last().get(0);
+        content9= StringUtil.nullToEmpty(doc9.get(SnippetSearcher.SNIPPET_FIELDNAME_PREFIX + "text")).trim();
+        assertEquals("The returned snippet is not as expected", "word5 word51 <B>hlght</B> word6. ... word11 <B>hlght</B> <B>hlght</B> word12. ... word15 <B>hlght</B> <B>hlght</B> <B>hlght</B> word16.", content9);
+
+        // The tests below are algorithm dependent. Current algo starts filling with near sentences (to give some context
+        // from left to right, adding 1 context sentence to the right of any existing hilighted fragment.
+        // Then it do the same adding a context sentence to the left but starting from right to left.
+        lenA[0]=135;
+        snippetSearcher= new SnippetSearcher(new CompositeSearcher(searcherConfig), fieldA, lenA, FRAG_SEP, PHRASE_BOUND, false);
+        results = snippetSearcher.search(new LazyParsedQuery("hlght"), 0, 10, new NoGroup(), 1, null, null);
+        assertEquals("We get a bad number of groups", 1, results.groups());
+        assertEquals("We get a bad number of results within the group", 1, results.getGroup(0).last().size());
+        doc9= results.getGroup(0).last().get(0);
+        content9= StringUtil.nullToEmpty(doc9.get(SnippetSearcher.SNIPPET_FIELDNAME_PREFIX + "text")).trim();
+        assertEquals("The returned snippet is not as expected", "word5 word51 <B>hlght</B> word6. word7 word8. ... word11 <B>hlght</B> <B>hlght</B> word12. ... word15 <B>hlght</B> <B>hlght</B> <B>hlght</B> word16.", content9);
+
+        lenA[0]=145;
+        snippetSearcher= new SnippetSearcher(new CompositeSearcher(searcherConfig), fieldA, lenA, FRAG_SEP, PHRASE_BOUND, false);
+        results = snippetSearcher.search(new LazyParsedQuery("hlght"), 0, 10, new NoGroup(), 1, null, null);
+        assertEquals("We get a bad number of groups", 1, results.groups());
+        assertEquals("We get a bad number of results within the group", 1, results.getGroup(0).last().size());
+        doc9= results.getGroup(0).last().get(0);
+        content9= StringUtil.nullToEmpty(doc9.get(SnippetSearcher.SNIPPET_FIELDNAME_PREFIX + "text")).trim();
+        assertEquals("The returned snippet is not as expected", "word5 word51 <B>hlght</B> word6. word7 word8. ... word11 <B>hlght</B> <B>hlght</B> word12. word13 word14. word15 <B>hlght</B> <B>hlght</B> <B>hlght</B> word16.", content9);
+        
+        lenA[0]=155;
+        snippetSearcher= new SnippetSearcher(new CompositeSearcher(searcherConfig), fieldA, lenA, FRAG_SEP, PHRASE_BOUND, false);
+        results = snippetSearcher.search(new LazyParsedQuery("hlght"), 0, 10, new NoGroup(), 1, null, null);
+        assertEquals("We get a bad number of groups", 1, results.groups());
+        assertEquals("We get a bad number of results within the group", 1, results.getGroup(0).last().size());
+        doc9= results.getGroup(0).last().get(0);
+        content9= StringUtil.nullToEmpty(doc9.get(SnippetSearcher.SNIPPET_FIELDNAME_PREFIX + "text")).trim();
+        assertEquals("The returned snippet is not as expected", "word5 word51 <B>hlght</B> word6. word7 word8. ... word11 <B>hlght</B> <B>hlght</B> word12. word13 word14. word15 <B>hlght</B> <B>hlght</B> <B>hlght</B> word16. word17.", content9);
+        
+        lenA[0]=161;
+        snippetSearcher= new SnippetSearcher(new CompositeSearcher(searcherConfig), fieldA, lenA, FRAG_SEP, PHRASE_BOUND, false);
+        results = snippetSearcher.search(new LazyParsedQuery("hlght"), 0, 10, new NoGroup(), 1, null, null);
+        assertEquals("We get a bad number of groups", 1, results.groups());
+        assertEquals("We get a bad number of results within the group", 1, results.getGroup(0).last().size());
+        doc9= results.getGroup(0).last().get(0);
+        content9= StringUtil.nullToEmpty(doc9.get(SnippetSearcher.SNIPPET_FIELDNAME_PREFIX + "text")).trim();
+        assertEquals("The returned snippet is not as expected", "word5 word51 <B>hlght</B> word6. word7 word8. word9 word10. word11 <B>hlght</B> <B>hlght</B> word12. word13 word14. word15 <B>hlght</B> <B>hlght</B> <B>hlght</B> word16. word17.", content9);
+
+        lenA[0]=175;
+        snippetSearcher= new SnippetSearcher(new CompositeSearcher(searcherConfig), fieldA, lenA, FRAG_SEP, PHRASE_BOUND, false);
+        results = snippetSearcher.search(new LazyParsedQuery("hlght"), 0, 10, new NoGroup(), 1, null, null);
+        assertEquals("We get a bad number of groups", 1, results.groups());
+        assertEquals("We get a bad number of results within the group", 1, results.getGroup(0).last().size());
+        doc9= results.getGroup(0).last().get(0);
+        content9= StringUtil.nullToEmpty(doc9.get(SnippetSearcher.SNIPPET_FIELDNAME_PREFIX + "text")).trim();
+        assertEquals("The returned snippet is not as expected", "word3 word4. word5 word51 <B>hlght</B> word6. word7 word8. word9 word10. word11 <B>hlght</B> <B>hlght</B> word12. word13 word14. word15 <B>hlght</B> <B>hlght</B> <B>hlght</B> word16. word17.", content9);
+
+        lenA[0]=185;
+        snippetSearcher= new SnippetSearcher(new CompositeSearcher(searcherConfig), fieldA, lenA, FRAG_SEP, PHRASE_BOUND, false);
+        results = snippetSearcher.search(new LazyParsedQuery("hlght"), 0, 10, new NoGroup(), 1, null, null);
+        assertEquals("We get a bad number of groups", 1, results.groups());
+        assertEquals("We get a bad number of results within the group", 1, results.getGroup(0).last().size());
+        doc9= results.getGroup(0).last().get(0);
+        content9= StringUtil.nullToEmpty(doc9.get(SnippetSearcher.SNIPPET_FIELDNAME_PREFIX + "text")).trim();
+        assertEquals("The returned snippet is not as expected", "word1 word2. word3 word4. word5 word51 <B>hlght</B> word6. word7 word8. word9 word10. word11 <B>hlght</B> <B>hlght</B> word12. word13 word14. word15 <B>hlght</B> <B>hlght</B> <B>hlght</B> word16. word17.", content9);
+
+        lenA[0]=500;
+        snippetSearcher= new SnippetSearcher(new CompositeSearcher(searcherConfig), fieldA, lenA, FRAG_SEP, PHRASE_BOUND, false);
+        results = snippetSearcher.search(new LazyParsedQuery("hlght"), 0, 10, new NoGroup(), 1, null, null);
+        assertEquals("We get a bad number of groups", 1, results.groups());
+        assertEquals("We get a bad number of results within the group", 1, results.getGroup(0).last().size());
+        doc9= results.getGroup(0).last().get(0);
+        content9= StringUtil.nullToEmpty(doc9.get(SnippetSearcher.SNIPPET_FIELDNAME_PREFIX + "text")).trim();
+        assertEquals("The returned snippet is not as expected", "word1 word2. word3 word4. word5 word51 <B>hlght</B> word6. word7 word8. word9 word10. word11 <B>hlght</B> <B>hlght</B> word12. word13 word14. word15 <B>hlght</B> <B>hlght</B> <B>hlght</B> word16. word17.", content9);
+
+
+    }
+
+    
+    @TestInfo(testType = TestInfo.TestType.INTEGRATION)
+    public void testLastChar() throws SearcherException {
+        int[] lenA={10}; // so we get 1 only snippet 
+        String[] fieldA={"text"};
+        snippetSearcher= new SnippetSearcher(new CompositeSearcher(searcherConfig), fieldA, lenA, FRAG_SEP, PHRASE_BOUND, false);
+
+        GroupedSearchResults results;        
+        results = snippetSearcher.search(new LazyParsedQuery("last"), 0, 10, new NoGroup(), 1, null, null);
+        assertEquals("We get a bad number of groups", 1, results.groups());
+        assertEquals("We get a bad number of results within the group", 1, results.getGroup(0).last().size());
+        org.apache.lucene.document.Document doc8= results.getGroup(0).last().get(0);
+        String content8= StringUtil.nullToEmpty(doc8.get(SnippetSearcher.SNIPPET_FIELDNAME_PREFIX + "text")).trim();
+        assertEquals("The returned snippet is not as expected", "<B>last</B> dot.", content8);
+        
+        results = snippetSearcher.search(new LazyParsedQuery("dot"), 0, 10, new NoGroup(), 1, null, null);
+        assertEquals("We get a bad number of groups", 1, results.groups());
+        assertEquals("We get a bad number of results within the group", 1, results.getGroup(0).last().size());
+        doc8= results.getGroup(0).last().get(0);
+        content8= StringUtil.nullToEmpty(doc8.get(SnippetSearcher.SNIPPET_FIELDNAME_PREFIX + "text")).trim();
+        assertEquals("The returned snippet is not as expected", "last <B>dot</B>.", content8);         
+
+    }
+
+    @TestInfo(testType = TestInfo.TestType.INTEGRATION)
+    public void testShortFragments() throws SearcherException {
+        int[] lenA={10}; // so we get 1 only snippet 
+        String[] fieldA={"text"};
+        snippetSearcher= new SnippetSearcher(new CompositeSearcher(searcherConfig), fieldA, lenA, FRAG_SEP, PHRASE_BOUND, false);
+
+        GroupedSearchResults results;        
+        results = snippetSearcher.search(new LazyParsedQuery("two"), 0, 10, new NoGroup(), 1, null, null);
+        assertEquals("We get a bad number of groups", 1, results.groups());
+        assertEquals("We get a bad number of results within the group", 1, results.getGroup(0).last().size());
+        org.apache.lucene.document.Document doc7= results.getGroup(0).last().get(0);
+        String content7= StringUtil.nullToEmpty(doc7.get(SnippetSearcher.SNIPPET_FIELDNAME_PREFIX + "text")).trim();
+        assertEquals("The returned snippet is not as expected", "<B>two</B> words", content7);
+        
+        results = snippetSearcher.search(new LazyParsedQuery("words"), 0, 10, new NoGroup(), 1, null, null);
+        assertEquals("We get a bad number of groups", 1, results.groups());
+        assertEquals("We get a bad number of results within the group", 1, results.getGroup(0).last().size());
+        doc7= results.getGroup(0).last().get(0);
+        content7= StringUtil.nullToEmpty(doc7.get(SnippetSearcher.SNIPPET_FIELDNAME_PREFIX + "text")).trim();
+        assertEquals("The returned snippet is not as expected", "two <B>words</B>", content7);                
+
     }
 
     @TestInfo(testType = TestInfo.TestType.INTEGRATION)
@@ -181,31 +388,7 @@ public class SnippetSearcherTest extends TestCase{
     }
 
     
-    @TestInfo(testType = TestInfo.TestType.INTEGRATION)
-    public void testSurrounding() throws SearcherException {
-        int[] lenA={40}; // >= "bla bla surrounding bla bla.".length()
-        String[] fieldA={"text"};
-        snippetSearcher= new SnippetSearcher(new CompositeSearcher(searcherConfig), fieldA, lenA, FRAG_SEP, PHRASE_BOUND, false);
 
-        GroupedSearchResults results;        
-        results = snippetSearcher.search(new LazyParsedQuery("surrounding"), 0, 10, new NoGroup(), 1, null, null);
-        assertEquals("We get a bad number of groups", 1, results.groups());
-        assertEquals("We get a bad number of results within the group", 1, results.getGroup(0).last().size());
-        org.apache.lucene.document.Document doc= results.getGroup(0).last().get(0);
-        String content= StringUtil.nullToEmpty(doc.get(SnippetSearcher.SNIPPET_FIELDNAME_PREFIX + "text")).trim();
-        assertEquals("The returned snippet is not as expected", "bla bla <B>surrounding</B> bla bla. bar bar bar bar.", content);
-        
-
-        int[] lenB={54}; // lenA + "bar bar bar bar.".length()        
-        snippetSearcher= new SnippetSearcher(new CompositeSearcher(searcherConfig), fieldA, lenB, FRAG_SEP, PHRASE_BOUND, false);                
-        results = snippetSearcher.search(new LazyParsedQuery("surrounding"), 0, 10, new NoGroup(), 1, null, null);
-        assertEquals("We get a bad number of groups", 1, results.groups());
-        assertEquals("We get a bad number of results within the group", 1, results.getGroup(0).last().size());
-        doc= results.getGroup(0).last().get(0);
-        content= StringUtil.nullToEmpty(doc.get(SnippetSearcher.SNIPPET_FIELDNAME_PREFIX + "text")).trim();
-        assertEquals("The returned snippet is not as expected", "foo foo foo foo. bla bla <B>surrounding</B> bla bla. bar bar bar bar.", content);            
-
-    }
 
     
     @TestInfo(testType = TestInfo.TestType.INTEGRATION)
@@ -277,6 +460,42 @@ public class SnippetSearcherTest extends TestCase{
         assertEquals("The returned snippet is not as expected", "This is a simple <B>phrase</B>", content);            
     }
 
+    class MultiThreadTestHlp extends Thread{
+        public GroupedSearchResults results;
+        public void run(){
+            try {
+                results = snippetSearcher.search(new LazyParsedQuery("phrase"), 0, 10, new NoGroup(), 1, null, null);
+            } catch (SearcherException e) {
+                e.printStackTrace();
+                fail(e.getMessage());
+            }
+        }                    
+    }
+
+    @TestInfo(testType = TestInfo.TestType.INTEGRATION)
+    public void testMultiThread() throws SearcherException {
+        MultiThreadTestHlp[] thrArr= new MultiThreadTestHlp[50];
+        for (int i=0; i< thrArr.length; i++){
+            thrArr[i]= new MultiThreadTestHlp();
+        }
+        for (int i=0; i< thrArr.length; i++){
+            thrArr[i].start();
+        }
+        try {
+            Thread.sleep(20000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+            fail(e.getMessage());
+        }
+        for (int i=0; i< thrArr.length; i++){
+            GroupedSearchResults results = thrArr[i].results;
+            assertEquals("We get a bad number of groups", 1, results.groups());
+            assertEquals("We get a bad number of results within the group", 1, results.getGroup(0).last().size());
+            org.apache.lucene.document.Document doc= results.getGroup(0).last().get(0);
+            String content= StringUtil.nullToEmpty(doc.get(SnippetSearcher.SNIPPET_FIELDNAME_PREFIX + "text")).trim();
+            assertEquals("The returned snippet is not as expected", "This is a simple <B>phrase</B>", content);
+        }
+    }
 
 
     /**
