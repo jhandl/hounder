@@ -41,6 +41,8 @@ public class MultiIndexerTest extends TestCase {
 
 	@Override
     public void setUp() {
+        filterOutput("the webserver never freed up");
+	    
         tmpDirs = new ArrayList<String>(numIndexers);
         rpcIndexers = new ArrayList<IIndexer>(numIndexers);
         baseIndexers = new ArrayList<IIndexer>(numIndexers);
@@ -102,11 +104,12 @@ public class MultiIndexerTest extends TestCase {
     		com.flaptor.util.FileUtil.deleteDir(tmpDir);
         }
         tmpDirs = new ArrayList<String>();
+        unfilterOutput();
 	}
 
     
-    @TestInfo(testType = TestInfo.TestType.UNIT,
-        requiresPort = {30000, 31000})
+    @TestInfo(testType = TestInfo.TestType.UNIT)
+//        ,requiresPort = {30000, 31000})
     public void testMultiIndexer() throws Exception {
         MultiIndexer multiIndexer = new MultiIndexer(); 
     
@@ -131,8 +134,8 @@ public class MultiIndexerTest extends TestCase {
         assertEquals("Did not index every document.", totalDocumentsFound,documents);
     }
 
-    @TestInfo(testType = TestInfo.TestType.UNIT,
-        requiresPort = {30000, 31000})
+    @TestInfo(testType = TestInfo.TestType.UNIT)
+//        ,requiresPort = {30000, 31000})
     public void testMixedNodesFails() throws Exception{
         // Mix up hosts
         Config config = Config.getConfig("multiIndexer.properties");
@@ -166,8 +169,8 @@ public class MultiIndexerTest extends TestCase {
         }
     }
 
-    @TestInfo(testType = TestInfo.TestType.UNIT,
-        requiresPort = {30000, 31000})
+    @TestInfo(testType = TestInfo.TestType.UNIT)
+//        ,requiresPort = {30000, 31000})
     public void testCommands() throws Exception {
         String command = "<command name='close'/>";
         MultiIndexer multiIndexer = new MultiIndexer();
