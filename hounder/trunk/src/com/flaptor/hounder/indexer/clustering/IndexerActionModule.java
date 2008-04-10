@@ -12,6 +12,7 @@ import com.flaptor.clusterfest.ModuleUtil;
 import com.flaptor.clusterfest.NodeDescriptor;
 import com.flaptor.clusterfest.WebModule;
 import com.flaptor.clusterfest.action.ActionModule;
+import com.flaptor.clusterfest.action.ActionNodeDescriptor;
 import com.flaptor.util.Pair;
 import com.flaptor.util.remote.WebServer;
 
@@ -19,9 +20,11 @@ public class IndexerActionModule extends ActionModule implements WebModule {
 
     public List<Pair<String, String>> getSelectedNodesActions() {
         List<Pair<String, String>> actions = new ArrayList<Pair<String,String>>();
-        actions.add(new Pair<String, String>("indexer.checkpoint","checkpoint"));
-        actions.add(new Pair<String, String>("indexer.optimize", "optimize"));
-        actions.add(new Pair<String, String>("indexer.close", "close"));
+        if (hasReachableNodes()) {
+            actions.add(new Pair<String, String>("indexer.checkpoint","checkpoint"));
+            actions.add(new Pair<String, String>("indexer.optimize", "optimize"));
+            actions.add(new Pair<String, String>("indexer.close", "close"));
+        }
         return actions;
     }
     public String selectedNodesAction(String action, List<NodeDescriptor> nodes, HttpServletRequest request) {
@@ -43,7 +46,7 @@ public class IndexerActionModule extends ActionModule implements WebModule {
         return ret;
     } 
     public String getNodeHTML(NodeDescriptor node, int nodeNum) {
-        if (isRegistered(node)) {
+        if (isRegistered(node) && node.isReachable()) {
             return 
             "<a href=\"?action=indexer.checkpoint&idx="+nodeNum + "\">checkpoint</a> " +     
             "<a href=\"?action=indexer.optimize&idx="+nodeNum + "\">optimize</a> " +     
