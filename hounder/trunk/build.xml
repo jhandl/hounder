@@ -344,17 +344,17 @@ limitations under the License.
     <target name="doc" description="creates the Hounder javadoc" >
         <delete dir="${javadoc.dir}" />
         <mkdir dir="${javadoc.dir}" />
-        <javadoc    sourcepath="${src.dir}"
+        <javadoc    sourcepath="${src.dir}:${test.dir}"
                     destdir="${javadoc.dir}"
                     Private="true"
                     linksource="yes"
                     >
-            <fileset dir="${src.dir}" defaultexcludes="yes">
+            <!--<fileset dir="${src.dir}" defaultexcludes="yes">
                 <include name="com/flaptor/**/*.java" />
-            </fileset>
-            <fileset dir="${test.dir}" defaultexcludes="yes">
+            </fileset>-->
+            <!--<fileset dir="${test.dir}" defaultexcludes="yes">
                 <include name="com/flaptor/**/*.java" />
-            </fileset>
+            </fileset>-->
             <doctitle><![CDATA[<h1>Hounder Documentation</h1>]]></doctitle>
 		    <classpath>
 			  <path refid="classpath.jars.tools" />
