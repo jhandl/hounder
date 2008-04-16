@@ -20,7 +20,7 @@ import java.lang.reflect.Constructor;
 import org.apache.log4j.Logger;
 import org.dom4j.Document;
 
-import com.flaptor.clusterfest.ClusterableListener;
+import com.flaptor.clusterfest.NodeListener;
 import com.flaptor.clusterfest.action.ActionModule;
 import com.flaptor.clusterfest.controlling.ControllerModule;
 import com.flaptor.clusterfest.controlling.node.ControllableImplementation;
@@ -51,7 +51,7 @@ public class Indexer implements IRmiIndexer, IIndexer, Stoppable {
     private static final Logger logger = Logger.getLogger(Execute.whoAmI());
     
     //clusterfest
-    private ClusterableListener clusteringListener;
+    private NodeListener clusteringListener;
     private IndexerMonitoredNode indexerMonitoredNode; 
     
     /**
@@ -86,7 +86,7 @@ public class Indexer implements IRmiIndexer, IIndexer, Stoppable {
         Config config = Config.getConfig("indexer.properties");
         if (config.getBoolean("clustering.enable")) {
         	int port = PortUtil.getPort("clustering.rpc.indexer");
-    		clusteringListener = new ClusterableListener(port, config);
+    		clusteringListener = new NodeListener(port, config);
     		indexerMonitoredNode = IndexerMonitoredNode.getInstance();
     		MonitorModule.addMonitorListener(clusteringListener, IndexerMonitoredNode.getInstance());
     		ControllerModule.addControllerListener(clusteringListener, new ControllableImplementation());
@@ -314,7 +314,7 @@ public class Indexer implements IRmiIndexer, IIndexer, Stoppable {
         }
     }
 
-    public ClusterableListener getClusteringListener() {
+    public NodeListener getClusteringListener() {
         return clusteringListener;
     }
 

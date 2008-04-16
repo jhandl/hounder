@@ -198,7 +198,7 @@ public class MultiSearcherTest extends TestCase {
     }
 
     @TestInfo(testType = TestInfo.TestType.INTEGRATION,
-            requiresPort = {30000, 31000})
+            requiresPort = {30000, 31000,32000})
     public void testSearchGroups() throws Exception {
     
         Config.getConfig("searcher.properties").set("searcher.isMultiSearcher", "false");

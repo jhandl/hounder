@@ -30,7 +30,7 @@ import org.mortbay.jetty.Request;
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.handler.AbstractHandler;
 
-import com.flaptor.clusterfest.ClusterableListener;
+import com.flaptor.clusterfest.NodeListener;
 import com.flaptor.clusterfest.controlling.ControllerModule;
 import com.flaptor.clusterfest.controlling.node.ControllableImplementation;
 import com.flaptor.clusterfest.monitoring.MonitorModule;
@@ -68,7 +68,7 @@ class HttpCacheServer {
     public static class CacheHandler extends AbstractHandler {
         
         private MultiCache<DocumentCacheItem> multiCache;
-        private ClusterableListener clusterableListener;
+        private NodeListener clusterableListener;
 
         StringTemplate frameTemplate;
         StringTemplate notFoundTemplate;
@@ -80,7 +80,7 @@ class HttpCacheServer {
 
         	if (config.getBoolean("clustering.enable")) {
             	int port = PortUtil.getPort("clustering.rpc.cacheServer");
-        		clusterableListener = new ClusterableListener(port, config);
+        		clusterableListener = new NodeListener(port, config);
         		MonitorModule.addMonitorListener(clusterableListener, new CacheServerMonitoredNode(this));
         		ControllerModule.addControllerListener(clusterableListener, new ControllableImplementation());
             }

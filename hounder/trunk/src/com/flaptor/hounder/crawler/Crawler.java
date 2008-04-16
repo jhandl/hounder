@@ -23,7 +23,7 @@ import java.util.Iterator;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
 
-import com.flaptor.clusterfest.ClusterableListener;
+import com.flaptor.clusterfest.NodeListener;
 import com.flaptor.clusterfest.controlling.ControllerModule;
 import com.flaptor.clusterfest.controlling.node.ControllableImplementation;
 import com.flaptor.clusterfest.monitoring.MonitorModule;
@@ -65,7 +65,7 @@ public class Crawler {
     private ModulesManager modules; // this holds the modules that will process the crawled pages.
     private boolean distributed; // if true, the underlying pagedb will be distributed.
     private PageCatcher pageCatcher = null;
-    private ClusterableListener clusteringListener;
+    private NodeListener clusteringListener;
     private static UrlFilter urlFilter;
 
 
@@ -100,7 +100,7 @@ public class Crawler {
 
     	if (config.getBoolean("clustering.enable")) {
         	int port = PortUtil.getPort("clustering.rpc.crawler");
-    		clusteringListener = new ClusterableListener(port, config);
+    		clusteringListener = new NodeListener(port, config);
     		MonitorModule.addMonitorListener(clusteringListener, new CrawlerMonitoredNode(this));
     		ControllerModule.addControllerListener(clusteringListener, new ControllableImplementation());
     		clusteringListener.addModuleListener("crawlerControl", new CrawlerControllableImplementation());

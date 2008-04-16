@@ -19,7 +19,7 @@ import java.io.File;
 
 import org.apache.log4j.Logger;
 
-import com.flaptor.clusterfest.ClusterableListener;
+import com.flaptor.clusterfest.NodeListener;
 import com.flaptor.clusterfest.controlling.ControllerModule;
 import com.flaptor.clusterfest.controlling.node.ControllableImplementation;
 import com.flaptor.clusterfest.monitoring.MonitorModule;
@@ -49,7 +49,7 @@ public class CompositeSearcher implements ISearcher {
 
     private ISearcher searcher;
     private ISearcher baseSearcher;
-    private ClusterableListener clusteringListener;
+    private NodeListener clusteringListener;
     private TrafficLimitingSearcher trafficLimitingSearcher;
     
     public CompositeSearcher() {
@@ -66,7 +66,7 @@ public class CompositeSearcher implements ISearcher {
         	} else {
         	    searcherConfig.set("clustering.node.type", "searcher");
         	}
-        	clusteringListener = new ClusterableListener(port, searcherConfig);
+        	clusteringListener = new NodeListener(port, searcherConfig);
     		MonitorModule.addMonitorListener(clusteringListener, new SearcherMonitoredNode(this));
     		ControllerModule.addControllerListener(clusteringListener, new ControllableImplementation());    		
         }
