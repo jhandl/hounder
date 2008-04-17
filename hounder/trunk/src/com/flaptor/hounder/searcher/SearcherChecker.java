@@ -35,7 +35,11 @@ public class SearcherChecker implements NodeChecker{
         String exception = (String)state.getProperties().get("searcherException");
         if (exception != null) {
             sanity = Sanity.BAD;
-            remarks.add("Searcher throwing exception: " + exception);
+            if (exception.contains("No indexId active")) {
+                remarks.add("No index active");
+            } else {
+                remarks.add("Searcher throwing exception: " + exception);
+            }
         }
         return new Result(sanity, remarks);
     }

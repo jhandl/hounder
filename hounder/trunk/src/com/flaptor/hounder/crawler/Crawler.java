@@ -65,7 +65,7 @@ public class Crawler {
     private ModulesManager modules; // this holds the modules that will process the crawled pages.
     private boolean distributed; // if true, the underlying pagedb will be distributed.
     private PageCatcher pageCatcher = null;
-    private NodeListener clusteringListener;
+    private NodeListener nodeListener;
     private static UrlFilter urlFilter;
 
 
@@ -100,10 +100,11 @@ public class Crawler {
 
     	if (config.getBoolean("clustering.enable")) {
         	int port = PortUtil.getPort("clustering.rpc.crawler");
-    		clusteringListener = new NodeListener(port, config);
-    		MonitorModule.addMonitorListener(clusteringListener, new CrawlerMonitoredNode(this));
-    		ControllerModule.addControllerListener(clusteringListener, new ControllableImplementation());
-    		clusteringListener.addModuleListener("crawlerControl", new CrawlerControllableImplementation());
+    		nodeListener = new NodeListener(port, config);
+    		MonitorModule.addMonitorListener(nodeListener, new CrawlerMonitoredNode(this));
+    		ControllerModule.addControllerListener(nodeListener, new ControllableImplementation());
+    		nodeListener.addModuleListener("crawlerControl", new CrawlerControllableImplementation());
+    		nodeListener.start();
         }
     }
 

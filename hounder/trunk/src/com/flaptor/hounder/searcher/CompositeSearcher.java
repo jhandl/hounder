@@ -49,7 +49,7 @@ public class CompositeSearcher implements ISearcher {
 
     private ISearcher searcher;
     private ISearcher baseSearcher;
-    private NodeListener clusteringListener;
+    private NodeListener nodeListener;
     private TrafficLimitingSearcher trafficLimitingSearcher;
     
     public CompositeSearcher() {
@@ -66,9 +66,10 @@ public class CompositeSearcher implements ISearcher {
         	} else {
         	    searcherConfig.set("clustering.node.type", "searcher");
         	}
-        	clusteringListener = new NodeListener(port, searcherConfig);
-    		MonitorModule.addMonitorListener(clusteringListener, new SearcherMonitoredNode(this));
-    		ControllerModule.addControllerListener(clusteringListener, new ControllableImplementation());    		
+        	nodeListener = new NodeListener(port, searcherConfig);
+    		MonitorModule.addMonitorListener(nodeListener, new SearcherMonitoredNode(this));
+    		ControllerModule.addControllerListener(nodeListener, new ControllableImplementation());
+    		nodeListener.start();
         }
 
     	if (searcherConfig.getBoolean("searcher.isMultiSearcher")) {

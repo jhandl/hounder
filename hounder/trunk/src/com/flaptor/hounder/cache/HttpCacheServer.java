@@ -68,7 +68,7 @@ class HttpCacheServer {
     public static class CacheHandler extends AbstractHandler {
         
         private MultiCache<DocumentCacheItem> multiCache;
-        private NodeListener clusterableListener;
+        private NodeListener nodeListener;
 
         StringTemplate frameTemplate;
         StringTemplate notFoundTemplate;
@@ -80,9 +80,10 @@ class HttpCacheServer {
 
         	if (config.getBoolean("clustering.enable")) {
             	int port = PortUtil.getPort("clustering.rpc.cacheServer");
-        		clusterableListener = new NodeListener(port, config);
-        		MonitorModule.addMonitorListener(clusterableListener, new CacheServerMonitoredNode(this));
-        		ControllerModule.addControllerListener(clusterableListener, new ControllableImplementation());
+        		nodeListener = new NodeListener(port, config);
+        		MonitorModule.addMonitorListener(nodeListener, new CacheServerMonitoredNode(this));
+        		ControllerModule.addControllerListener(nodeListener, new ControllableImplementation());
+        		nodeListener.start();
             }
 
         	List<Pair<String, Integer>> caches = new ArrayList<Pair<String, Integer>>();

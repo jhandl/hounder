@@ -51,7 +51,7 @@ public class Indexer implements IRmiIndexer, IIndexer, Stoppable {
     private static final Logger logger = Logger.getLogger(Execute.whoAmI());
     
     //clusterfest
-    private NodeListener clusteringListener;
+    private NodeListener nodeListener;
     private IndexerMonitoredNode indexerMonitoredNode; 
     
     /**
@@ -86,11 +86,12 @@ public class Indexer implements IRmiIndexer, IIndexer, Stoppable {
         Config config = Config.getConfig("indexer.properties");
         if (config.getBoolean("clustering.enable")) {
         	int port = PortUtil.getPort("clustering.rpc.indexer");
-    		clusteringListener = new NodeListener(port, config);
+    		nodeListener = new NodeListener(port, config);
+            ControllerModule.addControllerListener(nodeListener, new ControllableImplementation());
     		indexerMonitoredNode = IndexerMonitoredNode.getInstance();
-    		MonitorModule.addMonitorListener(clusteringListener, IndexerMonitoredNode.getInstance());
-    		ControllerModule.addControllerListener(clusteringListener, new ControllableImplementation());
-    		ActionModule.setActionReceiver(clusteringListener, new IndexerActionReceiver(this));
+    		MonitorModule.addMonitorListener(nodeListener, IndexerMonitoredNode.getInstance());
+    		ActionModule.setActionReceiver(nodeListener, new IndexerActionReceiver(this));
+    		nodeListener.start();
         }
 
 
@@ -299,10 +300,10 @@ public class Indexer implements IRmiIndexer, IIndexer, Stoppable {
             }            
            
             // Stop clustering if it was enabled
-            if (null != clusteringListener) {
+            if (null != nodeListener) {
                 logger.debug("Stopping clustering listener");
-                clusteringListener.requestStop();
-                while (!clusteringListener.isStopped()) {
+                nodeListener.requestStop();
+                while (!nodeListener.isStopped()) {
                     Execute.sleep(20,logger);
                 }
                 logger.debug("clustering listener stopped.");
@@ -315,7 +316,7 @@ public class Indexer implements IRmiIndexer, IIndexer, Stoppable {
     }
 
     public NodeListener getClusteringListener() {
-        return clusteringListener;
+        return nodeListener;
     }
 
     public IndexerMonitoredNode getIndexerMonitoredNode() {
