@@ -215,10 +215,7 @@ public class NutchFetcher implements IFetcher {
                 logger.warn("The fetched url is null. Skipping page.");
                 continue;
             }
-
             com.flaptor.hounder.crawler.pagedb.Page page = null;
-            boolean emitPage = true;
-
             // reconstruct old page url form the anchors data array
             String origurl;
             String[] anchors = fle.getAnchors();
@@ -228,15 +225,16 @@ public class NutchFetcher implements IFetcher {
                 page = fetchlist.getPage(origurl);
                 if (null == page) {
                     // This should never happen.
-                    throw new IllegalStateException("Page not recognized ("+origurl+")");
+                    logger.error("Page not recognized ("+origurl+"). Skipping.");
+                    continue;
                 }
                 // Lets see if this page has a redirect.
                 String newurl = getRedirect(fo,pd);
                 if (null != newurl) {
                     // Redirect, store new url and the original page for later use.
                     redirs.put(newurl, page);
-                    emitPage = false;
-                } // if null (eaning no redirect), simply emit.
+                    continue;
+                } // if null (meaning no redirect), simply emit.
             } else {
                 // The page has no stored origurl. It was added by the fetcher, as a redir destination.
                 // At this point, we should have seen the redir pointing to this page, so we retrieve it.
@@ -244,42 +242,42 @@ public class NutchFetcher implements IFetcher {
                 if (null == page) {
                     // The destination page of a redirect was written before the starting page.
                     // According to the nutch 0.7.2 fetcher code, this is impossible.
-                    logger.error("Page not recognized ("+url+"), redirect came before original page in segment.");
+                    logger.error("Page not recognized ("+url+"), redirect came before original page in segment. Skipping.");
+                    continue;
                 }
                 origurl = page.getUrl();
                 if (!keepUrl) {
-                    // Override original url with redirected url.
-                    try {
-                        page.setUrl(url);
-                    } catch (MalformedURLException e) {
-                        logger.warn("Malformed redirect url. Skipping page.",e);
-                    }
+                	// Override original url with redirected url.
+                	try {
+                		page.setUrl(url);
+                	} catch (MalformedURLException e) {
+                		logger.warn("Malformed redirect url ("+url+"). Skipping.");
+                		continue;
+                	}
                 }
             }
 
-            if (emitPage) {
-                boolean changed = true; // nutch ignores the server change status of the page.
-                boolean success = success(fo);
-                boolean recoverable = recoverable(fo);
+            boolean changed = true; // nutch ignores the server change status of the page.
+            boolean success = success(fo);
+            boolean recoverable = recoverable(fo);
 
-                // parse java.util.Properties, inserting lowercased keys on header map.
-                Map<String,String> header = new HashMap<String,String>();
-                Map<Object,Object> props = cnt.getMetadata();
-                for (Object key: props.keySet()) {
-                    String value = (String)props.get(key);
-                    header.put(((String)key).toLowerCase(),value);
-                }
-
-                FetchDocument doc = new FetchDocument(page,
-                        url,
-                        cnt.getContent(),
-                        header,
-                        success,
-                        recoverable,
-                        changed);
-
-                fetchdata.addDoc(doc);
+            // parse java.util.Properties, inserting lowercased keys on header map.
+            Map<String,String> header = new HashMap<String,String>();
+            Map<Object,Object> props = cnt.getMetadata();
+            for (Object key: props.keySet()) {
+            	String value = (String)props.get(key);
+            	header.put(((String)key).toLowerCase(),value);
             }
+
+            FetchDocument doc = new FetchDocument(page,
+            		url,
+            		cnt.getContent(),
+            		header,
+            		success,
+            		recoverable,
+            		changed);
+
+            fetchdata.addDoc(doc);
 
         }
         sr.close();

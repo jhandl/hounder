@@ -140,28 +140,42 @@ public class HtmlParser {
 
     // This method tries to create an URI from a possibly malformed url.
     private static URI getURI(String url) throws URISyntaxException {
-        URI uri = null;
-        int p = url.indexOf('?');
-        if (p < 0) {
-            uri = new URI(url.trim().replace(" ", "%20"));
-        } else {
-            int q = url.lastIndexOf('#');
-            if (q < 0) q = url.length();
-            String base = url.substring(0,p+1);
-            String query = url.substring(p+1,q);
-            String fragment = url.substring(q);
-            // Encode any space in the url. Can't use a url encoder because it would encode stuff like '/' and ':'.
-            base = base.replace(" ", "%20");
-            try {
-                // Re-encode the query part, to handle partially encoded urls.
-                query = java.net.URLEncoder.encode(java.net.URLDecoder.decode(query,"UTF-8"),"UTF-8");
-                query = query.replace("%3D","=").replace("%26","&");
-            } catch (java.io.UnsupportedEncodingException e) {
-                logger.error("encoding a url", e);
-            }
-            url = base + query;
-            uri = new URI(url.trim());
-        }
+    	URI uri = null;
+    	url = url.trim();
+    	if (url.startsWith("file:") || url.startsWith("javascript:")) {
+    		logger.debug("Can't handle url: "+url);
+    	} else {
+    		int p = url.indexOf('?');
+    		if (p < 0) {
+    			try {
+    				uri = new URI(url.replace(" ", "%20"));
+    			} catch (java.net.URISyntaxException e) {
+    				logger.debug("Malformed URI: "+url);
+    			}
+    		} else {
+    			String base, query;
+    			int q = url.lastIndexOf('#');
+    			if (q < 0) q = url.length();
+    			if (p < q) { 
+    				base = url.substring(0,p+1);
+    				query = url.substring(p+1,q);
+    			} else {
+    				base = url.substring(0,q)+"?";
+    				query = url.substring(p+1);
+    			}            
+    			// Encode any space in the url. Can't use a url encoder because it would encode stuff like '/' and ':'.
+    			base = base.replace(" ", "%20");
+    			try {
+    				// Re-encode the query part, to handle partially encoded urls.
+    				query = java.net.URLEncoder.encode(java.net.URLDecoder.decode(query,"UTF-8"),"UTF-8");
+    				query = query.replace("%3D","=").replace("%26","&");
+    			} catch (java.io.UnsupportedEncodingException e) {
+    				logger.debug("encoding a url", e);
+    			}
+    			url = base + query;
+    			uri = new URI(url);
+    		}
+    	}
         return uri;
     }
 
@@ -215,13 +229,15 @@ public class HtmlParser {
 
         public void addLink(String url, String anchor) throws URISyntaxException {
             URI target = getURI(url);
-            if (null != baseUri) {
-                if (baseUri.getPath() == null || baseUri.getPath().length() == 0) {
-                    baseUri = baseUri.resolve(URI.create("/"));
-                }
-                target = baseUri.resolve(target);
+            if (null != target) {
+            	if (null != baseUri) {
+            		if (baseUri.getPath() == null || baseUri.getPath().length() == 0) {
+            			baseUri = baseUri.resolve(URI.create("/"));
+            		}
+            		target = baseUri.resolve(target);
+            	}
+            	links.add(new Pair<String,String>(target.toString(),anchor.trim()));
             }
-            links.add(new Pair<String,String>(target.toString(),anchor.trim()));
         }
 
         public void setTitle(String title) {
@@ -281,7 +297,7 @@ public class HtmlParser {
                 org.xml.sax.InputSource inputSource = new org.xml.sax.InputSource(new java.io.ByteArrayInputStream(content.getBytes()));
                 parser.parse(inputSource);
             } catch (Exception e) {
-                logger.warn("Exception while trying to parse ["+content+"]");
+                logger.debug("Exception while trying to parse ["+content+"]");
                 throw e;
             }
             DOMReader reader = new DOMReader();
@@ -336,7 +352,7 @@ public class HtmlParser {
                 try {
                     out.addLink(href.getValue(), link.getText());
                 } catch (Exception e) {
-                    logger.warn("Exception occurred, ignoring link " + 
+                    logger.debug("Exception occurred, ignoring link " + 
                             link.getText() + " at " + href.getValue(), e);
                 }
             }
@@ -357,7 +373,7 @@ public class HtmlParser {
                     Element el = (Element)next;
                     extractText(el,out,field);
                 } else {
-                    logger.warn("xpath " + xpath + " selected some nodes of unknown type (" + next.getClass().getName() + " )");
+                    logger.debug("xpath " + xpath + " selected some nodes of unknown type (" + next.getClass().getName() + " )");
                 } 
             }
         
@@ -384,7 +400,7 @@ public class HtmlParser {
                     Node separator= DOMDocumentFactory.getInstance().createText(SEPARATOR);
                     node.add(separator);
                 } catch (Exception e) {
-                    logger.warn("Ignoring exception, not appending at " + node.getPath());
+                    logger.debug("Ignoring exception, not appending at " + node.getPath());
                     continue;
                 }
             }
@@ -401,7 +417,7 @@ public class HtmlParser {
             try {
                 node.detach();
             }catch (Exception e) {
-                logger.warn("Ignoring exception", e);
+                logger.debug("Ignoring exception", e);
             }
         }        
     }

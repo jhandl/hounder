@@ -38,11 +38,13 @@ public class Idx {
 
     private static void check (boolean ok, String msg) {
         if (!ok) {
-            String usage = "\n  usage:\n    Idx create <idxDir> <inputfile>\n" +
+            String usage = "\n    Idx create <idxDir> <inputfile>\n" +
             "    Idx list <idxDir> [<limit>]\n" +
-            "    Idx search <idxDir> <term> <query>\n" +
+            "    Idx search <idxDir> <field> <query>\n" +
             "    Idx optimize <idxDir>\n" +
+            "    Idx merge <idxDirDest> <idxDirSource>\n" +
             "    Idx term-count <idxDir> <field>\n" +
+            "    Idx hit-count <idxDir> <field> <query>\n" +
             "    Idx terms <idxDir> <field>\n" +
             "    Idx uncompound <idxDir>\n" +
             "    Idx compound <idxDir>\n" +
@@ -112,6 +114,16 @@ public class Idx {
             IndexWriter writer = new IndexWriter(idx, new StandardAnalyzer(), false);
             writer.optimize();
             writer.close();
+        } else if ("merge".equals(cmd)) {
+            check(arg.length == 3, "not enough parameters");
+            File idx2 = new File(arg[2]);
+            check(idx.exists(), "Index dir 1 not found");
+            check(idx2.exists(), "Index dir 2 not found");
+            IndexReader reader = IndexReader.open(idx2);
+            IndexWriter writer = new IndexWriter(idx, new StandardAnalyzer(), false);
+            writer.addIndexes(new IndexReader[] {reader});
+            writer.close();
+            reader.close();
         } else if ("term-count".equals(cmd)) {
             check(arg.length == 3, "not enough parameters");
             check(idx.exists(), "Index dir not found");
@@ -126,6 +138,15 @@ public class Idx {
             terms.close();
             reader.close();
             System.out.println("Found " + count + " different values for field " + field);
+        } else if ("hit-count".equals(cmd)) {
+            check(arg.length > 3, "Not enough arguments");
+            check(idx.exists(), "Index dir not found");
+            String field = arg[2];
+            String query = arg[3];
+            IndexSearcher searcher = new IndexSearcher(IndexReader.open(idx));
+            Hits hits = searcher.search(new TermQuery(new Term(field, query)));
+            System.out.println("\nNumber of hits: "+hits.length()+"\n");
+            searcher.close();
         } else if ("uncompound".equals(cmd)) {
             IndexWriter writer = new IndexWriter(idx, new StandardAnalyzer(), false);
             writer.setUseCompoundFile(false);
