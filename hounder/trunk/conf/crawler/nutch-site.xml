@@ -91,7 +91,7 @@
 
   <property>
     <name>plugin.includes</name>
-    <value>nutch-extensionpoints|protocol-http|urlfilter-regex|parse-(text|html|msword|pdf|rss)|index-(basic|more)|query-(basic|site|url)</value>
+    <value>nutch-extensionpoints|protocol-http|urlfilter-regex|parse-(text|html)|index-(basic|more)|query-(basic|site|url)</value>
   </property>
 
 <!--
