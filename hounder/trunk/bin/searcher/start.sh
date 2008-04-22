@@ -38,7 +38,7 @@ if ./status.sh | grep -q "is running"
 then
 	RMI=`${GET_PORT} getPort searcher.rmi`
 	XMLRPC=`${GET_PORT} getPort searcher.xml`
-	WEB=`${GET_PORT} getPort searcher.xml`
+	WEB=`${GET_PORT} getPort searcher.webOpenSearch`
 
     echo
     echo    Searcher started, listening:
