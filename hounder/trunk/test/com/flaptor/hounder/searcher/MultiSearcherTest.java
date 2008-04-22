@@ -52,7 +52,7 @@ public class MultiSearcherTest extends TestCase {
     private List<ISearcher> searchers; 
     private List<Indexer> indexers;
     private List<String> tmpDirs;
-    private MultiExecutor<Void> executor = new MultiExecutor<Void>(10, "testMultiSearcher");
+    private MultiExecutor<Void> executor = new MultiExecutor<Void>(20, "testMultiSearcher");
     
     public void setUp() {
         Config.getConfig("searcher.properties").set("multiSearcher.workerThreads", "10");
@@ -213,17 +213,18 @@ public class MultiSearcherTest extends TestCase {
 
         
         //now check through multiSearcher
-
         Config.getConfig("multiSearcher.properties").set("multiSearcher.hosts", hosts);
 
         final ISearcher multiSearcher = new MultiSearcher();
+        Thread.sleep(5000);
+        
         Execution<Void> execution = new Execution<Void>();
         for (int times = 0; times < 50; times++) {
             execution.addTask(new Callable<Void>() {
                 public Void call() throws Exception {
                     GroupedSearchResults gsr = multiSearcher.search(new MatchAllQuery(),0,docsPerSearcher*numServers,new StoredFieldGroup("group"),docsPerGroup,null,null);
                     
-                    assertEquals("Not the same count of groups.", docsPerSearcher / docsPerGroup, gsr.groups());
+                    if (docsPerSearcher / docsPerGroup != gsr.groups()) throw new Exception("Not the same count of groups.");
                     
                     for (int i = 0; i < gsr.groups(); i++) {
                         if (docsPerGroup != gsr.getGroup(i).last().size()) {
