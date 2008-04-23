@@ -37,7 +37,7 @@ public class SpamDetectorModule extends ATrueFalseModule {
 	 */
     public SpamDetectorModule (String name, Config globalConfig) throws IOException {
         super(name, globalConfig);
-        maxTitleLength = config.getInt("max.title.length");
+        maxTitleLength = getModuleConfig().getInt("max.title.length");
     }
     
     //    @Override

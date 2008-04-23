@@ -47,7 +47,7 @@ public abstract class AProcessorModule implements IProcessorModule {
      */
     protected HashSet<String> passThroughOnMissingTags;
 
-    protected final Config config;      // The config for the module.
+    private Config moduleConfig;      // The config for the module.
     protected final String moduleName;  // The name of the module.
 
     protected final String IS_HOTSPOT_TAG;
@@ -75,7 +75,7 @@ public abstract class AProcessorModule implements IProcessorModule {
         EMIT_DOC_TAG = globalConfig.getString("emitdoc.tag");
         
         moduleName = name;
-        config = Config.getConfig(name + "Module.properties");
+        moduleConfig = Config.getConfig(name + "Module.properties");
 
         // Set pass through on tags. read from config
         passThroughOnTags = loadTags("pass.through.on.tags");        
@@ -126,7 +126,7 @@ public abstract class AProcessorModule implements IProcessorModule {
     protected HashSet<String> loadTags(String strTag) {
         HashSet<String> set= new HashSet<String>();
         String[] tags;
-        tags= config.getStringArray(strTag);
+        tags= moduleConfig.getStringArray(strTag);
         logger.debug(strTag + ": " + tags);        
         for (String tag: tags) {
             tag = tag.trim();
@@ -155,5 +155,15 @@ public abstract class AProcessorModule implements IProcessorModule {
     @Override
     public String toString() {
         return getClass().getName() + ":" + getModuleName();
+    }
+
+
+    protected Config getModuleConfig() {
+        return moduleConfig;
+    }
+
+
+    protected void setModuleConfig(Config moduleConfig) {
+        this.moduleConfig = moduleConfig;
     }
 }

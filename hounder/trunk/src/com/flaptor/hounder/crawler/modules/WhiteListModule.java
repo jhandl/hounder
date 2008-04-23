@@ -39,7 +39,7 @@ public class WhiteListModule extends ATrueFalseModule {
 	 */
     public WhiteListModule (String name, Config globalConfig) throws IOException{
         super(name, globalConfig);
-        patterns = new UrlPatterns(config.getString("whitelist.file"));
+        patterns = new UrlPatterns(getModuleConfig().getString("whitelist.file"));
     }
     
     @Override

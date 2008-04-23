@@ -37,14 +37,15 @@ public class TimeAttributesModule extends AProcessorModule {
 
     public TimeAttributesModule (String moduleName, Config globalConfig) {
         super(moduleName, globalConfig);
-        modifiedDay     = config.getBoolean("modification.day");
-        modifiedHour    = config.getBoolean("modification.hour");
-        modifiedMinute  = config.getBoolean("modification.minute");
-        modifiedLong    = config.getBoolean("modification.long");
-        fetchedDay      = config.getBoolean("fetch.day");
-        fetchedHour     = config.getBoolean("fetch.hour");
-        fetchedMinute   = config.getBoolean("fetch.minute");
-        fetchedLong     = config.getBoolean("fetch.long");
+        Config mdlConfig = getModuleConfig();
+        modifiedDay     = mdlConfig.getBoolean("modification.day");
+        modifiedHour    = mdlConfig.getBoolean("modification.hour");
+        modifiedMinute  = mdlConfig.getBoolean("modification.minute");
+        modifiedLong    = mdlConfig.getBoolean("modification.long");
+        fetchedDay      = mdlConfig.getBoolean("fetch.day");
+        fetchedHour     = mdlConfig.getBoolean("fetch.hour");
+        fetchedMinute   = mdlConfig.getBoolean("fetch.minute");
+        fetchedLong     = mdlConfig.getBoolean("fetch.long");
     }
     
     @Override

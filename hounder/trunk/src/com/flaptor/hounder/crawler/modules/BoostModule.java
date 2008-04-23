@@ -40,25 +40,26 @@ public class BoostModule extends AProcessorModule {
     public BoostModule (String moduleName, Config globalConfig) {
         super(moduleName, globalConfig);
             ABoostCondition.Type conditionType = null ;
-            String conditionString = config.getString("boost.condition");
+            Config mdlConfig = getModuleConfig();
+            String conditionString = mdlConfig.getString("boost.condition");
             if ("url".equals(conditionString)) conditionType = ABoostCondition.Type.UrlPattern;
             if ("keyword".equals(conditionString)) conditionType = ABoostCondition.Type.Keyword;
             if ("urlandkeyword".equals(conditionString)) conditionType = ABoostCondition.Type.UrlPatternAndKeyword;
-            condition = ABoostCondition.getBoostCondition(config,conditionType);
+            condition = ABoostCondition.getBoostCondition(mdlConfig,conditionType);
 
             ABoostMethod.Type methodType = null;
-            String methodString = config.getString("boost.method");
+            String methodString = mdlConfig.getString("boost.method");
             if ("doc".equals(methodString)) methodType = ABoostMethod.Type.Doc;
             if ("field".equals(methodString)) methodType = ABoostMethod.Type.Field;
             if ("keyword".equals(methodString)) methodType = ABoostMethod.Type.Keyword;
-            method = ABoostMethod.getBoostMethod(config,methodType);
+            method = ABoostMethod.getBoostMethod(mdlConfig,methodType);
 
             ABoostValue.Type valueType = null;
             valueType = ABoostValue.Type.None;
-            String valueString = config.getString("boost.value");
+            String valueString = mdlConfig.getString("boost.value");
             if ("constant".equals(valueString)) valueType = ABoostValue.Type.Constant;
             if ("attribute".equals(valueString)) valueType = ABoostValue.Type.Attribute;
-            value = ABoostValue.getBoostValue(config,valueType);
+            value = ABoostValue.getBoostValue(mdlConfig,valueType);
 
             booster = new Booster(condition,value,method);
     }

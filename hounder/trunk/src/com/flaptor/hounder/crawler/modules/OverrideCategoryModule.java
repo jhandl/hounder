@@ -38,7 +38,7 @@ public class OverrideCategoryModule extends AProcessorModule {
 
     public OverrideCategoryModule(String moduleName, Config globalConfig) {
         super(moduleName, globalConfig);
-        overridableCategories = config.getStringArray("categories.order");
+        overridableCategories = getModuleConfig().getStringArray("categories.order");
         if (0 == overridableCategories.length) {
             String error = "Instantiated without categories to override";
             logger.error(error);

@@ -52,7 +52,7 @@ public class CrawlStatsModule extends AProcessorModule {
 
     public CrawlStatsModule(String moduleName, Config globalConfig) {
         super(moduleName, globalConfig);
-        outDir = new File (config.getString("output.directory"));
+        outDir = new File (getModuleConfig().getString("output.directory"));
         if (!outDir.isDirectory()) {
             if (!outDir.mkdirs()) {
                 logger.warn("could not create directory " + outDir + ", will log stats as warnings instead of dumping them to a file");

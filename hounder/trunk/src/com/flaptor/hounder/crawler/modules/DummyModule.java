@@ -32,7 +32,7 @@ public class DummyModule extends AProcessorModule {
     
     public DummyModule (String name, Config globalConfig) throws IOException{
         super(name, globalConfig);
-        echoMessage = config.getString("echo.message");
+        echoMessage = getModuleConfig().getString("echo.message");
     }
     
     public void internalProcess (FetchDocument doc) {

@@ -69,7 +69,7 @@ public abstract class AThresholdModule extends AProcessorModule {
         if (null == name || "".equals(name)) {
             throw new IllegalArgumentException("Illegal module name");
         }
-        thresholdValue=  new Double (config.getFloat("threshold.value"));
+        thresholdValue=  new Double (getModuleConfig().getFloat("threshold.value"));
         onBelowSetTags=    loadTags("on.below.threshold.set.tags");
         onBelowUnsetTag=  loadTags("on.below.threshold.unset.tags");
         onAboveSetTag=   loadTags("on.above.threshold.set.tags");

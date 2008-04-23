@@ -38,11 +38,12 @@ public class CacheModule extends AProcessorModule {
     
     public CacheModule (String moduleName, Config globalConfig) {
         super(moduleName, globalConfig);
-        String textDir = config.getString("text.cache.dir");
+        Config mdlConfig = getModuleConfig();
+        String textDir = mdlConfig.getString("text.cache.dir");
         if (textDir.length() > 0) {
             textCache = new FileCache<String>(textDir);
         }
-        String pageDir = config.getString("page.cache.dir");
+        String pageDir = mdlConfig.getString("page.cache.dir");
         if (pageDir.length() > 0) {
             pageCache = new FileCache<DocumentCacheItem>(pageDir);
         }

@@ -51,10 +51,11 @@ public class LoggerModule extends AProcessorModule {
         attributesToLog = loadTags("attributes.to.log");
         tagsToLog = loadTags("tags.to.log");
         categoriesToLog = loadTags("categories.to.log");
-        logText= config.getBoolean("log.text");
-        logEmmited= config.getBoolean("log.emmited");
+        Config mdlConfig = getModuleConfig();
+        logText= mdlConfig.getBoolean("log.text");
+        logEmmited= mdlConfig.getBoolean("log.emmited");
 
-        String outputFileName= config.getString("log.file.name");
+        String outputFileName= mdlConfig.getString("log.file.name");
 
         if (null == outputFileName || 0 == outputFileName.length() ||
                 outputFileName.equalsIgnoreCase("stderr")){

@@ -78,8 +78,9 @@ public class OutLinksCountryModule extends AThresholdModule {
         super(name, globalConfig);
         String sitesFile;
         
-        regexp[OUTLINKS_1]= config.getString("outlinks.sites.regexp.1").trim();
-        sitesFile= config.getString("outlinks.sites.file.1");
+        Config mdlConfig = getModuleConfig();
+        regexp[OUTLINKS_1]= mdlConfig.getString("outlinks.sites.regexp.1").trim();
+        sitesFile= mdlConfig.getString("outlinks.sites.file.1");
         knownSites[OUTLINKS_1]= new HashSet<String>();
         if (null == sitesFile || "".equals(sitesFile)) {
             logger.warn("There is no outlinks.sites.file.1 file defined.");
@@ -88,8 +89,8 @@ public class OutLinksCountryModule extends AThresholdModule {
             FileUtil.fileToSet(null, sitesFile, knownSites[OUTLINKS_1],logger);
         } 
 
-        regexp[OUTLINKS_2]= config.getString("outlinks.sites.regexp.2").trim();
-        sitesFile= config.getString("outlinks.sites.file.2");
+        regexp[OUTLINKS_2]= mdlConfig.getString("outlinks.sites.regexp.2").trim();
+        sitesFile= mdlConfig.getString("outlinks.sites.file.2");
         knownSites[OUTLINKS_2]= new HashSet<String>();
         if (null == sitesFile || "".equals(sitesFile)) {
             logger.warn("There is no outlinks.sites.file.2 file defined.");
@@ -98,8 +99,8 @@ public class OutLinksCountryModule extends AThresholdModule {
             FileUtil.fileToSet(null, sitesFile, knownSites[OUTLINKS_2],logger);
         }
 
-        regexp[OUTLINKS_IGNORE]= config.getString("outlinks.sites.regexp.ignore").trim();
-        sitesFile= config.getString("outlinks.sites.file.ignore");
+        regexp[OUTLINKS_IGNORE]= mdlConfig.getString("outlinks.sites.regexp.ignore").trim();
+        sitesFile= mdlConfig.getString("outlinks.sites.file.ignore");
         knownSites[OUTLINKS_IGNORE]= new HashSet<String>();
         if (null == sitesFile || "".equals(sitesFile)) {
             logger.warn("There is no outlinks.sites.file.ignore file defined.");

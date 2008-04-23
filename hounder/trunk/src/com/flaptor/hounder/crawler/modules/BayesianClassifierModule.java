@@ -48,11 +48,12 @@ public class BayesianClassifierModule extends AThresholdModule {
     public BayesianClassifierModule (String moduleName, Config globalConfig) {   
         super(moduleName, globalConfig);
         textLengthLimit = globalConfig.getInt("page.text.max.length");
-        String categoryList = config.getString("categories");        
+        Config mdlConfig = getModuleConfig();
+        String categoryList = mdlConfig.getString("categories");        
         if ((categoryList != null) && !"".equals(categoryList.trim())) {
             categories = categoryList.split(",");
-            double unknownTermsProbability = config.getFloat("unknown.terms.probability");
-            categoryThreshold   = config.getFloat("category.score.threshold");            
+            double unknownTermsProbability = mdlConfig.getFloat("unknown.terms.probability");
+            categoryThreshold   = mdlConfig.getFloat("category.score.threshold");            
             multiClassifier = new MultiClassifier(categories, unknownTermsProbability);
         } else { // categories is null or ""
             // It makes no sense to have a BayesianClassifierModule that 

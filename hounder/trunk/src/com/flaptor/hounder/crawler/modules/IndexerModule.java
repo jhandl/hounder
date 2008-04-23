@@ -72,23 +72,24 @@ public class IndexerModule extends AProcessorModule {
         super(moduleName, globalConfig);
         textLengthLimit = globalConfig.getInt("page.text.max.length");
         titleLengthLimit = globalConfig.getInt("page.title.max.length");
-        indexerBusyRetryTime = config.getInt("indexer.busy.retry.time");
+        Config mdlConfig = getModuleConfig();
+        indexerBusyRetryTime = mdlConfig.getInt("indexer.busy.retry.time");
         crawlName = globalConfig.getString("crawler.name");
 
-        categoryBoostDamp = weightToDamp(config.getFloat("category.boost.weight"));
-        pagerankBoostDamp = weightToDamp(config.getFloat("pagerank.boost.weight"));
-        logBoostDamp = weightToDamp(config.getFloat("log.boost.weight"));
-        freshnessBoostDamp = weightToDamp(config.getFloat("freshness.boost.weight"));
-        prepareFreshnessBoost(config.getString("freshness.times"));
-        hostStopWords = new HashSet<String>(Arrays.asList(config.getStringArray("host.stopwords")));
-        sendContent = config.getBoolean("send.content.to.indexer");
+        categoryBoostDamp = weightToDamp(mdlConfig.getFloat("category.boost.weight"));
+        pagerankBoostDamp = weightToDamp(mdlConfig.getFloat("pagerank.boost.weight"));
+        logBoostDamp = weightToDamp(mdlConfig.getFloat("log.boost.weight"));
+        freshnessBoostDamp = weightToDamp(mdlConfig.getFloat("freshness.boost.weight"));
+        prepareFreshnessBoost(mdlConfig.getString("freshness.times"));
+        hostStopWords = new HashSet<String>(Arrays.asList(mdlConfig.getStringArray("host.stopwords")));
+        sendContent = mdlConfig.getBoolean("send.content.to.indexer");
 
         // instantiate the indexer.
-        if (config.getBoolean("use.mock.indexer")) {
+        if (mdlConfig.getBoolean("use.mock.indexer")) {
             logger.warn("Using a mock indexer. This should be used only for testing.");
             this.indexer = new MockIndexer();
         } else {
-        	Pair<String, Integer> host = PortUtil.parseHost(config.getString("remoteRmiIndexer.host"), "indexer.rmi");
+        	Pair<String, Integer> host = PortUtil.parseHost(mdlConfig.getString("remoteRmiIndexer.host"), "indexer.rmi");
             this.indexer = new RmiIndexerStub(host.last(), host.first());
         }        
     }

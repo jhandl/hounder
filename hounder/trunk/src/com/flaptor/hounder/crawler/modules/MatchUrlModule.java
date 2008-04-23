@@ -39,7 +39,7 @@ public class MatchUrlModule extends ATrueFalseModule {
 	 */
     public MatchUrlModule (String name, Config globalConfig) throws IOException{
         super(name, globalConfig);
-        String filename = config.getString("url.pattern.file");
+        String filename = getModuleConfig().getString("url.pattern.file");
         String filepath = FileUtil.getFilePathFromClasspath(filename);
         patterns = new UrlPatterns(filepath); // TODO: hotspots should be singleton, otherwise we have two copies in ram.
     }

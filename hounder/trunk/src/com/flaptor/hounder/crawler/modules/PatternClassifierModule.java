@@ -51,7 +51,7 @@ public class PatternClassifierModule extends ATrueFalseModule {
      */
     public PatternClassifierModule(String moduleName,Config globalConfig) {
         super(moduleName, globalConfig);
-        String filename = config.getString("patterns.file");
+        String filename = getModuleConfig().getString("patterns.file");
         if (null == filename || "".equals(filename)) {
             String error = "Invalid patterns.file filename.";
             error += " PatternClassifier can not work without a patterns file.";

@@ -51,7 +51,7 @@ public class CacheWithHistoryModule extends CacheModule {
 
     public CacheWithHistoryModule (String moduleName, Config globalConfig) {
         super(moduleName, globalConfig);
-        String dateDir = config.getString("date.cache.dir");
+        String dateDir = getModuleConfig().getString("date.cache.dir");
         dateCache= new FileCache<SortedMap<Long,Long>>(dateDir);
     }
     
