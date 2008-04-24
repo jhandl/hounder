@@ -87,10 +87,10 @@ public class Indexer implements IRmiIndexer, IIndexer, Stoppable {
         if (config.getBoolean("clustering.enable")) {
         	int port = PortUtil.getPort("clustering.rpc.indexer");
     		nodeListener = new NodeListener(port, config);
-            ControllerModule.addControllerListener(nodeListener, new ControllableImplementation());
+            ControllerModule.addModuleListener(nodeListener, new ControllableImplementation());
     		indexerMonitoredNode = IndexerMonitoredNode.getInstance();
-    		MonitorModule.addMonitorListener(nodeListener, IndexerMonitoredNode.getInstance());
-    		ActionModule.setActionReceiver(nodeListener, new IndexerActionReceiver(this));
+    		MonitorModule.addModuleListener(nodeListener, IndexerMonitoredNode.getInstance());
+    		ActionModule.addModuleListener(nodeListener, new IndexerActionReceiver(this));
     		nodeListener.start();
         }
 

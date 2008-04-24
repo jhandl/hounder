@@ -101,8 +101,8 @@ public class Crawler {
     	if (config.getBoolean("clustering.enable")) {
         	int port = PortUtil.getPort("clustering.rpc.crawler");
     		nodeListener = new NodeListener(port, config);
-    		MonitorModule.addMonitorListener(nodeListener, new CrawlerMonitoredNode(this));
-    		ControllerModule.addControllerListener(nodeListener, new ControllableImplementation());
+    		MonitorModule.addModuleListener(nodeListener, new CrawlerMonitoredNode(this));
+    		ControllerModule.addModuleListener(nodeListener, new ControllableImplementation());
     		nodeListener.addModuleListener("crawlerControl", new CrawlerControllableImplementation());
     		nodeListener.start();
         }

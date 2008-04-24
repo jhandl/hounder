@@ -81,8 +81,8 @@ class HttpCacheServer {
         	if (config.getBoolean("clustering.enable")) {
             	int port = PortUtil.getPort("clustering.rpc.cacheServer");
         		nodeListener = new NodeListener(port, config);
-        		MonitorModule.addMonitorListener(nodeListener, new CacheServerMonitoredNode(this));
-        		ControllerModule.addControllerListener(nodeListener, new ControllableImplementation());
+        		MonitorModule.addModuleListener(nodeListener, new CacheServerMonitoredNode(this));
+        		ControllerModule.addModuleListener(nodeListener, new ControllableImplementation());
         		nodeListener.start();
             }
 

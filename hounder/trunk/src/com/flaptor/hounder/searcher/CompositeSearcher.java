@@ -67,8 +67,8 @@ public class CompositeSearcher implements ISearcher {
         	    searcherConfig.set("clustering.node.type", "searcher");
         	}
         	nodeListener = new NodeListener(port, searcherConfig);
-    		MonitorModule.addMonitorListener(nodeListener, new SearcherMonitoredNode(this));
-    		ControllerModule.addControllerListener(nodeListener, new ControllableImplementation());
+    		MonitorModule.addModuleListener(nodeListener, new SearcherMonitoredNode(this));
+    		ControllerModule.addModuleListener(nodeListener, new ControllableImplementation());
     		nodeListener.start();
         }
 
