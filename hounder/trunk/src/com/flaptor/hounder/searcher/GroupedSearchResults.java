@@ -58,7 +58,7 @@ public final class GroupedSearchResults implements java.io.Serializable {
     @Override
     public String toString() {
         StringBuffer buf = new StringBuffer();
-        buf.append("Found ")
+        buf.append("GroupedSearchResults: Found ")
             .append(results.size())
             .append(" results.");
         int i = 0;

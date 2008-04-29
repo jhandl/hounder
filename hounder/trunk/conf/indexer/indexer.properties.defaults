@@ -65,3 +65,10 @@ HtmlParser.separatorTags=TD,TR,BR,P,LI,UL,OL,DIV,A,H1,H2,H3,H4,H5
 #
 # The format is fieldName://SOME/XPATH,otherFieldName:/SOME//OTHER[name="xpath"] .. 
 HtmlParser.extraFieldMapping=
+
+
+# Which fields format should be checked. This is a pairList ( fieldName:type,otherFieldName,otherType .. ).
+# Right now, the only supported type is long.
+# example:
+# FieldFormatChecker.fields=date:long,age:long
+FieldFormatChecker.fields=

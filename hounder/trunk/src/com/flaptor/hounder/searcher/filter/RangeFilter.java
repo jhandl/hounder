@@ -16,8 +16,6 @@ limitations under the License.
 package com.flaptor.hounder.searcher.filter;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * A filter that let pass document within a range of values.
@@ -86,11 +84,11 @@ public class RangeFilter extends AFilter implements Serializable {
 	  @inheritDoc
 	 */
 	public int hashCode() {
-		List<String> list = new ArrayList<String>(3);
-		list.add(field);
-		list.add(from);
-		list.add(to);
-		return list.hashCode();
+        int retVal = 31;
+        if (field != null) retVal ^= field.hashCode();
+        if (from  != null) retVal ^= from.hashCode();
+        if (to    != null) retVal ^= to.hashCode();
+        return retVal;
 	}
 
 }

@@ -16,7 +16,6 @@ limitations under the License.
 package com.flaptor.hounder.searcher.filter;
 
 import java.io.Serializable;
-import java.util.Vector;
 
 /**
  * A filter that filters document not matching a specific value for a specific field.
@@ -76,10 +75,10 @@ public class ValueFilter extends AFilter implements Serializable {
 	 @inheritDoc
 	*/
 	public int hashCode() {
-		Vector<Object> vec = new Vector<Object>(2);
-		vec.add(field);
-		vec.add(value);
-		return vec.hashCode();
+        if (null == field && null == value) return 17;
+        if (null == field) return value.hashCode();
+        if (null == value) return field.hashCode();
+        return field.hashCode() ^ value.hashCode();
 	}
 
 }

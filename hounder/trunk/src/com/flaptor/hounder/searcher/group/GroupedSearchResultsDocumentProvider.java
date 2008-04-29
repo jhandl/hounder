@@ -62,7 +62,7 @@ public class GroupedSearchResultsDocumentProvider implements DocumentProvider {
                     overflowList.add(new Pair<Document,Float>(docList.get(k),scoreList.get(k)));
                 }
             }
-            countedHits += gsr.get(i).totalGroupsEstimation();
+            countedHits += gsr.get(i).totalResults();
             lists.add(list);
         }
         this.totalHits = countedHits;

@@ -22,6 +22,7 @@ import org.dom4j.Document;
 import com.flaptor.util.Config;
 import com.flaptor.util.Execute;
 import com.flaptor.util.FileUtil;
+import com.flaptor.util.MonitoringKillerThread;
 import com.flaptor.util.PortUtil;
 import com.flaptor.util.remote.RmiServer;
 import com.flaptor.util.remote.XmlrpcServer;
@@ -51,6 +52,8 @@ public class MultipleRpcIndexer implements IIndexer {
             xmlrpcServer.addHandler(null, baseIndexer);
             xmlrpcServer.start();
         }
+
+        new MonitoringKillerThread(indexer,this).start();
     }
     
     public int index(Document doc) {
@@ -99,6 +102,10 @@ public class MultipleRpcIndexer implements IIndexer {
         IIndexer indexer = conf.getBoolean("isMultiIndexer") ? new MultiIndexer() : new Indexer();
         new MultipleRpcIndexer(indexer,conf.getBoolean("rmiInterface"), conf.getBoolean("xmlInterface"));
     }
+
+
+
+
 
     private class StopperThread extends Thread {
         public StopperThread() {
