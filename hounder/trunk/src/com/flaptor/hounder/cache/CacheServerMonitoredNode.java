@@ -15,7 +15,7 @@ limitations under the License.
 */
 package com.flaptor.hounder.cache;
 
-import com.flaptor.clusterfest.monitoring.node.MonitoreableImplementation;
+import com.flaptor.hounder.HounderMonitoreable;
 import com.flaptor.hounder.cache.HttpCacheServer.CacheHandler;
 
 /**
@@ -23,7 +23,7 @@ import com.flaptor.hounder.cache.HttpCacheServer.CacheHandler;
  * 
  * @author Flaptor Development Team
  */
-public class CacheServerMonitoredNode extends MonitoreableImplementation {
+public class CacheServerMonitoredNode extends HounderMonitoreable {
 
 	CacheHandler cacheHandler;
 	
@@ -33,10 +33,5 @@ public class CacheServerMonitoredNode extends MonitoreableImplementation {
 
 	public void updateProperties() {
 		super.updateProperties();
-	}
-	
-	public void updateProperty(String property) {
-		//update all for now
-		updateProperties();
 	}
 }

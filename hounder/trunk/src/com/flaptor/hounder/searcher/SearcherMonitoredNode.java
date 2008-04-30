@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.flaptor.clusterfest.monitoring.node.MonitoreableImplementation;
+import com.flaptor.hounder.HounderMonitoreable;
 import com.flaptor.hounder.searcher.group.NoGroup;
 import com.flaptor.hounder.searcher.query.LazyParsedQuery;
 import com.flaptor.util.Pair;
@@ -30,7 +31,7 @@ import com.flaptor.util.ThreadUtil;
  * 
  * @author Martin Massera
  */
-public class SearcherMonitoredNode extends MonitoreableImplementation {
+public class SearcherMonitoredNode extends HounderMonitoreable {
 
 	CompositeSearcher searcher;
 
@@ -46,16 +47,11 @@ public class SearcherMonitoredNode extends MonitoreableImplementation {
 			setProperty("maxSimultaneousQueries", String.valueOf(tls.getMaxSimultaneousQueries()));
 			setProperty("simultaneousQueries", String.valueOf(tls.getSimultaneousQueries()));
 		}
-		setProperty("queryStats", stats.getStats("searcherQuery"));
-		setProperty("cacheHit", stats.getStats("cacheHit"));
-		setProperty("cacheMiss", stats.getStats("cacheMiss"));
-		setProperty("suggestQuery", stats.getStats("suggestQuery"));
-        setProperty("responseTimes", stats.getStats("responseTimes"));
 		try {
-            searcher.search(new LazyParsedQuery("testing123"), 0, 1, new NoGroup(), 1, null,null);
             setProperty("searcherException", null);
-        } catch (SearcherException e) {
-            setProperty("searcherException", e.getMessage());
+            searcher.search(new LazyParsedQuery("testing123"), 0, 1, new NoGroup(), 1, null,null);
+        } catch (Throwable t) {
+            setProperty("searcherException", t.getMessage());
         }
 		ArrayList<Pair<String,Float>> averageTimes = new ArrayList<Pair<String,Float>>();
 		for (String eventName : stats.getEvents()) {
@@ -66,18 +62,5 @@ public class SearcherMonitoredNode extends MonitoreableImplementation {
 		if (averageTimes.size() > 0) {
 			setProperty("averageTimes",averageTimes);
 		}
-	}
-
-	public static List<String> getThreadNames() {
-		List<String> ret = new ArrayList<String>();
-		for (Thread t : ThreadUtil.getLiveThreads()) {
-			ret.add(t.getName());
-		}
-		return ret;
-	}
-
-	public void updateProperty(String property) {
-		//update all for now
-		updateProperties();
 	}
 }

@@ -15,14 +15,14 @@ limitations under the License.
 */
 package com.flaptor.hounder.crawler;
 
-import com.flaptor.clusterfest.monitoring.node.MonitoreableImplementation;
+import com.flaptor.hounder.HounderMonitoreable;
 
 /**
  * implementation of MonitoredNode for monitoring a searcher
  * 
  * @author Martin Massera
  */
-public class CrawlerMonitoredNode extends MonitoreableImplementation {
+public class CrawlerMonitoredNode extends HounderMonitoreable {
 
 	Crawler crawler;
 	
@@ -32,10 +32,5 @@ public class CrawlerMonitoredNode extends MonitoreableImplementation {
 
 	public void updateProperties() {
 		super.updateProperties();
-	}
-	
-	public void updateProperty(String property) {
-		//update all for now
-		updateProperties();
 	}
 }

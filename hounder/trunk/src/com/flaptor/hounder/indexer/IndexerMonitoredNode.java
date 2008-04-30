@@ -16,38 +16,21 @@ limitations under the License.
 package com.flaptor.hounder.indexer;
 
 import com.flaptor.clusterfest.monitoring.node.MonitoreableImplementation;
+import com.flaptor.hounder.HounderMonitoreable;
 import com.flaptor.util.Statistics;
 
 /**
  * implementation of MonitoredNode for monitoring a searcher
  * @author Flaptor Development Team
  */
-public class IndexerMonitoredNode extends MonitoreableImplementation {
-
-	IIndexer indexer;
-    Statistics statistics = Statistics.getStatistics();
-
+public class IndexerMonitoredNode extends HounderMonitoreable {
 
     private static final IndexerMonitoredNode INSTANCE = new IndexerMonitoredNode();
-
-
     public static IndexerMonitoredNode getInstance() {
         return INSTANCE;
     }
 
-    /*
-	public IndexerMonitoredNode(IIndexer indexer) {
-		this.indexer = indexer;
-	}
-    */
-
 	public void updateProperties() {
 		super.updateProperties();
-        properties.put(Indexer.DOCUMENT_ENQUEUED, statistics.getStats(Indexer.DOCUMENT_ENQUEUED));
-	}
-	
-	public void updateProperty(String property) {
-		//update all for now
-		updateProperties();
 	}
 }

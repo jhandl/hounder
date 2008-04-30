@@ -21,6 +21,7 @@ import java.util.List;
 import com.flaptor.clusterfest.monitoring.MonitorNodeDescriptor;
 import com.flaptor.clusterfest.monitoring.NodeChecker;
 import com.flaptor.clusterfest.monitoring.NodeState;
+import com.flaptor.util.Statistics;
 
 /**
  * Checker for cacheServer node type
@@ -30,6 +31,8 @@ import com.flaptor.clusterfest.monitoring.NodeState;
 public class CacheServerChecker implements NodeChecker{
 
 	public NodeChecker.Result checkNode(MonitorNodeDescriptor node, NodeState state) {
+        Statistics statistics = (Statistics)state.getProperties().get("statistics");
+	    
 	    List<String> remarks = new ArrayList<String>();
 	    remarks.add("This is a stub checker, please write a sanity checker for this type of node.");
 	    return new Result(Sanity.GOOD, remarks);

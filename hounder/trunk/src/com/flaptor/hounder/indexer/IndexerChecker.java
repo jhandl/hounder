@@ -21,6 +21,7 @@ import java.util.List;
 import com.flaptor.clusterfest.monitoring.MonitorNodeDescriptor;
 import com.flaptor.clusterfest.monitoring.NodeChecker;
 import com.flaptor.clusterfest.monitoring.NodeState;
+import com.flaptor.util.Statistics;
 
 /**
  * Checker for indexer node type
@@ -32,6 +33,8 @@ public class IndexerChecker implements NodeChecker{
     public NodeChecker.Result checkNode(MonitorNodeDescriptor node, NodeState state) {
         Sanity sanity = Sanity.GOOD;
         List<String> remarks = new ArrayList<String>();
+        
+        Statistics statistics = (Statistics)state.getProperties().get("statistics");
         
         List<String> indexUpdateProblems = (List<String>)state.getProperties().get("indexUpdateProblems");
         if (indexUpdateProblems != null && indexUpdateProblems.size() > 0) {
