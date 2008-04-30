@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.log4j.Logger;
+import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.search.Filter;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.Query;
@@ -27,11 +28,15 @@ import org.apache.lucene.search.Sort;
 import org.apache.lucene.search.TopDocs;
 
 import com.flaptor.hounder.Index;
+import com.flaptor.hounder.searcher.filter.AFilter;
 import com.flaptor.hounder.searcher.group.AGroup;
 import com.flaptor.hounder.searcher.group.AResultsGrouper;
 import com.flaptor.hounder.searcher.group.NoGroup;
 import com.flaptor.hounder.searcher.group.TopDocsDocumentProvider;
 import com.flaptor.hounder.searcher.payload.DatePayloadScorer;
+import com.flaptor.hounder.searcher.query.AQuery;
+import com.flaptor.hounder.searcher.sort.ASort;
+import com.flaptor.hounder.util.Callbackable;
 import com.flaptor.util.Cache;
 import com.flaptor.util.Config;
 import com.flaptor.util.Execute;
@@ -83,11 +88,18 @@ final class ReloadableIndexHandler implements Stoppable {
     int currentIndexId;
     int[] errCount;
     int[] okCount;
-
+    
     // The similarity to use when compairing documents.
     // It is very useful for boosting on searchtime.
     private org.apache.lucene.search.Similarity similarity;
 
+    // Sample one every N queries
+    private int querySamplePeriod = 0;
+    private int queriesInPeriod = 0;
+    private int savedQueryindex = 0;
+    private int numberOfSavedQueries = 0;
+    private SavedQuery[] savedQueries = null;
+    
 
     /**
      * Constructor.
@@ -136,10 +148,82 @@ final class ReloadableIndexHandler implements Stoppable {
         //FIXME: This is a potential but unlikely race condition, as we are publishing "this" to another thread
         //	before the object is fully constructed (the constructor hasn't ended yet).
 
-
-
-
+        querySamplePeriod = config.getInt("Searcher.query.sample.period");
+        numberOfSavedQueries = config.getInt("Searcher.query.sample.size");
+        savedQueries = new SavedQuery[numberOfSavedQueries];
     }
+
+    
+    private class SavedQuery {
+    	Query query;
+    	Filter filter;
+    	Sort sort;
+    	int offset;
+    	int groupCount;
+    	AGroup groupBy;
+    	int groupSize;
+    	public SavedQuery(Query query, Filter filter, Sort sort, int offset, int groupCount, AGroup groupBy, int groupSize) {
+    		this.query = query;
+    		this.filter = filter;
+    		this.sort = sort;
+    		this.offset = offset;
+    		this.groupCount = groupCount;
+    		this.groupBy = groupBy;
+    		this.groupSize = groupSize;
+    	}
+    	public void replay() {
+    		try {
+				search(query, filter, sort, offset, groupCount, groupBy, groupSize);
+			} catch (Exception e) {
+				// ignore.
+			}
+    	}
+    }
+    
+	/**
+	 * Determine if the time has come to save another query 
+	 * as a sample for future use for re-heating the searcher.
+	 * @return true if it is time to take another query sample.
+	 */
+	private boolean shouldSaveQuery() {
+		boolean should = false;
+		if (querySamplePeriod > 0) {
+			queriesInPeriod++;
+			if (queriesInPeriod >= querySamplePeriod) {
+				queriesInPeriod = 0;
+				should = true;
+			}
+		}
+		return should;
+	}
+	
+	/**
+	 * Save a query for future use in re-heating the searcher after a new index has been loaded.
+	 */
+	private void saveQuery(Query query, Filter filter, Sort sort, int offset, int groupCount, AGroup groupBy, int groupSize) {
+		if (savedQueryindex >= numberOfSavedQueries) savedQueryindex = 0;
+	    savedQueries[savedQueryindex] = new SavedQuery(query, filter, sort, offset, groupCount, groupBy, groupSize);
+	    savedQueryindex++;
+	}
+	
+	/**
+	 * This method will be called whenever a new index is read.
+	 * The purpose of this is to make a search to cause the new index to be used for the first
+	 * time and avoid a user the honor of waiting for the searcher to load and prepare its 
+	 * internal (lazy) data structures. 
+	 */
+	public void executeSavedQueries() {
+        if (-1 != currentIndexId && null != savedQueries) {
+        	int savePeriod = querySamplePeriod;
+        	querySamplePeriod = 0;
+        	for (SavedQuery query : savedQueries) {
+        		if (null != query) {
+			    	query.replay();
+        		}
+        	}
+        	querySamplePeriod = savePeriod;
+		}
+	}
 
 
     /**
@@ -173,6 +257,11 @@ final class ReloadableIndexHandler implements Stoppable {
             inUse[indexId]++;
             usageCount[indexId]++;
         }
+
+     	if (shouldSaveQuery()) {
+    		saveQuery(query, filter, sort, offset, groupCount, groupBy, groupSize);
+    	}
+
         try {
             org.apache.lucene.search.Searcher searcher = indexSearchersPool[indexId].last();
             TopDocs tdocs;
@@ -331,8 +420,9 @@ final class ReloadableIndexHandler implements Stoppable {
      *             the new one. Should never happen if used properly.
      */
     public int setNewIndex(final Index newIndex) throws IOException {
-
-        IndexSearcher newIndexSearcher = new IndexSearcher(newIndex.getReader());
+    	IndexReader index = newIndex.getReader();
+    	index.terms(); // for heating the index.
+        IndexSearcher newIndexSearcher = new IndexSearcher(index);
         newIndexSearcher.setSimilarity(similarity);
         int newIndexId = getAvailableIndexId();
         if (-1 == newIndexId) {
@@ -358,9 +448,12 @@ final class ReloadableIndexHandler implements Stoppable {
         //invalidate the cache, if any
         clearCaches();
 
+ 		executeSavedQueries();
+        
         return (currentIndexId);
     }
 
+   
     /**
      * Clear the caches.
      * Invalidates all the caches, after printing statistics about their hitrate.

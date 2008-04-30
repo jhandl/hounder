@@ -67,13 +67,10 @@ public class IndexUpdatesListener implements IRemoteIndexUpdater, Stoppable {
         this.library = lib;
 
         Config config = Config.getConfig("searcher.properties");
-        this.indexDir = Config.getConfig("common.properties").getString("baseDir") + 
-        File.separator +
-        config.getString("searcher.dir") + 
-        File.separator + 
-        "indexes";
+        this.indexDir = Config.getConfig("common.properties").getString("baseDir") 
+        					+ File.separator + config.getString("searcher.dir") 
+        					+ File.separator + "indexes";
         int fetchIndexPort = PortUtil.getPort("post.new.index");
-
         server = new RmiServer(fetchIndexPort);
         server.addHandler(RmiServer.DEFAULT_SERVICE_NAME, this);
         server.start();
