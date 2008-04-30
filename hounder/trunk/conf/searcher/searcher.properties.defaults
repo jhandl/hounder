@@ -105,3 +105,8 @@ clustering.enable=true
 searcher.cachedVersion.showLink=false
 #host:baseport notation or host (using the same baseport as this installation)
 searcher.cachedVersion.cacheServerHost=
+
+# Sample period and size for re-heating the searcher after loading a new index.
+Searcher.query.sample.period = 0
+Searcher.query.sample.size = 0
+
