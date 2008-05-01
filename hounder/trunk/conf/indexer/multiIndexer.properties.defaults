@@ -1,0 +1,8 @@
+# Wheter to transform documents using XsltModule before sending them to unis.
+# If this variable is true, documents will be transformed, and after that they 
+# will be hashed. This means that if the transformation does not ensure 
+# //documentId is present on the output, an error will appear.
+multiIndexer.useXslt=no
+
+clustering.enable=yes
+clustering.node.type=multiindexer

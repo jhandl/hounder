@@ -127,6 +127,8 @@ public class MultiSearcher implements ISearcher {
                 } else {
                     badResults++;
                     logger.warn("Exception from remote searcher " +  numSearcher, result.getException());
+                    //gather stats of searcher failures
+                    Statistics.getStatistics().notifyEventError("averageTimes_"+searcherIPs.get(numSearcher));
                 }
             }
         }

@@ -23,6 +23,13 @@ import org.apache.log4j.Logger;
 import org.dom4j.Document;
 import org.dom4j.Node;
 
+import com.flaptor.clusterfest.NodeListener;
+import com.flaptor.clusterfest.action.ActionModule;
+import com.flaptor.clusterfest.controlling.ControllerModule;
+import com.flaptor.clusterfest.controlling.node.ControllableImplementation;
+import com.flaptor.clusterfest.monitoring.MonitorModule;
+import com.flaptor.hounder.HounderMonitoreable;
+import com.flaptor.hounder.indexer.clustering.IndexerActionReceiver;
 import com.flaptor.hounder.indexer.util.Hash;
 import com.flaptor.util.Config;
 import com.flaptor.util.DocumentParser;
@@ -43,7 +50,11 @@ import com.flaptor.util.RunningState;
  * @author Flaptor Development Team
  */
 public class MultiIndexer implements IRmiIndexer, IIndexer {
-    
+
+	//clusterfest
+    private NodeListener nodeListener;
+    private IndexerMonitoredNode indexerMonitoredNode; 
+
     private static final Logger logger = Logger.getLogger(Execute.whoAmI());
     protected RunningState state = RunningState.RUNNING;
     protected ArrayList<IRemoteIndexer> indexers = new ArrayList<IRemoteIndexer>();
@@ -84,6 +95,16 @@ public class MultiIndexer implements IRmiIndexer, IIndexer {
             xsltModule = null;
             logger.info("MultiIndexer will NOT be using XsltModule");
         }
+        
+        if (config.getBoolean("clustering.enable")) {
+        	int port = PortUtil.getPort("clustering.rpc.indexer");
+    		nodeListener = new NodeListener(port, config);
+            ControllerModule.addModuleListener(nodeListener, new ControllableImplementation());
+    		indexerMonitoredNode = IndexerMonitoredNode.getInstance();
+    		MonitorModule.addModuleListener(nodeListener, IndexerMonitoredNode.getInstance());
+    		nodeListener.start();
+        }
+
     }
 
 

@@ -91,7 +91,9 @@ public class CompositeSearcher implements ISearcher {
         if (searcherConfig.getBoolean("compositeSearcher.useQueriesInProgress")) {
             searcher = new QueriesInProgressSearcher(searcher);
         }
-        if (searcherConfig.getBoolean("compositeSearcher.useCache")) {
+        
+        if (searcherConfig.getBoolean("compositeSearcher.useCache") && !searcherConfig.getBoolean("searcher.isMultiSearcher")) {
+        //if it's a multiSearcher, nobody will ever flush the cache
             Cache<QueryParams, GroupedSearchResults> cache = new LRUCache<QueryParams, GroupedSearchResults>(500); //XXX TODO: make this configurable
             if (baseSearcher instanceof Searcher) {
             	((Searcher)baseSearcher).addCache(cache);
