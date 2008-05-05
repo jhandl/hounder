@@ -22,6 +22,8 @@ import org.apache.log4j.Logger;
 import com.flaptor.clusterfest.NodeListener;
 import com.flaptor.clusterfest.controlling.ControllerModule;
 import com.flaptor.clusterfest.controlling.node.ControllableImplementation;
+import com.flaptor.clusterfest.deploy.DeployListenerImplementation;
+import com.flaptor.clusterfest.deploy.DeployModule;
 import com.flaptor.clusterfest.monitoring.MonitorModule;
 import com.flaptor.hounder.cluster.MultiSearcher;
 import com.flaptor.hounder.searcher.filter.AFilter;
@@ -69,6 +71,7 @@ public class CompositeSearcher implements ISearcher {
         	nodeListener = new NodeListener(port, searcherConfig);
     		MonitorModule.addModuleListener(nodeListener, new SearcherMonitoredNode(this));
     		ControllerModule.addModuleListener(nodeListener, new ControllableImplementation());
+            DeployModule.addModuleListener(nodeListener, new DeployListenerImplementation());
     		nodeListener.start();
         }
 

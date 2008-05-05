@@ -73,7 +73,7 @@ public class CrawlerControlModule extends AbstractModule<CrawlerControlNode> imp
 	public static CrawlerControllable getCrawlerControllableProxy(XmlrpcClient xmlrpcClient) {
 		return (CrawlerControllable)XmlrpcClient.proxy("crawlerControl", CrawlerControllable.class, xmlrpcClient);	
 	}
-	public String action(String action, HttpServletRequest request) {
+	public ActionReturn action(String action, HttpServletRequest request) {
 		return null;
 	}
 	public List<String> getActions() {
@@ -93,7 +93,7 @@ public class CrawlerControlModule extends AbstractModule<CrawlerControlNode> imp
         return new ArrayList<Pair<String,String>>();
     }
 
-    public String selectedNodesAction(String action, List<NodeDescriptor> nodes, HttpServletRequest request) {
+    public ActionReturn selectedNodesAction(String action, List<NodeDescriptor> nodes, HttpServletRequest request) {
         return null;
     }
 

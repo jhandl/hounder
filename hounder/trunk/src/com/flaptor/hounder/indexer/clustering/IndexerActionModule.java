@@ -27,7 +27,7 @@ public class IndexerActionModule extends ActionModule implements WebModule {
         }
         return actions;
     }
-    public String selectedNodesAction(String action, List<NodeDescriptor> nodes, HttpServletRequest request) {
+    public ActionReturn selectedNodesAction(String action, List<NodeDescriptor> nodes, HttpServletRequest request) {
         action = action.replace("indexer.", "");
         List<Pair<NodeDescriptor,Throwable>> errors = sendAction(nodes, action, null);
         String ret;
@@ -43,7 +43,7 @@ public class IndexerActionModule extends ActionModule implements WebModule {
         for (NodeDescriptor node : nodes){
             ClusterManager.getInstance().updateAllInfo(node);
         }
-        return ret;
+        return ActionReturn.returnMessage(ret);
     } 
     public String getNodeHTML(NodeDescriptor node, int nodeNum) {
         if (isRegistered(node) && node.isReachable()) {
@@ -56,7 +56,7 @@ public class IndexerActionModule extends ActionModule implements WebModule {
     public List<String> getActions() {
         return Arrays.asList(new String[]{"indexer.checkpoint","indexer.optimize", "indexer.close"});
     }
-    public String action(String action, HttpServletRequest request) {
+    public ActionReturn action(String action, HttpServletRequest request) {
         NodeDescriptor node = ModuleUtil.getNodeFromRequest(request);
         return selectedNodesAction(action, Arrays.asList(new NodeDescriptor[]{node}), request);
     }

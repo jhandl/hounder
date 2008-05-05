@@ -26,6 +26,8 @@ import org.apache.log4j.PropertyConfigurator;
 import com.flaptor.clusterfest.NodeListener;
 import com.flaptor.clusterfest.controlling.ControllerModule;
 import com.flaptor.clusterfest.controlling.node.ControllableImplementation;
+import com.flaptor.clusterfest.deploy.DeployListenerImplementation;
+import com.flaptor.clusterfest.deploy.DeployModule;
 import com.flaptor.clusterfest.monitoring.MonitorModule;
 import com.flaptor.hounder.crawler.clustering.CrawlerControllableImplementation;
 import com.flaptor.hounder.crawler.modules.CacheModule;
@@ -104,6 +106,7 @@ public class Crawler {
     		MonitorModule.addModuleListener(nodeListener, new CrawlerMonitoredNode(this));
     		ControllerModule.addModuleListener(nodeListener, new ControllableImplementation());
     		nodeListener.addModuleListener("crawlerControl", new CrawlerControllableImplementation());
+            DeployModule.addModuleListener(nodeListener, new DeployListenerImplementation());
     		nodeListener.start();
         }
     }

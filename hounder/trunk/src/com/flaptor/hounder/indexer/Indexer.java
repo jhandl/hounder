@@ -24,6 +24,8 @@ import com.flaptor.clusterfest.NodeListener;
 import com.flaptor.clusterfest.action.ActionModule;
 import com.flaptor.clusterfest.controlling.ControllerModule;
 import com.flaptor.clusterfest.controlling.node.ControllableImplementation;
+import com.flaptor.clusterfest.deploy.DeployListenerImplementation;
+import com.flaptor.clusterfest.deploy.DeployModule;
 import com.flaptor.clusterfest.monitoring.MonitorModule;
 import com.flaptor.hounder.indexer.clustering.IndexerActionReceiver;
 import com.flaptor.util.AStoppableThread;
@@ -91,6 +93,7 @@ public class Indexer implements IRmiIndexer, IIndexer, Stoppable {
     		indexerMonitoredNode = IndexerMonitoredNode.getInstance();
     		MonitorModule.addModuleListener(nodeListener, IndexerMonitoredNode.getInstance());
     		ActionModule.addModuleListener(nodeListener, new IndexerActionReceiver(this));
+    		DeployModule.addModuleListener(nodeListener, new DeployListenerImplementation());
     		nodeListener.start();
         }
 

@@ -81,6 +81,8 @@ limitations under the License.
             <include name="velocity-deps-1.5.jar" />
             <include name="velocity-tools-1.5.jar" />
             <include name="commons-digester-1.8.jar" />
+            <include name="commons-fileupload-1.2.jar" />
+            <include name="commons-digester-1.8.jar" />
         </fileset>
     </path>
 
