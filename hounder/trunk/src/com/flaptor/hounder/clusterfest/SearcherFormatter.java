@@ -1,4 +1,4 @@
-package com.flaptor.hounder.searcher;
+package com.flaptor.hounder.clusterfest;
 
 import java.util.ArrayList;
 import com.flaptor.clusterfest.monitoring.DefaultPropertyFormatter;

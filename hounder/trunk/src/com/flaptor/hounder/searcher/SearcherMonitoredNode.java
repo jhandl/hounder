@@ -19,7 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.flaptor.clusterfest.monitoring.node.MonitoreableImplementation;
-import com.flaptor.hounder.HounderMonitoreable;
+import com.flaptor.hounder.clusterfest.HounderMonitoreable;
 import com.flaptor.hounder.searcher.group.NoGroup;
 import com.flaptor.hounder.searcher.query.LazyParsedQuery;
 import com.flaptor.util.Pair;

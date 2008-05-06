@@ -16,7 +16,7 @@ limitations under the License.
 package com.flaptor.hounder.indexer;
 
 import com.flaptor.clusterfest.monitoring.node.MonitoreableImplementation;
-import com.flaptor.hounder.HounderMonitoreable;
+import com.flaptor.hounder.clusterfest.HounderMonitoreable;
 import com.flaptor.util.Statistics;
 
 /**

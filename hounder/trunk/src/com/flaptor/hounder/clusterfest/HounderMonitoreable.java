@@ -1,4 +1,4 @@
-package com.flaptor.hounder;
+package com.flaptor.hounder.clusterfest;
 
 import java.util.Map;
 
