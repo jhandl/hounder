@@ -1,6 +1,8 @@
 package com.flaptor.hounder.clusterfest;
 
 import java.util.ArrayList;
+
+import com.flaptor.clusterfest.NodeDescriptor;
 import com.flaptor.clusterfest.monitoring.DefaultPropertyFormatter;
 import com.flaptor.clusterfest.monitoring.PropertyFormatter;
 import com.flaptor.hist4j.Cell;
@@ -14,7 +16,7 @@ public class SearcherFormatter implements PropertyFormatter {
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public String format(String name, Object value) {
+	public String format(NodeDescriptor node, String name, Object value) {
 		StringBuffer output = new StringBuffer();
 		if (name.equals("averageTimes")) {
 			ArrayList<Pair<String,Float>> averageTimes = (ArrayList<Pair<String,Float>>)value;
@@ -38,7 +40,7 @@ public class SearcherFormatter implements PropertyFormatter {
 			addStats(output,"Last",last);
 			addStats(output,"Accumulated",accum);
 		} else {
-			output.append((new DefaultPropertyFormatter()).format(name,value));
+			output.append((new DefaultPropertyFormatter()).format(node, name,value));
 		}
 		return output.toString();
 	}
