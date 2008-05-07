@@ -332,7 +332,8 @@ public class OpenSearchHandler extends AbstractHandler {
         Document dom = doQuery(request, searcher);
         String openSearchResults = DomUtil.domToString(dom);
         response.setContentType("text/xml");
-        response.setContentLength(openSearchResults.length());
+//        response.setContentLength(openSearchResults.getBytes().length); <-- failed and was replaced in version 2721
+//        response.setContentLength(openSearchResults.length()); <-- failed and was commented out in version 4408
         response.setCharacterEncoding("utf-8");
         PrintWriter pw = response.getWriter();
         pw.print(openSearchResults);
