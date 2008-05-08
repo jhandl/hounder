@@ -40,11 +40,12 @@ public class Idx {
         if (!ok) {
             String usage = "\n    Idx create <idxDir> <inputfile>\n" +
             "    Idx list <idxDir> [<limit>]\n" +
-            "    Idx search <idxDir> <field> <query>\n" +
+            "    Idx search <idxDir> <field> <value>\n" +
             "    Idx optimize <idxDir>\n" +
+            "    Idx delete <idxDir> <field> <value>\n" +
             "    Idx merge <idxDirDest> <idxDirSource>\n" +
             "    Idx term-count <idxDir> <field>\n" +
-            "    Idx hit-count <idxDir> <field> <query>\n" +
+            "    Idx hit-count <idxDir> <field> <value>\n" +
             "    Idx terms <idxDir> <field>\n" +
             "    Idx uncompound <idxDir>\n" +
             "    Idx compound <idxDir>\n" +
@@ -93,9 +94,9 @@ public class Idx {
             check(idx.exists(), "Index dir not found");
             check(arg.length>3, "Not enough arguments");
             String field = arg[2];
-            String query = arg[3];
+            String value = arg[3];
             IndexSearcher searcher = new IndexSearcher(IndexReader.open(idx));
-            Hits hits = searcher.search(new TermQuery(new Term(field, query)));
+            Hits hits = searcher.search(new TermQuery(new Term(field, value)));
             System.out.println("\nNumber of hits: "+hits.length()+"\n");
             Iterator it = hits.iterator();
             while (it.hasNext()) {
@@ -110,6 +111,14 @@ public class Idx {
             }
             searcher.close();
             System.out.println();
+        } else if ("delete".equals(cmd)) {
+            check(idx.exists(), "Index dir not found");
+            check(arg.length>3, "Not enough arguments");
+            String field = arg[2];
+            String value = arg[3];
+            IndexReader reader = IndexReader.open(idx);
+            reader.deleteDocuments(new Term(field,value));
+            reader.close();
         } else if ("optimize".equals(cmd)) {
             IndexWriter writer = new IndexWriter(idx, new StandardAnalyzer(), false);
             writer.optimize();
@@ -142,9 +151,9 @@ public class Idx {
             check(arg.length > 3, "Not enough arguments");
             check(idx.exists(), "Index dir not found");
             String field = arg[2];
-            String query = arg[3];
+            String value = arg[3];
             IndexSearcher searcher = new IndexSearcher(IndexReader.open(idx));
-            Hits hits = searcher.search(new TermQuery(new Term(field, query)));
+            Hits hits = searcher.search(new TermQuery(new Term(field, value)));
             System.out.println("\nNumber of hits: "+hits.length()+"\n");
             searcher.close();
         } else if ("uncompound".equals(cmd)) {
