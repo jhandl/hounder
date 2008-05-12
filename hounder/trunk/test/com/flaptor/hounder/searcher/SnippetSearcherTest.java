@@ -68,7 +68,7 @@ public class SnippetSearcherTest extends TestCase{
         tmpDirs = new ArrayList<String>(2);
         try {
             setUpSearcher();
-            Execute.sleep(3000);
+            Execute.sleep(10000);
         } catch (Exception e) {
             e.printStackTrace();
         }
