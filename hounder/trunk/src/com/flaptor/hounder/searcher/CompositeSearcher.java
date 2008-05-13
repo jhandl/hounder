@@ -130,6 +130,10 @@ public class CompositeSearcher implements ISearcher {
     }
     
     public GroupedSearchResults search(AQuery query, int firstResult, int count, AGroup group, int groupSize, AFilter filter, ASort sort) throws SearcherException{
+    	if (logger.isDebugEnabled()) {
+    		logger.debug("received query: "+  query + ",from: " + firstResult + ", requesting: " + count + ", grouping by:"
+    				+ group + ", with groupsize: " + groupSize + ", filtering by: " + filter + ", sorting by: " + sort);
+    	}
     	return searcher.search(query, firstResult, count, group, groupSize, filter, sort);
     }
     
