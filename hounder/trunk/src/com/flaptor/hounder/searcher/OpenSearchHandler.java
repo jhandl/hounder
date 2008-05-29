@@ -133,11 +133,15 @@ public class OpenSearchHandler extends AbstractHandler {
         // query (string)    the query string
         // start (int)       the offset of the first result
         // hitsPerPage (int) the number of results to be returned
+        // orderBy (string)  the order in which to return the results: <field>:(int|long|float)[:reverse]
+        // tz (int)	         the timezone for displaying the date
+        
         // Query String
         String queryString = getParameter(params,"query");
         if ((null == queryString) || (queryString.trim().equals(""))) {
             queryString = "";
         }
+
         // First hit to display
         int start = 0;        // Default value
         String startParam = getParameter(params, "start");
@@ -266,6 +270,17 @@ public class OpenSearchHandler extends AbstractHandler {
             }
         } 
 
+        // Timezone (uni-valued)
+        int timezone = 0;
+        String tzParam = getParameter(params, "tz");
+        if (tzParam != null) {
+        	try {
+        		timezone = Integer.parseInt(tzParam);
+        	} catch (Exception e) {
+                logger.warn("Error parsing timezone", e);        		
+        	}
+        }
+        
         String requestUrl = request.getRequestURL().toString();
         String baseUrl = requestUrl.substring(0,requestUrl.lastIndexOf('/'));
         StringBuffer extraParams = new StringBuffer();
@@ -290,6 +305,10 @@ public class OpenSearchHandler extends AbstractHandler {
                 extraParams.append("&crawl=");
                 extraParams.append(p);
             }
+        }
+        if (tzParam != null) {
+            extraParams.append("&tz=");
+            extraParams.append(tzParam);
         }
 
         GroupedSearchResults sr = null;

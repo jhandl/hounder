@@ -686,7 +686,6 @@ public class PageDB implements IPageStore {
                 PageDB pagedb = new PageDB(dir);
                 pagedb.open(READ);
                 for (Page page : pagedb) {
-                    String url = page.getUrl();
                     int distance = page.getDistance();
                     int retries = page.getRetries();
                     float priority = page.getPriority();
@@ -710,7 +709,6 @@ public class PageDB implements IPageStore {
                 }
                 System.err.println();
                 System.err.println("  stat:  size="+pagedb.getSize()+"  fetched="+pagedb.getFetchedSize()+"  failed="+pagedb.getFailedSize()+"  cycles="+pagedb.getCycles());
-                System.err.println("  real:  size="+size+"  fetched="+fetched+"  failed="+failed);
                 System.err.println();
                 for (int d=0; d<=maxDistance; d++) if (distStats[d] > 0) System.err.println("        distance "+d+": "+distStats[d]);
                 System.err.println();
@@ -719,15 +717,11 @@ public class PageDB implements IPageStore {
                 float histMin, histMax;
                 histMin = pagedb.stats.getPriorityThreshold(0);
                 histMax = pagedb.stats.getPriorityThreshold(100);
-                System.err.println("  Priority:");
-                System.err.println("      hist:   min="+histMin+"  max="+histMax);
-                System.err.println("      real:   min="+minPriority+"  max="+maxPriority);
+                System.err.println("  Priority:   min="+histMin+"  max="+histMax);
                 System.err.println();
                 histMin = pagedb.stats.getScoreThreshold(0);
                 histMax = pagedb.stats.getScoreThreshold(100);
-                System.err.println("  Score:  (sum="+pagedb.getFetchedScore()+")");
-                System.err.println("      hist:   min="+histMin+"  max="+histMax);
-                System.err.println("      real:   min="+minScore+"  max="+maxScore);
+                System.err.println("  Score:  (sum="+pagedb.getFetchedScore()+"):   min="+histMin+"  max="+histMax);
                 System.err.println();
                 pagedb.close();
 

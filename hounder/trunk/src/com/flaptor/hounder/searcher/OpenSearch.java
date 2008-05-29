@@ -51,16 +51,22 @@ public class OpenSearch {
      * map between the index-name and the opensearch name.
      * This field map the 'description' field
      */
-    private static final String descriptionField;
+    private static final String descField;
+    private static final String descPrefix;
     private static final String linkField;
+    private static final String linkPrefix;
     private static final String titleField;
+    private static final String titlePrefix;
 
     static {
         Config config = Config.getConfig("opensearch.properties");
         String[] fieldList = config.getStringArray("opensearch.show.hounder.fields");
+        titlePrefix = config.getString("opensearch.title.prefix");
         titleField = config.getString("opensearch.title.from.index.field");
+        linkPrefix = config.getString("opensearch.link.prefix");
         linkField = config.getString("opensearch.link.from.index.field");
-        descriptionField = config.getString("opensearch.description.from.index.field");    	
+        descField = config.getString("opensearch.description.from.index.field");    	
+        descPrefix = config.getString("opensearch.description.prefix");    	
         fieldsToShow.addAll(Arrays.asList(fieldList));
     }
 
@@ -101,10 +107,10 @@ public class OpenSearch {
         root.add(opensearchNs);
         root.add(hounderNs);
         Element channel = root.addElement("channel");
-        channel.addElement("title").addText("Hounder: " +DomUtil.filterXml(queryString));
+        channel.addElement("title").addText(titlePrefix+" "+DomUtil.filterXml(queryString));
         channel.addElement("link").addText(baseUrl + "/" + htmlSearcher +
                 "?query=" +encodedQuery + "&start=" + start + extraParams);
-        channel.addElement("description").addText("Hounder search results for query: " + DomUtil.filterXml(queryString));
+        channel.addElement("description").addText(descPrefix+" "+DomUtil.filterXml(queryString));
         channel.addElement(QName.get("totalResults", opensearchNs)).addText(Integer.toString(sr.totalGroupsEstimation()));
         channel.addElement(QName.get("startIndex", opensearchNs)).addText(Integer.toString(start));
         channel.addElement(QName.get("itemsPerPage", opensearchNs)).addText(Integer.toString(count));
@@ -138,16 +144,16 @@ public class OpenSearch {
 
     private static Element createAndAddElement( org.apache.lucene.document.Document doc, 
             Element parent, Namespace hounderNs){
-        String url= StringUtil.nullToEmpty(doc.get(linkField)).trim();
-        String description= StringUtil.nullToEmpty(doc.get(descriptionField)).trim();
+        String link= StringUtil.nullToEmpty(doc.get(linkField)).trim();
+        String description= StringUtil.nullToEmpty(doc.get(descField)).trim();
         String title= StringUtil.nullToEmpty(doc.get(titleField)).trim();           
         if ("".equals(title)) {
-            title=url;
+            title=link;
         }            
 
         Element item = parent.addElement("item");            
         item.addElement("title").addText(DomUtil.filterXml(title));
-        item.addElement("link").addText(DomUtil.filterXml(url));
+        item.addElement("link").addText(linkPrefix + DomUtil.filterXml(link));
         String desc = DomUtil.filterXml(description);
         item.addElement("description").addText(desc);
 
