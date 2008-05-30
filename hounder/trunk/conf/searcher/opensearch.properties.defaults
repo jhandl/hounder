@@ -17,4 +17,4 @@ opensearch.description.from.index.field= snippet_text
 # The title can have a prefix prepended to it, so it can be more readable in rss feeds
 opensearch.title.prefix = Hounder:
 opensearch.link.prefix = 
-opensearch.descripction.prefix = Hounder search results for:
+opensearch.description.prefix = Hounder search results for:
