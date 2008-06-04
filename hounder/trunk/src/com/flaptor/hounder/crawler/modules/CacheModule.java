@@ -80,7 +80,7 @@ public class CacheModule extends AProcessorModule {
             return;
         }
         DocumentCacheItem item = new DocumentCacheItem(doc.getContent(), doc.getMimeType());
-        if (null == text) {
+        if (null == item) {
             logger.warn("Document does not have the original content.");
             return;
         }
