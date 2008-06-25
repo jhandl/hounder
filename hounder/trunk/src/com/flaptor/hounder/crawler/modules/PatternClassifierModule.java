@@ -74,12 +74,13 @@ public class PatternClassifierModule extends ATrueFalseModule {
         }
         String url = page.getUrl();
 
+	
         Set<String> foundCategories = patterns.getTokens(url);
-
-        boolean foundSomething = false;
-        for (String category: foundCategories) {
-            doc.addCategory(category);
-            foundSomething = true;
+        boolean foundSomething = (null != foundCategories);
+        if (foundSomething) {
+            for (String category: foundCategories) {
+                doc.addCategory(category);
+            }
         }
 
         return foundSomething;

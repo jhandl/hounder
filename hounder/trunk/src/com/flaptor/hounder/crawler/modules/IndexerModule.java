@@ -108,7 +108,9 @@ public class IndexerModule extends AProcessorModule {
             logger.warn("Page is null. Ignoring this document.");
             return;
         }
-
+        if (logger.isDebugEnabled()) { 
+            logger.debug("Doc has tags: "+doc.getTags().toString());
+        } 
         if (doc.hasTag(EMIT_DOC_TAG)) {
             addToIndex(doc);
         } else {

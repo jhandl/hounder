@@ -260,8 +260,11 @@ public class UrlPatterns {
     }
 
 
-
+    /**
+     * Returns the tokens that the url matches, an empty set if there is a match but no token is specified, and null if there is no match.
+     */
     public synchronized Set<String> getTokens(String line) {
+        boolean matches = false;
         Set<String> tokens = new HashSet<String>(defaultTokens);
 
         line = line.toLowerCase();
@@ -272,9 +275,11 @@ public class UrlPatterns {
             for (PatternRule rule : partial.elementAt(i).getValue()) {
                 if (rule.matches(suffix)) {
                     tokens.addAll(rule.getTokens());
+                    matches = true;
                 }
             }
         }
+        if (!matches && !matchAll) tokens = null;
         return tokens;
     }
 
@@ -434,7 +439,7 @@ public class UrlPatterns {
             } else {
                 pattern = parts[1].toLowerCase().trim();
             }
-            logger.debug("only pattern: " + line);
+            logger.debug("only pattern: " + line + " pattern: "+pattern);
             return new Pair<String,PatternRule>(prefix,new OnlyPattern(pattern));
         }
     }

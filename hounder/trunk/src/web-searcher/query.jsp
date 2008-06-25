@@ -16,7 +16,6 @@ limitations under the License.
 <%!
 void addQueryBox(HttpServletRequest request, java.io.Writer out) throws java.io.IOException{
 	out.write("<form method=\"GET\" action=\"\">");
-	out.write("		<input type=\"hidden\" name=\"group\" value=\"site\"/>");
 	out.write("		query: ");	
 	String q=request.getParameter("query");
 	if (null != q){
