@@ -736,6 +736,7 @@ limitations under the License.
         <copy todir="${tmp.dir}/dist">
             <fileset dir="${dist.dir}"/>
         </copy>
+        <mkdir dir="${tmp.dir}/logs"/>
 
         <!-- installer -->
         <copy todir="${tmp.dir}">
