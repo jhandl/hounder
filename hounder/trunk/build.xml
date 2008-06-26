@@ -705,12 +705,11 @@ limitations under the License.
         <tar destfile="${product.output.dir}/${project}-${version}-src.tgz" compression="gzip">
         	
             <tarfileset file="*.xml" prefix="${prefix}"/>
-            <tarfileset file="*.sh" prefix="${prefix}"/>
             <tarfileset file="${docs.dir}/LICENSE" prefix="${prefix}"/>
             <tarfileset dir="${src.dir}" prefix="${prefix}/src"/>
             <tarfileset dir="${test.dir}" prefix="${prefix}/test"/>
             <tarfileset dir="${conf.dir}" prefix="${prefix}/conf" />
-            <tarfileset dir="${docs.dir}" prefix="${prefix}/docs"/>
+            <tarfileset dir="${docs.dir}/javadoc" prefix="${prefix}/javadoc"/>
             <tarfileset dir="${bin.dir}" mode="755" prefix="${prefix}/bin"/>
             <tarfileset dir="${lib.dir}" prefix="${prefix}/lib"/>            
             <tarfileset dir="${tools.dir}" prefix="${prefix}/tools"/>
