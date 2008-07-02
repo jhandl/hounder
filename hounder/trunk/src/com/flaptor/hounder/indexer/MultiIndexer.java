@@ -24,12 +24,9 @@ import org.dom4j.Document;
 import org.dom4j.Node;
 
 import com.flaptor.clusterfest.NodeListener;
-import com.flaptor.clusterfest.action.ActionModule;
 import com.flaptor.clusterfest.controlling.ControllerModule;
 import com.flaptor.clusterfest.controlling.node.ControllableImplementation;
 import com.flaptor.clusterfest.monitoring.MonitorModule;
-import com.flaptor.hounder.clusterfest.HounderMonitoreable;
-import com.flaptor.hounder.indexer.clustering.IndexerActionReceiver;
 import com.flaptor.hounder.indexer.util.Hash;
 import com.flaptor.util.Config;
 import com.flaptor.util.DocumentParser;

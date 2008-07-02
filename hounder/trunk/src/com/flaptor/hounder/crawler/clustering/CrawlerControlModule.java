@@ -23,8 +23,8 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.flaptor.clusterfest.AbstractModule;
 import com.flaptor.clusterfest.NodeDescriptor;
-import com.flaptor.clusterfest.NodeUnreachableException;
 import com.flaptor.clusterfest.WebModule;
+import com.flaptor.clusterfest.exceptions.NodeException;
 import com.flaptor.util.Pair;
 import com.flaptor.util.remote.NoSuchRpcMethodException;
 import com.flaptor.util.remote.WebServer;
@@ -43,14 +43,15 @@ public class CrawlerControlModule extends AbstractModule<CrawlerControlNode> imp
 	}
 
 	@Override
-	public boolean shouldRegister(NodeDescriptor node) throws NodeUnreachableException {
+	public boolean shouldRegister(NodeDescriptor node) throws NodeException {
 		try {
 			boolean ret = getCrawlerControllableProxy(node.getXmlrpcClient()).ping();
 			return ret;
 		} catch (NoSuchRpcMethodException e) {
 			return false;
-		} catch (Exception e) {
-			throw new NodeUnreachableException(e, node);
+		} catch (Throwable t) {
+		    node.checkAndThrow(t);
+		    return false; //never called
 		}
 	}
     @Override
@@ -61,7 +62,7 @@ public class CrawlerControlModule extends AbstractModule<CrawlerControlNode> imp
 	public String getBoostConfig(CrawlerControlNode node) {
 		try {
 			return node.getBoostConfig();
-		} catch (NodeUnreachableException e) {
+		} catch (NodeException e) {
 			return null;
 		}
 	}

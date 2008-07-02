@@ -5,8 +5,6 @@ import org.apache.log4j.Logger;
 import com.flaptor.clusterfest.action.ActionReceiverImplementation;
 import com.flaptor.hounder.indexer.Indexer;
 import com.flaptor.hounder.indexer.IndexerCommands;
-import com.flaptor.hounder.test.XmlIndexerClient;
-import com.flaptor.util.PortUtil;
 
 /**
  * Receives actions from clusterfest

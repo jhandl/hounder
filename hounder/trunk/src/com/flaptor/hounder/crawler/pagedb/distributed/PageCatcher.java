@@ -22,8 +22,8 @@ import org.apache.log4j.Logger;
 import com.flaptor.hounder.crawler.pagedb.Page;
 import com.flaptor.hounder.crawler.pagedb.PageDB;
 import com.flaptor.util.Execute;
-import com.flaptor.util.remote.RpcException;
 import com.flaptor.util.remote.RmiServer;
+import com.flaptor.util.remote.RpcException;
 
 
 

@@ -16,15 +16,12 @@ limitations under the License.
 package com.flaptor.hounder.searcher;
 
 import java.util.ArrayList;
-import java.util.List;
 
-import com.flaptor.clusterfest.monitoring.node.MonitoreableImplementation;
 import com.flaptor.hounder.clusterfest.HounderMonitoreable;
 import com.flaptor.hounder.searcher.group.NoGroup;
 import com.flaptor.hounder.searcher.query.LazyParsedQuery;
 import com.flaptor.util.Pair;
 import com.flaptor.util.Statistics;
-import com.flaptor.util.ThreadUtil;
 
 /**
  * implementation of MonitoredNode for monitoring a searcher

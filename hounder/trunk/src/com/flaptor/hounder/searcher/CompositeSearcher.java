@@ -36,7 +36,6 @@ import com.flaptor.util.Cache;
 import com.flaptor.util.Config;
 import com.flaptor.util.LRUCache;
 import com.flaptor.util.PortUtil;
-import com.flaptor.util.Statistics;
 
 /**
  * The composition of Searchers in the order we are interested:

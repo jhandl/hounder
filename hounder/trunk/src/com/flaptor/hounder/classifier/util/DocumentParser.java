@@ -27,8 +27,8 @@ import org.apache.lucene.analysis.Token;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 
-import com.flaptor.util.Execute;
 import com.flaptor.hounder.util.TokenUtil;
+import com.flaptor.util.Execute;
 
 
 /**

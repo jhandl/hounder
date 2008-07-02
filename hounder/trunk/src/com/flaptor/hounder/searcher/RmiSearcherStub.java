@@ -28,8 +28,8 @@ import com.flaptor.hounder.searcher.query.LazyParsedQuery;
 import com.flaptor.hounder.searcher.sort.ASort;
 import com.flaptor.util.PortUtil;
 import com.flaptor.util.remote.ARmiClientStub;
-import com.flaptor.util.remote.RpcException;
 import com.flaptor.util.remote.ExponentialFallbackPolicy;
+import com.flaptor.util.remote.RpcException;
 
 /**
  * A client-side IRemoteSearcher that connects with the server

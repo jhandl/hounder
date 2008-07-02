@@ -41,7 +41,6 @@ import com.flaptor.util.Config;
 import com.flaptor.util.Execute;
 import com.flaptor.util.Pair;
 import com.flaptor.util.PortUtil;
-import com.flaptor.util.Statistics;
 import com.flaptor.util.cache.MultiCache;
 
 /**

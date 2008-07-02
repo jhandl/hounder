@@ -21,10 +21,9 @@ import java.util.Vector;
 import org.apache.lucene.analysis.Token;
 import org.apache.lucene.analysis.TokenStream;
 
+import com.flaptor.hounder.util.TokenUtil;
 import com.flaptor.util.TestCase;
 import com.flaptor.util.TestInfo;
-
-import com.flaptor.hounder.util.TokenUtil;
 
 /**
  * @author Flaptor Development Team

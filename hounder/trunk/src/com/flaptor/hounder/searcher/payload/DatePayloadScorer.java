@@ -15,8 +15,8 @@ limitations under the License.
 */
 package com.flaptor.hounder.searcher.payload;
 
-import org.apache.lucene.search.DefaultSimilarity;
 import org.apache.log4j.Logger;
+import org.apache.lucene.search.DefaultSimilarity;
 
 /**
  * A Scorer that scores payloads depending the date

@@ -5,10 +5,8 @@ import java.util.ArrayList;
 import com.flaptor.clusterfest.NodeDescriptor;
 import com.flaptor.clusterfest.monitoring.DefaultPropertyFormatter;
 import com.flaptor.clusterfest.monitoring.PropertyFormatter;
-import com.flaptor.hist4j.Cell;
 import com.flaptor.util.Pair;
 import com.flaptor.util.Triad;
-import com.flaptor.util.Statistics;
 import com.flaptor.util.Statistics.EventStats;
 
 

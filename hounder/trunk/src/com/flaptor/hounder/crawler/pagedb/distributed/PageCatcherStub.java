@@ -23,8 +23,8 @@ import org.apache.log4j.Logger;
 import com.flaptor.hounder.crawler.pagedb.Page;
 import com.flaptor.util.PortUtil;
 import com.flaptor.util.remote.ARmiClientStub;
-import com.flaptor.util.remote.RpcException;
 import com.flaptor.util.remote.ExponentialFallbackPolicy;
+import com.flaptor.util.remote.RpcException;
 
 /**
  * A client-side IRemotePageCatcher that connects with the server

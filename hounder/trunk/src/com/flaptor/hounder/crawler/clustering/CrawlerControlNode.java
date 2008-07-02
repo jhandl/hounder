@@ -17,7 +17,7 @@ package com.flaptor.hounder.crawler.clustering;
 
 import com.flaptor.clusterfest.ModuleNodeDescriptor;
 import com.flaptor.clusterfest.NodeDescriptor;
-import com.flaptor.clusterfest.NodeUnreachableException;
+import com.flaptor.clusterfest.exceptions.NodeException;
 
 /**
  * Node for crawler control module
@@ -32,12 +32,12 @@ public class CrawlerControlNode extends ModuleNodeDescriptor {
 		crawlerControllable = CrawlerControlModule.getCrawlerControllableProxy(node.getXmlrpcClient());
 	}
 
-	public String getBoostConfig() throws NodeUnreachableException {
+	public String getBoostConfig() throws NodeException {
 		try{
 			return crawlerControllable.getBoostConfig();
-		}
-		catch (Exception e) {
-		    throw new NodeUnreachableException(e, getNodeDescriptor());
+		} catch (Throwable t) {
+		    getNodeDescriptor().checkAndThrow(t);
+		    return null; //never called
 		}
 	}
 }

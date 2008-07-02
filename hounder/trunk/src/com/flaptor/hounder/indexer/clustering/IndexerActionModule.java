@@ -12,7 +12,6 @@ import com.flaptor.clusterfest.ModuleUtil;
 import com.flaptor.clusterfest.NodeDescriptor;
 import com.flaptor.clusterfest.WebModule;
 import com.flaptor.clusterfest.action.ActionModule;
-import com.flaptor.clusterfest.action.ActionNodeDescriptor;
 import com.flaptor.util.Pair;
 import com.flaptor.util.remote.WebServer;
 

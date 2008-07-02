@@ -22,7 +22,6 @@ import java.util.concurrent.Callable;
 import org.antlr.stringtemplate.StringTemplate;
 
 import com.flaptor.hounder.cluster.MultiSearcher;
-import com.flaptor.hounder.searcher.CompositeSearcher;
 import com.flaptor.hounder.indexer.Indexer;
 import com.flaptor.hounder.searcher.group.NoGroup;
 import com.flaptor.hounder.searcher.group.StoredFieldGroup;

@@ -1,7 +1,5 @@
 package com.flaptor.hounder.clusterfest;
 
-import java.util.Map;
-
 import com.flaptor.clusterfest.monitoring.node.MonitoreableImplementation;
 import com.flaptor.util.Statistics;
 

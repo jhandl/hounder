@@ -16,7 +16,6 @@ import com.flaptor.clusterfest.chart.ChartModule;
 import com.flaptor.clusterfest.monitoring.MonitorModule;
 import com.flaptor.clusterfest.monitoring.MonitorNodeDescriptor;
 import com.flaptor.hist4j.AdaptiveHistogram;
-import com.flaptor.hist4j.HistogramNode;
 import com.flaptor.util.DateUtil;
 import com.flaptor.util.Pair;
 import com.flaptor.util.Statistics;

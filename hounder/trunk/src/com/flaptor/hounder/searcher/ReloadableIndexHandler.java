@@ -28,14 +28,11 @@ import org.apache.lucene.search.Sort;
 import org.apache.lucene.search.TopDocs;
 
 import com.flaptor.hounder.Index;
-import com.flaptor.hounder.searcher.filter.AFilter;
 import com.flaptor.hounder.searcher.group.AGroup;
 import com.flaptor.hounder.searcher.group.AResultsGrouper;
 import com.flaptor.hounder.searcher.group.NoGroup;
 import com.flaptor.hounder.searcher.group.TopDocsDocumentProvider;
 import com.flaptor.hounder.searcher.payload.DatePayloadScorer;
-import com.flaptor.hounder.searcher.query.AQuery;
-import com.flaptor.hounder.searcher.sort.ASort;
 import com.flaptor.util.Cache;
 import com.flaptor.util.Config;
 import com.flaptor.util.Execute;

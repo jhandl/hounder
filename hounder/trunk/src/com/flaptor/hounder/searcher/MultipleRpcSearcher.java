@@ -15,17 +15,9 @@ limitations under the License.
 */
 package com.flaptor.hounder.searcher;
 
-import java.io.IOException;
-
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
-import org.mortbay.jetty.handler.AbstractHandler;
 
-import com.flaptor.hounder.cluster.MultiSearcher;
 import com.flaptor.hounder.searcher.filter.AFilter;
 import com.flaptor.hounder.searcher.group.AGroup;
 import com.flaptor.hounder.searcher.query.AQuery;

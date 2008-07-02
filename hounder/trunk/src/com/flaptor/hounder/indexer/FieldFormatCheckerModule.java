@@ -15,17 +15,17 @@ limitations under the License.
 */
 package com.flaptor.hounder.indexer;
 
-import org.apache.log4j.Logger;
-import org.dom4j.Document;
-import org.dom4j.Node;
-
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.log4j.Logger;
+import org.dom4j.Document;
+import org.dom4j.Node;
+
+import com.flaptor.util.Config;
 import com.flaptor.util.DomUtil;
 import com.flaptor.util.Execute;
-import com.flaptor.util.Config;
 import com.flaptor.util.Pair;
 
 /**
