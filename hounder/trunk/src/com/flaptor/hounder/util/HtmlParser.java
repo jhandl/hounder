@@ -104,6 +104,12 @@ public class HtmlParser {
      */
     public HtmlParser(String ignoreXPath, String[] separatorTags, Map<String,String> fieldDefinitions) {
         parser = new org.cyberneko.html.parsers.DOMParser();
+        try {
+            parser.setFeature("http://cyberneko.org/html/features/scanner/ignore-specified-charset", true);
+            parser.setProperty("http://cyberneko.org/html/properties/default-encoding","UTF-8");
+        } catch (Exception e) { 
+            logger.warn("Setting nekohtml parser encoding options", e);
+        }
         if (null != ignoreXPath && 0 < ignoreXPath.length()){
             xpathIgnore= ignoreXPath;
         }
@@ -294,7 +300,7 @@ public class HtmlParser {
         synchronized (this) {
             try {
                 // use cyberneko to parse the html documents (even broken ones)
-                org.xml.sax.InputSource inputSource = new org.xml.sax.InputSource(new java.io.ByteArrayInputStream(content.getBytes()));
+                org.xml.sax.InputSource inputSource = new org.xml.sax.InputSource(new java.io.ByteArrayInputStream(content.getBytes("UTF-8")));
                 parser.parse(inputSource);
             } catch (Exception e) {
                 logger.debug("Exception while trying to parse ["+content+"]");

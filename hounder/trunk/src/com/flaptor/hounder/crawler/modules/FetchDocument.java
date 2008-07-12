@@ -114,7 +114,7 @@ public class FetchDocument {
 
     private void parse () {
         try {
-            HtmlParser.Output out = parser.parse(page.getUrl(), new String(content));
+            HtmlParser.Output out = parser.parse(page.getUrl(), new String(content,getEncoding()));
             this.text = out.getText();
             this.title = out.getTitle();
             List<Pair<String,String>> ol = out.getLinks();
@@ -194,14 +194,39 @@ public class FetchDocument {
         return content;
     }
 
+    public String getEncoding () {
+        String encoding = null;
+        // find charset. http headers usually have a Content-Type line, but
+        // as it may not be in the same case, all headers are stored lowercased.
+        // Content-Type lines contain mime-type and charset, separated by ;
+        // for example
+        // Content-Type: text/html; charset=UTF-8
+        if (header.containsKey("content-type")) {
+            String[] tokens = header.get("content-type").split(";");
+            for (String token: tokens) {
+                if (token.toLowerCase().contains("charset") && token.contains("=")){
+                    encoding = token.split("=")[1].trim().toUpperCase();
+                    break;
+                }
+            }
+        }
+        // if not found, use default encoding
+        if (null == encoding) {
+            encoding = java.nio.charset.Charset.defaultCharset().name();
+        }
+        return encoding;
+    }
+
     public String getLastModified () {
-        // FIXME
-        throw new UnsupportedOperationException();
+        if (null == header) return null;
+        // Values on header are all lowercased
+        return header.get("lastmodified");
     }
 
     public String getLastUpdated () {
-        // FIXME
-        throw new UnsupportedOperationException();
+        if (null == header) return null;
+        // Values on header are all lowercased
+        return header.get("lastupdated");
     }
 
     public String getOriginalUrl () {
@@ -312,11 +337,8 @@ public class FetchDocument {
     /**
      * Removes a category from this FetchDocument. If the FetchDocument
      * has the parameter category, it is deleted.
-     *
      * @param category
      *      The category to delete from the document.
-     *      
-     *
      * @return
      *      true if the category was present and it has been deleted.
      *      false if the category was not present.
