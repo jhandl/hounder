@@ -26,7 +26,7 @@ MAIN=com.flaptor.hounder.crawler.Crawler
 name=`pwd | awk '{n=split($0,a,"/"); print a[n]}'`
 echo Starting the $name crawler...
 
-ARGUS="-server -Xms256m -Xmx256m -XX:-UseGCTimeLimit"
+ARGUS="-server -Xms512m -Xmx512m -XX:-UseGCTimeLimit"
 CMND="java ${ARGUS} -cp ${CP} ${MAIN}"
 #echo ${CMND}
 nohup  ${CMND} > ${LOUT} 2> ${LERR} &
