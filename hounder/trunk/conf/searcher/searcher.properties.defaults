@@ -110,3 +110,6 @@ searcher.cachedVersion.cacheServerHost=
 Searcher.query.sample.period = 0
 Searcher.query.sample.size = 0
 
+
+# which payloadscorer to use with each field
+SimilarityForwarder.scorers=date_payload:com.flaptor.hounder.searcher.payload.DatePayloadScorer

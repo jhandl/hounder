@@ -37,7 +37,9 @@ import com.flaptor.hounder.searcher.filter.AFilter;
 import com.flaptor.hounder.searcher.filter.ValueFilter;
 import com.flaptor.hounder.searcher.group.NoGroup;
 import com.flaptor.hounder.searcher.group.StoredFieldGroup;
+import com.flaptor.hounder.searcher.query.AndQuery;
 import com.flaptor.hounder.searcher.query.LazyParsedQuery;
+import com.flaptor.hounder.searcher.query.PayloadQuery;
 import com.flaptor.hounder.searcher.query.MatchAllQuery;
 import com.flaptor.hounder.searcher.query.TermQuery;
 import com.flaptor.hounder.searcher.query.WordQuerySuggestor;
@@ -134,6 +136,7 @@ public class IndexerSearcherTest extends TestCase {
 		searcherConfig.set("ReloadableIndexSearcher.minTimeBetweenIndexes", "1000");
 		searcherConfig.set("ReloadableIndexSearcher.sleepTime", "1000");
 		searcherConfig.set("clustering.enable", "false");
+        searcherConfig.set("SimilarityForwarder.scorers","");
 		
 		//TODO see why it crashes if snippets are set
 		searcherConfig.set("Searcher.generateSnippets", "false");
@@ -480,9 +483,7 @@ public class IndexerSearcherTest extends TestCase {
 
        
         // override config, so payloads are used
-        searcherConfig.set("Searcher.usePayloads","yes");
-        searcherConfig.set("Searcher.payloadField","payload");
-        searcherConfig.set("Searcher.payloadScorer","date");
+        searcherConfig.set("SimilarityForwarder.scorers","payload:com.flaptor.hounder.searcher.payload.DatePayloadScorer");
    
         // restart searcher
         searcher = new CompositeSearcher();
@@ -490,7 +491,7 @@ public class IndexerSearcherTest extends TestCase {
 
 
         // perform query
-        gsr = searcher.search(new TermQuery("content", "contenta"), 0, 10, new NoGroup(), 1, null, null);
+        gsr = searcher.search(new AndQuery(new TermQuery("content", "contenta"),new PayloadQuery("payload")), 0, 10, new NoGroup(), 1, null, null);
         assertEquals(gsr.groups(),2);
 
         // check that now, using payloads, big payload is first

@@ -58,14 +58,6 @@ public class Searcher implements ISearcher {
 	protected ReloadableIndexHandler ris = null;
 
 
-    // Boolean indicating if payloads are to be used when 
-    // searcher to boost terms, and which will be the 
-    // boosted field.
-    private boolean usingPayloads;
-    // Payload field name.
-    private String payloadField;
- 
-
 	/**
 	 * Constructor.
 	 * Takes many configuration parameters from the config.
@@ -73,16 +65,6 @@ public class Searcher implements ISearcher {
 	 */
 	public Searcher() {
 		ris = new ReloadableIndexHandler();
-
-        usingPayloads = config.getBoolean("Searcher.usePayloads");
-        if (usingPayloads) {
-            payloadField = config.getString("Searcher.payloadField");
-            if (null == payloadField || "".equals(payloadField)) {
-                throw new IllegalArgumentException("payloadFields can not be empty when Searcher.usePayloads is true");
-            }
-        }
-
-
     }
 
     /**
@@ -143,20 +125,7 @@ public class Searcher implements ISearcher {
 
 
             // Construct boosting query with payloads
-            Query luceneQuery;
-            if (usingPayloads) {
-                Query origQuery = query.getLuceneQuery();
-                Query boostingQuery = new BoostingTermQuery(new Term(payloadField,payloadField));
-                luceneQuery = new BooleanQuery();
-                ((BooleanQuery)luceneQuery).add(origQuery,BooleanClause.Occur.MUST);
-                ((BooleanQuery)luceneQuery).add(boostingQuery,BooleanClause.Occur.MUST);
-                // TODO documents without payloads will NOT match queries.
-                // if there is an index with documents without payload, they will NEVER
-                // match a query.
-            } else {
-                luceneQuery = query.getLuceneQuery();
-            }
-
+            Query luceneQuery = query.getLuceneQuery();
 
             Pair<GroupedSearchResults, org.apache.lucene.search.Query> resultPair = ris.search(luceneQuery, filter, sort, firstResult, count,groupBy,groupSize);
             res = resultPair.first();

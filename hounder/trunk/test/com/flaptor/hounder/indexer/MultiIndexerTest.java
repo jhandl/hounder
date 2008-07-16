@@ -55,6 +55,7 @@ public class MultiIndexerTest extends TestCase {
         Config config = Config.getConfig("multiIndexer.properties");
         config.set("multiIndexer.useXslt","no");
         config.set("indexer.hosts",hosts);
+        config.set("clustering.enable","false");
         Config.getConfig("common.properties").set("port.base", String.valueOf(genPort(numIndexers + 1 )));
         Config.getConfig("indexer.properties").set("clustering.enable","false");
     }
@@ -77,6 +78,7 @@ public class MultiIndexerTest extends TestCase {
         config.set("IndexLibrary.rsyncAccessString","");
         config.set("IndexManager.indexDescriptor",i+"of"+numIndexers+"@defaultCluster");
         config.set("Indexer.modules","com.flaptor.hounder.indexer.CommandsModule,com.flaptor.hounder.indexer.LoggerModule,com.flaptor.hounder.indexer.Writer");
+        config.set("clustering.enable","false");
        
         IIndexer baseIndexer = new Indexer();
         IIndexer indexer = new MultipleRpcIndexer(baseIndexer,true/*rmi*/,false/*xmlrpc*/);
@@ -108,8 +110,8 @@ public class MultiIndexerTest extends TestCase {
 	}
 
     
-    @TestInfo(testType = TestInfo.TestType.UNIT)
-//        ,requiresPort = {30000, 31000})
+    @TestInfo(testType = TestInfo.TestType.UNIT 
+            ,requiresPort = {30000, 31000,32000})
     public void testMultiIndexer() throws Exception {
         MultiIndexer multiIndexer = new MultiIndexer(); 
     
@@ -134,8 +136,8 @@ public class MultiIndexerTest extends TestCase {
         assertEquals("Did not index every document.", totalDocumentsFound,documents);
     }
 
-    @TestInfo(testType = TestInfo.TestType.UNIT)
-//        ,requiresPort = {30000, 31000})
+    @TestInfo(testType = TestInfo.TestType.UNIT
+        ,requiresPort = {30000, 31000,32000})
     public void testMixedNodesFails() throws Exception{
         // Mix up hosts
         Config config = Config.getConfig("multiIndexer.properties");
@@ -169,8 +171,8 @@ public class MultiIndexerTest extends TestCase {
         }
     }
 
-    @TestInfo(testType = TestInfo.TestType.UNIT)
-//        ,requiresPort = {30000, 31000})
+    @TestInfo(testType = TestInfo.TestType.UNIT
+        ,requiresPort = {30000, 31000,32000})
     public void testCommands() throws Exception {
         String command = "<command name='close'/>";
         MultiIndexer multiIndexer = new MultiIndexer();
@@ -183,6 +185,8 @@ public class MultiIndexerTest extends TestCase {
         for (IIndexer indexer: baseIndexers) {
             assertTrue("indexer " + indexer + " is not stopped.", indexer.isStopped());
         } 
+
+        multiIndexer.requestStop();
     } 
 
 

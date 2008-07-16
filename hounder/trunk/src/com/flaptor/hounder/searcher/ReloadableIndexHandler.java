@@ -32,7 +32,9 @@ import com.flaptor.hounder.searcher.group.AGroup;
 import com.flaptor.hounder.searcher.group.AResultsGrouper;
 import com.flaptor.hounder.searcher.group.NoGroup;
 import com.flaptor.hounder.searcher.group.TopDocsDocumentProvider;
-import com.flaptor.hounder.searcher.payload.DatePayloadScorer;
+import com.flaptor.hounder.searcher.payload.SimilarityForwarder;
+
+
 import com.flaptor.util.Cache;
 import com.flaptor.util.Config;
 import com.flaptor.util.Execute;
@@ -131,14 +133,8 @@ final class ReloadableIndexHandler implements Stoppable {
 
         currentIndexId = -1;
 
-        String whichSimilarity = config.getString("Searcher.payloadScorer");
-        if ("date".equals(whichSimilarity.trim().toLowerCase())) {
-            similarity = new DatePayloadScorer();
-            logger.debug("using DatePayloadScorer as similarity");
-        } else {
-            similarity = new org.apache.lucene.search.DefaultSimilarity();
-        }
 
+        similarity = new SimilarityForwarder();
 
         library = new IndexLibrary(this);
         //FIXME: This is a potential but unlikely race condition, as we are publishing "this" to another thread

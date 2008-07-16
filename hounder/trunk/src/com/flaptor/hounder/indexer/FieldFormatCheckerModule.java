@@ -97,7 +97,7 @@ public final class FieldFormatCheckerModule extends AModule {
             } catch (NumberFormatException e) {
                 logger.error("Document has field " + longField + ", but it is not parseable as Long. Dropping document");
                 if ( logger.isDebugEnabled()){
-                    logger.debug(DomUtil.domToString(doc) + " contains field " + longField + " but it is not parseable as Long.");
+                    logger.debug(DomUtil.domToString(doc) + " contains field " + longField + " but it is not parseable as Long. Node:" + node.toString() + " - text: " + text);
                 }
                 return new Document[0];
             }
