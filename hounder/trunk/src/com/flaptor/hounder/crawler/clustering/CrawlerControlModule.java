@@ -21,6 +21,8 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.log4j.Logger;
+
 import com.flaptor.clusterfest.AbstractModule;
 import com.flaptor.clusterfest.NodeDescriptor;
 import com.flaptor.clusterfest.WebModule;
@@ -36,6 +38,7 @@ import com.flaptor.util.remote.XmlrpcClient;
  * @author Martin Massera
  */
 public class CrawlerControlModule extends AbstractModule<CrawlerControlNode> implements WebModule {
+    private static final Logger logger = Logger.getLogger(com.flaptor.util.Execute.whoAmI());
 
 	@Override
 	protected CrawlerControlNode createModuleNode(NodeDescriptor node) {
@@ -50,7 +53,7 @@ public class CrawlerControlModule extends AbstractModule<CrawlerControlNode> imp
 		} catch (NoSuchRpcMethodException e) {
 			return false;
 		} catch (Throwable t) {
-		    node.checkAndThrow(t);
+		    node.checkAndThrow(t, logger);
 		    return false; //never called
 		}
 	}

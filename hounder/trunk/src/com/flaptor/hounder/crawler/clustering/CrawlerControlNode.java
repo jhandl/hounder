@@ -15,6 +15,8 @@ limitations under the License.
 */
 package com.flaptor.hounder.crawler.clustering;
 
+import org.apache.log4j.Logger;
+
 import com.flaptor.clusterfest.ModuleNodeDescriptor;
 import com.flaptor.clusterfest.NodeDescriptor;
 import com.flaptor.clusterfest.exceptions.NodeException;
@@ -25,6 +27,7 @@ import com.flaptor.clusterfest.exceptions.NodeException;
  * @author Martin Massera
  */
 public class CrawlerControlNode extends ModuleNodeDescriptor {
+    private static final Logger logger = Logger.getLogger(com.flaptor.util.Execute.whoAmI());
 	private CrawlerControllable crawlerControllable;
 	
 	public CrawlerControlNode(NodeDescriptor node) {
@@ -36,7 +39,7 @@ public class CrawlerControlNode extends ModuleNodeDescriptor {
 		try{
 			return crawlerControllable.getBoostConfig();
 		} catch (Throwable t) {
-		    getNodeDescriptor().checkAndThrow(t);
+		    getNodeDescriptor().checkAndThrow(t, logger);
 		    return null; //never called
 		}
 	}
