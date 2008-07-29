@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 pid=`cat pid`
 if [ -z "$pid" ]; then

@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 if ./status.sh | grep -q "is running"
 then

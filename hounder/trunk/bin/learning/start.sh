@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #This script is used in the learning app to start it
 #
 
