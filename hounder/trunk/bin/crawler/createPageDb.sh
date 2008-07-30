@@ -8,4 +8,4 @@ DEPS=$LIBS/hounder-trunk-deps.jar
 CP=${CONF}:.:${HOUNDER}:${DEPS}
 MAIN=com.flaptor.hounder.crawler.pagedb.PageDB
 
-xjava -cp ${CP} $MAIN create pagedb pagedb.seeds
+java -cp ${CP} $MAIN create pagedb pagedb.seeds
