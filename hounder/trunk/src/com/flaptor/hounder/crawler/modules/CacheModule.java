@@ -20,6 +20,7 @@ import org.apache.log4j.Logger;
 import com.flaptor.hounder.crawler.pagedb.Page;
 import com.flaptor.util.Config;
 import com.flaptor.util.Execute;
+import com.flaptor.util.FileUtil;
 import com.flaptor.util.PortUtil;
 import com.flaptor.util.cache.FileCache;
 import com.flaptor.util.remote.RmiServer;
@@ -34,7 +35,7 @@ public class CacheModule extends AProcessorModule {
     private FileCache<String> textCache = null; // cache for the parsed text of the fetched pages.
     private FileCache<DocumentCacheItem> pageCache = null; // cache for the original contents of the fetched pages.
     private int textLengthLimit; // the maximum allowed page text length.
-    private RmiServer cacheRmiServer;   
+    private RmiServer cacheRmiServer;
     
     public CacheModule (String moduleName, Config globalConfig) {
         super(moduleName, globalConfig);
@@ -51,8 +52,11 @@ public class CacheModule extends AProcessorModule {
         
         cacheRmiServer = new RmiServer(PortUtil.getPort("crawler.pageCache.rmi")); 
         cacheRmiServer.addHandler(RmiServer.DEFAULT_SERVICE_NAME, pageCache);
-
-        cacheRmiServer.start();
+        try {
+        	cacheRmiServer.start();
+        } catch (Exception e) {
+        	logger.warn("Starting cache server", e);
+        }
     }
 
     public FileCache<String> getTextCache () {
@@ -96,5 +100,6 @@ public class CacheModule extends AProcessorModule {
 	protected String getDocumentText(FetchDocument doc) {
 		return doc.getText(textLengthLimit);
 	}
+
 
 }
