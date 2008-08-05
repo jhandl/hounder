@@ -42,7 +42,7 @@ import com.flaptor.util.PortUtil;
  * Statistics -> SuggestQuery -> Cache -> Queries in Progress -> 
  * TrafficLimiting -> Snippet -> Searcher
  * 
- * @author Martin Massera
+ * @author Martin Massera, JHandle, Spike, DButhay
  */
 public class CompositeSearcher implements ISearcher {
     
@@ -57,7 +57,7 @@ public class CompositeSearcher implements ISearcher {
         this(Config.getConfig("searcher.properties"));
     }
     
-    public CompositeSearcher(Config searcherConfig) {
+    private CompositeSearcher(Config searcherConfig) {
 
         // start clustering first.
     	if (searcherConfig.getBoolean("clustering.enable")) {
@@ -96,7 +96,8 @@ public class CompositeSearcher implements ISearcher {
         
         if (searcherConfig.getBoolean("compositeSearcher.useCache") && !searcherConfig.getBoolean("searcher.isMultiSearcher")) {
         //if it's a multiSearcher, nobody will ever flush the cache
-            Cache<QueryParams, GroupedSearchResults> cache = new LRUCache<QueryParams, GroupedSearchResults>(500); //XXX TODO: make this configurable
+        	int cacheSize = searcherConfig.getInt("compositeSearcher.resultsCacheSize");
+            Cache<QueryParams, GroupedSearchResults> cache = new LRUCache<QueryParams, GroupedSearchResults>(cacheSize);
             if (baseSearcher instanceof Searcher) {
             	((Searcher)baseSearcher).addCache(cache);
             }
@@ -129,10 +130,6 @@ public class CompositeSearcher implements ISearcher {
     }
     
     public GroupedSearchResults search(AQuery query, int firstResult, int count, AGroup group, int groupSize, AFilter filter, ASort sort) throws SearcherException{
-    	if (logger.isDebugEnabled()) {
-    		logger.debug("received query: "+  query + ",from: " + firstResult + ", requesting: " + count + ", grouping by:"
-    				+ group + ", with groupsize: " + groupSize + ", filtering by: " + filter + ", sorting by: " + sort);
-    	}
     	return searcher.search(query, firstResult, count, group, groupSize, filter, sort);
     }
     

@@ -15,19 +15,22 @@ limitations under the License.
 */
 package com.flaptor.hounder.searcher;
 
+import org.apache.log4j.Logger;
+
 import com.flaptor.hounder.searcher.filter.AFilter;
 import com.flaptor.hounder.searcher.group.AGroup;
 import com.flaptor.hounder.searcher.query.AQuery;
 import com.flaptor.hounder.searcher.sort.ASort;
+import com.flaptor.util.Execute;
 import com.flaptor.util.Statistics;
 
 /**
- * A searcher for taking query times
+ * A searcher for taking query times, and print individual query statistics
  * 
- * @author Martin Massera
+ * @author Martin Massera, Spike, DButhay
  */
 public class StatisticSearcher implements ISearcher {
-
+	private static final Logger logger = Logger.getLogger(Execute.whoAmI());
 	private ISearcher searcher;
 	
 	public StatisticSearcher(ISearcher searcher) {
@@ -46,8 +49,18 @@ public class StatisticSearcher implements ISearcher {
 				long time = System.currentTimeMillis() - start;
 				Statistics.getStatistics().notifyEventValue("responseTimes", time);
 				results.setResponseTime(time);
+				if (logger.isDebugEnabled()) {
+					logger.debug("Query statistics: responding to query (success, response time " + time +" ms)" + query + " ,from " + firstResult +
+							", with " + count + ", filtering by" + filter + ",grouping by" + group + ", sorting by " +
+							sort);
+				}
 			} else {
 				Statistics.getStatistics().notifyEventError("responseTimes");
+				if (logger.isDebugEnabled()) {
+					logger.debug("Query statistics: responding to query (failure)" + query + " ,from " + firstResult +
+							", with " + count + ", filtering by" + filter + ",grouping by" + group + ", sorting by " +
+							sort);
+				}
 			}
 		}
 		if (null == results) throw new SearcherException("GroupedSearchResults is NULL");

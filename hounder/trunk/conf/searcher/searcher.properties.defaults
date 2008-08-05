@@ -89,6 +89,7 @@ compositeSearcher.useQueriesInProgress=true
 compositeSearcher.useCache=true
 compositeSearcher.useSynonymSuggestQuery=false
 compositeSearcher.useSpellCheckSuggestQuery=false
+compositeSearcher.resultsCacheSize=500
 
 #Index library, that keeps track of used indexes, deletes, etc.
 #Clean directories that are not indexes, or old indexes, when 

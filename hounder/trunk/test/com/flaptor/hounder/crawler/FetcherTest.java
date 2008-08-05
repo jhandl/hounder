@@ -31,6 +31,7 @@ import com.flaptor.util.FileUtil;
 import com.flaptor.util.TestCase;
 import com.flaptor.util.TestUtils;
 import com.flaptor.util.remote.WebServer;
+import com.flaptor.util.TestInfo;
 
 /**
  * @author Flaptor Development Team
@@ -62,7 +63,8 @@ public class FetcherTest extends TestCase {
         FileUtil.deleteDir(tmpDir);
     }
 
-
+    @TestInfo(testType = TestInfo.TestType.INTEGRATION,
+            requiresPort = {8086})
     public void testFetcher() throws Exception {
         int size = 10;
 

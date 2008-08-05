@@ -64,6 +64,8 @@ import com.flaptor.util.TestInfo;
  */
 public class IndexerSearcherTest extends TestCase {
 	private static Logger logger = null;
+
+
 	private String addA = "<documentAdd><documentId>a</documentId><field name=\"content\" stored=\"true\" indexed=\"true\" tokenized=\"true\">contentA</field></documentAdd>";
 	private String deleteA = "<documentDelete><documentId>a</documentId></documentDelete>";
 
@@ -170,15 +172,15 @@ public class IndexerSearcherTest extends TestCase {
 
 
     @Override
-    public void tearDown() {
-        stopIndexer();
-        stopSearcher();
-		com.flaptor.util.FileUtil.deleteDir(tmpDir);
-        unfilterOutput();
-	}
+        public void tearDown() {
+            stopIndexer();
+            stopSearcher();
+            com.flaptor.util.FileUtil.deleteDir(tmpDir);
+            unfilterOutput();
+        }
 
     @TestInfo(testType = TestInfo.TestType.SYSTEM,
-            requiresPort = {10000})
+            requiresPort = {10000, 10001, 10010, 10011, 10012})
     public void xtestQuerySuggest() throws IOException, SearcherException{
         indexer.index(addC);
         indexer.index(addB);
@@ -216,7 +218,7 @@ public class IndexerSearcherTest extends TestCase {
 	 * while searching.
 	 */
     @TestInfo(testType = TestInfo.TestType.SYSTEM,
-            requiresPort = {10000})
+            requiresPort = {10000, 10001, 10010, 10011, 10012})
 	public void testIndexingDocumentBoost()  throws SearcherException{
 		indexer.index(addC);
 		indexer.index(addCb);
@@ -234,7 +236,7 @@ public class IndexerSearcherTest extends TestCase {
 	 * index onother, get another...
 	 */
     @TestInfo(testType = TestInfo.TestType.SYSTEM,
-            requiresPort = {10000})
+            requiresPort = {10000, 10001, 10010, 10011, 10012})
 	public void testWhatYouAddIsWhatYouGet()  throws SearcherException{
 		Execute.sleep(5000);
 		GroupedSearchResults sr = searcher.search(new TermQuery("content", "contenta"), 0, 10, noGroup, 1, null, null);
@@ -263,7 +265,7 @@ public class IndexerSearcherTest extends TestCase {
 	 * Tests filters that do not mach any document, filter them all.
 	 */
     @TestInfo(testType = TestInfo.TestType.SYSTEM,
-            requiresPort = {10000})
+            requiresPort = {10000, 10001, 10010, 10011, 10012})
 	public void testNonMatchingFilters()  throws SearcherException{
 		indexer.index(addA);
 		indexer.index(addB);
@@ -279,7 +281,7 @@ public class IndexerSearcherTest extends TestCase {
 	 * Tests a value filter that matches some documents.
 	 */
     @TestInfo(testType = TestInfo.TestType.SYSTEM,
-            requiresPort = {10000})
+            requiresPort = {10000, 10001, 10010, 10011, 10012})
 	public void testValueFilter()  throws SearcherException{
 		indexer.index(addA);
 		indexer.index(addB);
@@ -294,7 +296,7 @@ public class IndexerSearcherTest extends TestCase {
 
 
     @TestInfo(testType = TestInfo.TestType.SYSTEM,
-            requiresPort = {10000})
+            requiresPort = {10000, 10001, 10010, 10011, 10012})
     public void testGroupedResults()  throws SearcherException{
         indexer.index(group1a);
         indexer.index(group1b);
@@ -311,7 +313,7 @@ public class IndexerSearcherTest extends TestCase {
     }
 
     @TestInfo(testType = TestInfo.TestType.SYSTEM,
-            requiresPort = {10000})
+            requiresPort = {10000, 10001, 10010, 10011, 10012})
     public void testDedupedResults()  throws SearcherException{
         indexer.index(group1a);
         indexer.index(group1b);
@@ -325,7 +327,7 @@ public class IndexerSearcherTest extends TestCase {
     }
 
     @TestInfo(testType = TestInfo.TestType.SYSTEM,
-            requiresPort = {10000})
+            requiresPort = {10000, 10001, 10010, 10011, 10012})
     public void testCache()  throws SearcherException{
         indexer.index(group1a);
         indexer.index(group1b);
@@ -370,7 +372,7 @@ public class IndexerSearcherTest extends TestCase {
     }
 
     @TestInfo(testType = TestInfo.TestType.SYSTEM,
-            requiresPort = {10000})
+            requiresPort = {10000, 10001, 10010, 10011, 10012})
     public void testSearcherStartup() throws Exception {
         File wd = new File(tmpDir);
         ArrayList<Pair<String,String>> indexes = new ArrayList<Pair<String,String>>(); // first=index_name last=copy_name
@@ -463,7 +465,8 @@ public class IndexerSearcherTest extends TestCase {
 
 
 
-
+    @TestInfo(testType = TestInfo.TestType.SYSTEM,
+            requiresPort = {10000, 10001, 10010, 10011, 10012})
     public void testPayloads() throws Exception{
         Config searcherConfig = Config.getConfig("searcher.properties");
 
