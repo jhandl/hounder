@@ -28,15 +28,19 @@ import com.flaptor.hounder.searcher.group.AGroup;
 import com.flaptor.hounder.searcher.query.AQuery;
 import com.flaptor.hounder.searcher.sort.ASort;
 
+import com.flaptor.util.Statistics;
+
 /**
  * This class limits the number of simultaneous queries 
  * and manages the waiting queue size according to throughput 
  * estimates.
  * 
- * @author Martin Massera
+ * @author Martin Massera, Spike
  */
 public class TrafficLimitingSearcher implements ISearcher {
     private static final Logger logger = Logger.getLogger(com.flaptor.util.Execute.whoAmI());
+
+    private final Statistics stats = Statistics.getStatistics();
 
     private int maxSimultaneousQueries;
     private int maxTimeInQueue;
@@ -75,12 +79,15 @@ public class TrafficLimitingSearcher implements ISearcher {
         QueryParams qparams = new QueryParams(query, firstResult, count, group, groupSize, filter, sort);
         
         boolean doQuery = false;
+        int qipToReport;
         synchronized (queriesInProgress) { //see if there is place to do the query
             if (queriesInProgress < maxSimultaneousQueries) {
                 queriesInProgress = queriesInProgress + 1;
                 doQuery = true;
             }
+            qipToReport = queriesInProgress;
         }
+        stats.notifyEventValue("queriesInProgress", qipToReport);
         GroupedSearchResults res = null;
         if (doQuery) { //if there is place do the query
         	res = executeSearchAndPoll(qparams);

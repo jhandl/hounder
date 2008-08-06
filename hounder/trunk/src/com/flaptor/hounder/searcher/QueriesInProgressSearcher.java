@@ -34,10 +34,12 @@ import com.flaptor.util.Statistics;
  * the first one returns.
  *
  * 
- * @author Martin Massera
+ * @author Martin Massera, Spike.
  */
 public class QueriesInProgressSearcher implements ISearcher {
     private static final Logger logger = Logger.getLogger(com.flaptor.util.Execute.whoAmI());
+
+    private Statistics stats = Statistics.getStatistics();
 
     final private ISearcher baseSearcher;
     Map<QueryParams, QueryResults> inProgress = new HashMap<QueryParams, QueryResults>();
@@ -57,16 +59,15 @@ public class QueriesInProgressSearcher implements ISearcher {
             if (!inProgress.containsKey(params)) {
                 inProgress.put(params, new QueryResults());
                 execute = true;
-                Statistics.getStatistics().notifyEventValue("queryInProgress", 1);
             } else {
                 execute = false;
-                Statistics.getStatistics().notifyEventValue("queryInProgress", 0);
             }
             results = inProgress.get(params);
         }
 
         GroupedSearchResults retvalue = null;
         if (execute) {
+            stats.notifyEventValue("mergedQueries", 0);
             SearcherException searcherException = null;
         	RuntimeException runtimeException = null;
             try {
@@ -85,6 +86,7 @@ public class QueriesInProgressSearcher implements ISearcher {
                 results.notifyAll();
             }
         } else {
+            stats.notifyEventValue("mergedQueries", 1);
             synchronized (results) {
             	while (!results.isValid()) {
                     try {
