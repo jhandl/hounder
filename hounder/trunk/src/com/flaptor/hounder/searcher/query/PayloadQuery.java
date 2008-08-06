@@ -45,6 +45,7 @@ import java.io.Serializable;
  * @author Flaptor Development Team
  */
 public class PayloadQuery extends AQuery {
+    private static final long serialVersionUID = 1L;
     private final String field;
 
     /**
