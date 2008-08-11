@@ -99,6 +99,10 @@ public class FetcherTest extends TestCase {
 
         // Stop the web server
         server.requestStop();
+        for ( int i = 0; i < 100; i++) { 
+            if (server.isStopped()) break;
+            com.flaptor.util.Execute.sleep(1000);
+        }
 
         // Chech that the page has been fetched
         for (FetchDocument doc : fetchdata) {

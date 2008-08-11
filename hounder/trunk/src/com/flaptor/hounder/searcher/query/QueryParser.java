@@ -107,19 +107,20 @@ public class QueryParser implements Serializable {
      * it creates the phraseMatcher from the file specified in searcher.query.phrasesFile
      * if blank, it recognizes no phrases
      * 
-     * @return the newly created phraseMatcher
+     * @return the newly created phraseMatcher, or null if searcher.query.phrasesFile was blank
      */
     private PhraseMatcher createPhraseMatcher() {
-        PhraseMatcher pm = new PhraseMatcher();
+        PhraseMatcher pm;
         String phrasesFilePath = searcherConfig.getString("QueryParser.phrasesFile").trim();
-        if (phrasesFilePath.equals("")) pm.construct(new ArrayList<String>());
-        else {
+        if (phrasesFilePath.equals("")) {
+            pm = null;
+        } else {
             try {
-
+                pm = new PhraseMatcher();
                 pm.construct(new File(phrasesFilePath));
             } catch (IOException e) {
                 logger.error("error while constructing phraseMatcher", e);
-                pm.construct(new ArrayList<String>());
+                pm = null;
             }
         }
         return pm;
@@ -170,6 +171,11 @@ public class QueryParser implements Serializable {
     }
 
     private String matchPhrases(String query) {
+        // check if it makes sense to try to match phrases first
+        if (null == phraseMatcher) return query;
+
+
+        // else, match them
         StringBuffer newQuery = new StringBuffer();
         int pos = -1;
         boolean inQuotes = false;
