@@ -1,16 +1,16 @@
 /*
- Copyright 2008 Flaptor (flaptor.com) 
- 
- Licensed under the Apache License, Version 2.0 (the "License"); 
- you may not use this file except in compliance with the License. 
- You may obtain a copy of the License at 
- 
-     http://www.apache.org/licenses/LICENSE-2.0 
- 
- Unless required by applicable law or agreed to in writing, software 
- distributed under the License is distributed on an "AS IS" BASIS, 
- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
- See the License for the specific language governing permissions and 
+ Copyright 2008 Flaptor (flaptor.com)
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+     http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
  limitations under the License.
  */
 
@@ -39,7 +39,7 @@ import com.flaptor.util.RunningState;
 
 /**
  * This class implements the hounder multi indexer. It recieves documents
- * to index and relays them to one of a number of indexers according to a 
+ * to index and relays them to one of a number of indexers according to a
  * pluggable function of the received document, for example the hash of the
  * url. It is important that this hash function splits the incomming stream
  * of documents evenly so each indexer will end up with a similarly sized
@@ -50,7 +50,7 @@ public class MultiIndexer implements IRmiIndexer, IIndexer {
 
 	//clusterfest
     private NodeListener nodeListener;
-    private IndexerMonitoredNode indexerMonitoredNode; 
+    private IndexerMonitoredNode indexerMonitoredNode;
 
     private static final Logger logger = Logger.getLogger(Execute.whoAmI());
     protected RunningState state = RunningState.RUNNING;
@@ -63,7 +63,7 @@ public class MultiIndexer implements IRmiIndexer, IIndexer {
     private final boolean useXslt;
     private final XsltModule xsltModule;
 
-    
+
     /**
      * Constructor.
      */
@@ -81,7 +81,7 @@ public class MultiIndexer implements IRmiIndexer, IIndexer {
 
         useXslt = config.getBoolean("multiIndexer.useXslt");
         if (useXslt) {
-            try { 
+            try {
                 xsltModule = new XsltModule();
                 logger.info("MultiIndexer will be using XsltModule");
             } catch (Exception e) {
@@ -92,7 +92,7 @@ public class MultiIndexer implements IRmiIndexer, IIndexer {
             xsltModule = null;
             logger.info("MultiIndexer will NOT be using XsltModule");
         }
-        
+
         if (config.getBoolean("clustering.enable")) {
         	int port = PortUtil.getPort("clustering.rpc.indexer");
     		nodeListener = new NodeListener(port, config);
@@ -147,16 +147,16 @@ public class MultiIndexer implements IRmiIndexer, IIndexer {
 
         // else, it may be a document to index / delete
         // get the documentId.
-        
+
         Node node = doc.selectSingleNode("//documentId");
         if (null == node) {
             logger.error("Document missing documentId. Will not index it.");
             logger.error("Document was : " + DomUtil.domToString(doc));
             return Indexer.FAILURE;
         }
-        
 
-        // get the target indexer. 
+
+        // get the target indexer.
         // Make sure that urls begin with http://
         String url = node.getText();
         int target = hashFunction.hash(url);
@@ -165,7 +165,11 @@ public class MultiIndexer implements IRmiIndexer, IIndexer {
         try {
             IRemoteIndexer indexer = indexers.get(target);
             logger.debug("Sending " + node.getText() + " to indexer " + target);
-            return indexer.index(doc);
+            int res = indexer.index(doc);
+            if (res != Indexer.SUCCESS){
+                logger.debug("Problem ("+res+") indexing " + node.getText() + " to indexer " + target);
+            }
+            return res;
         } catch (com.flaptor.util.remote.RpcException e) {
             logger.error("Connection failed: ",e);
             return Indexer.FAILURE;
@@ -194,7 +198,7 @@ public class MultiIndexer implements IRmiIndexer, IIndexer {
     protected int processCommand(final Document doc) {
         Node commandNode = doc.selectSingleNode("/command");
         Node attNode = commandNode.selectSingleNode("@node");
-        
+
         if (null == attNode) { // so it is for all nodes
 
             for (IRemoteIndexer indexer: indexers) {
@@ -222,7 +226,7 @@ public class MultiIndexer implements IRmiIndexer, IIndexer {
 
                 }
             }
-            // in case no one returned Indexer.FAILURE 
+            // in case no one returned Indexer.FAILURE
             return Indexer.SUCCESS;
         } else { // specific node
 
