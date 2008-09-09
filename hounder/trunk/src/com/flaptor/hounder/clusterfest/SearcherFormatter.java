@@ -12,7 +12,6 @@ import com.flaptor.util.Statistics.EventStats;
 
 public class SearcherFormatter implements PropertyFormatter {
 
-	@Override
 	@SuppressWarnings("unchecked")
 	public String format(NodeDescriptor node, String name, Object value) {
 		StringBuffer output = new StringBuffer();

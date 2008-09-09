@@ -134,8 +134,8 @@ public class Index {
     }
 
     /**
-     * Gets a reader to read/erase over the index.
-     * @return a lucene IndexReader. The caller has to remember closing it after use.
+     * Gets a _NEW_ reader to read/erase over the index.
+     * @return a new lucene IndexReader. The caller has to remember closing it after use.
      * @throws IllegalStateException if the index has been closed.
      */
     public IndexReader getReader() {
@@ -143,7 +143,9 @@ public class Index {
             throw new IllegalStateException("Can't get reader: the index is closed.");
         }
         try {
-            return IndexReader.open(directory);
+        	FSDirectory dir = FSDirectory.getDirectory(path);
+        	dir.setDisableLocks(true);
+            return IndexReader.open(dir);
         } catch (IOException e) {
             logger.error("Error while getting the reader.", e);
             throw new RuntimeException("Error while getting the reader.");
@@ -261,7 +263,6 @@ public class Index {
         mp.setMinMergeMB(smallSegmentSize);
         mp.setMergeFactor(config.getInt("Index.mergeFactor"));
         mergePolicy = mp;
-        
         
         
         createAnalyzer();

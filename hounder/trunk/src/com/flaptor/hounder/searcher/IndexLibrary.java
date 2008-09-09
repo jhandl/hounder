@@ -80,7 +80,7 @@ public class IndexLibrary implements LocalIndexUpdater, Stoppable {
             try {
                 this.rih.setNewIndex(currentIndex);
                 logger.info("Using newest un-corrupted index to start searcher.");
-            } catch (IOException e) {
+            } catch (SearcherException e) {
                 logger.error("While initializing ReloadableIndexHandler with newest un-corrupted index: "+e,e);
             }
 
@@ -126,9 +126,8 @@ public class IndexLibrary implements LocalIndexUpdater, Stoppable {
         try {
             rih.setNewIndex(index);
             currentIndex = index;
-            rih.flush();
             return true;
-        } catch (IOException e) {
+        } catch (SearcherException e) {
             logger.error(e,e);
             return false;
         }

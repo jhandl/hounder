@@ -18,6 +18,9 @@ package com.flaptor.hounder.searcher;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.apache.log4j.Logger;
 import org.apache.lucene.index.IndexReader;
@@ -33,36 +36,31 @@ import com.flaptor.hounder.searcher.group.AResultsGrouper;
 import com.flaptor.hounder.searcher.group.NoGroup;
 import com.flaptor.hounder.searcher.group.TopDocsDocumentProvider;
 import com.flaptor.hounder.searcher.payload.SimilarityForwarder;
-
-
 import com.flaptor.util.Cache;
 import com.flaptor.util.Config;
 import com.flaptor.util.Execute;
 import com.flaptor.util.Pair;
 import com.flaptor.util.RunningState;
+import com.flaptor.util.Statistics;
 import com.flaptor.util.Stoppable;
 
 /**
  * Automatically detects index changes, providing required
- * <code>IndexSearcher</code> functionality on the newest index. It checks
- * periodically for new indexes. After a new index is found, it waits 30 seconds
- * to check again. Search operations are always completed, regardless the index
- * is changing.
+ * <code>IndexSearcher</code> functionality on the newest index.
  * @author Flaptor Development Team
  */
 final class ReloadableIndexHandler implements Stoppable {
 
 	private static final Logger logger = Logger.getLogger(Execute.whoAmI());
 	private static final Config config = Config.getConfig("searcher.properties");
+	private static final Statistics statistics = Statistics.getStatistics();
 	
-	/** when an old index is replaced by a new one, the queries pending on the old index
-	 * are still processed on it. Because there could be many index changes in a row,
-	 * we can keep a few old indexes for a little while until they service their queries.
-	 */
-	private static final int MAX_CONCURRENT_SEARCHERS=5;
 	protected final int maxOffset;
 	protected final int maxHitsPerPage;
     protected final int slackFactor;
+
+    // The similarity to use when compairing documents. It is very useful for boosting on searchtime.
+    private final org.apache.lucene.search.Similarity similarity;
 
     //State related te the shutdown sequence.
     private RunningState state = RunningState.RUNNING;
@@ -71,25 +69,8 @@ final class ReloadableIndexHandler implements Stoppable {
     private List<Cache> caches = new ArrayList<Cache>();
 
     private IndexLibrary library;
-
-    private int size;
-
-    // The following objects are shared by searcher threads and by readindex thread.
-    // search() method, used by searcher threads, modifies inUse[] and usageCount[],
-    // and uses currentIndexId and indexSearchersPool[].
-    Pair<Index, IndexSearcher>[] indexSearchersPool;
-
-    int[] usageCount;
-    int[] inUse;
-    boolean[] available;
-    long[] startTimestamp;
-    int currentIndexId;
-    int[] errCount;
-    int[] okCount;
+    AtomicReference<IndexRepository> currentIndexRepository = new AtomicReference<IndexRepository>(null);
     
-    // The similarity to use when compairing documents.
-    // It is very useful for boosting on searchtime.
-    private org.apache.lucene.search.Similarity similarity;
 
     // Sample one every N queries
     private int querySamplePeriod = 0;
@@ -114,26 +95,7 @@ final class ReloadableIndexHandler implements Stoppable {
         maxOffset = config.getInt("ReloadableIndexSearcher.maxOffset");
         maxHitsPerPage = config.getInt("ReloadableIndexSearcher.maxHitsPerPage");
         slackFactor = config.getInt("ReloadableIndexSearcher.lookupLimit"); 
-        size = MAX_CONCURRENT_SEARCHERS;
-        indexSearchersPool = new Pair[size];
-        usageCount = new int[size]; 
-        inUse = new int[size];
-        available = new boolean[size];
-        startTimestamp = new long[size];
-        errCount = new int[size];
-        okCount = new int[size];
         
-        for (int i = 0; i < size; i++) {
-            indexSearchersPool[i] = null;
-            usageCount[i] = 0;
-            inUse[i] = 0;
-            available[i] = true;
-            startTimestamp[i] = 0;
-        }
-
-        currentIndexId = -1;
-
-
         similarity = new SimilarityForwarder();
 
         library = new IndexLibrary(this);
@@ -146,31 +108,6 @@ final class ReloadableIndexHandler implements Stoppable {
     }
 
     
-    private class SavedQuery {
-    	Query query;
-    	Filter filter;
-    	Sort sort;
-    	int offset;
-    	int groupCount;
-    	AGroup groupBy;
-    	int groupSize;
-    	public SavedQuery(Query query, Filter filter, Sort sort, int offset, int groupCount, AGroup groupBy, int groupSize) {
-    		this.query = query;
-    		this.filter = filter;
-    		this.sort = sort;
-    		this.offset = offset;
-    		this.groupCount = groupCount;
-    		this.groupBy = groupBy;
-    		this.groupSize = groupSize;
-    	}
-    	public void replay() {
-    		try {
-				search(query, filter, sort, offset, groupCount, groupBy, groupSize);
-			} catch (Exception e) {
-				// ignore.
-			}
-    	}
-    }
     
 	/**
 	 * Determine if the time has come to save another query 
@@ -205,7 +142,7 @@ final class ReloadableIndexHandler implements Stoppable {
 	 * internal (lazy) data structures. 
 	 */
 	public void executeSavedQueries() {
-        if (-1 != currentIndexId && null != savedQueries) {
+        if (null != savedQueries && null != currentIndexRepository.get()) {
         	int savePeriod = querySamplePeriod;
         	querySamplePeriod = 0;
         	for (SavedQuery query : savedQueries) {
@@ -234,52 +171,42 @@ final class ReloadableIndexHandler implements Stoppable {
      * @throws NoIndexActiveException if there is no index active or if <code>IndexSearcher.search()</code> failed.
      * See #org.apache.lucene.search.IndexSearcher for details.
      */
-    public Pair<GroupedSearchResults, Query> search(final Query query, final Filter filter, final Sort sort, final int offset, final int groupCount, AGroup groupBy, int groupSize) throws IOException, NoIndexActiveException {
-        // Only need to synchronize access to counters. The search operation can be left outside, as it is thread-safe.
-        // indexId is a local variable, and its indexSearcher is already marked 'in-use'.
-        // Lock is obtained over 'inUse' array to separate of new index setting sync. process.
-        int indexId = -1;
-        boolean ok = false;
-        synchronized(inUse) {
-            if (currentIndexId == -1) {
-                throw new NoIndexActiveException();
-            }
-            indexId = currentIndexId;
-
-            inUse[indexId]++;
-            usageCount[indexId]++;
-        }
-
-     	if (shouldSaveQuery()) {
-    		saveQuery(query, filter, sort, offset, groupCount, groupBy, groupSize);
-    	}
-
-        try {
-            org.apache.lucene.search.Searcher searcher = indexSearchersPool[indexId].last();
-            TopDocs tdocs;
-            if (null == sort) { //Lucene's documentation is not clear about whether search may take a null sort, so...
-                tdocs= searcher.search(query,filter, offset + groupSize * groupCount * slackFactor);
-            } else {
-                tdocs= searcher.search(query,filter, offset + groupSize * groupCount * slackFactor, sort);
-            }
-
-            // Exceptions are thrown to upper layer, but if we got here, assume everything is ok.
-            ok = true;
-            Query rewrittenQuery = searcher.rewrite(query);
-            GroupedSearchResults results = pageResults(tdocs, searcher, offset, groupCount, groupBy, groupSize);
-            if (null == results) {
-            	throw new RuntimeException("GroupedSearchResults is NULL");
-            }
-            return(new Pair<GroupedSearchResults, Query>(results, rewrittenQuery));
-
-        } finally {
-            synchronized(inUse) {
-                inUse[indexId]--;
-                if (ok) { okCount[indexId] ++; } // keep counting after having decided
-                else { errCount[indexId] ++; }   // what to do with the index for stats
-            }
-        }
+	public Pair<GroupedSearchResults, Query> search(final Query query, final Filter filter, final Sort sort, final int offset, final int groupCount, AGroup groupBy, int groupSize) throws IOException, NoIndexActiveException {
+		IndexRepository ir = currentIndexRepository.get();
+		if (null == ir) {
+			throw new NoIndexActiveException();
+		}
+		IndexSearcher searcher = ir.getIndexSearcher();
+		try {
+			if (shouldSaveQuery()) {
+				saveQuery(query, filter, sort, offset, groupCount, groupBy, groupSize);
+			}
+	
+			TopDocs tdocs;
+			long startTime = System.currentTimeMillis();
+			if (null == sort) { //Lucene's documentation is not clear about whether search may take a null sort, so...
+				tdocs= searcher.search(query,filter, offset + groupSize * groupCount * slackFactor);
+			} else {
+				tdocs= searcher.search(query,filter, offset + groupSize * groupCount * slackFactor, sort);
+			}
+			statistics.notifyEventValue("lucene work time", System.currentTimeMillis() - startTime);
+	
+			// Exceptions are thrown to upper layer, but if we got here, assume everything is ok.
+			Query rewrittenQuery = searcher.rewrite(query);
+			GroupedSearchResults results = pageResults(tdocs, searcher, offset, groupCount, groupBy, groupSize);
+			if (null == results) {
+				throw new RuntimeException("GroupedSearchResults is NULL");
+			}
+			return(new Pair<GroupedSearchResults, Query>(results, rewrittenQuery));
+		} catch (IOException e) {
+			statistics.notifyEventError("lucene work time");
+			throw e;
+		} finally {
+			ir.releaseIndexSearcher(searcher);
+		}
+		
     }
+			
 
     /**
 	  Fetches the actual documents for the requested interval.
@@ -319,7 +246,7 @@ final class ReloadableIndexHandler implements Stoppable {
 
 
         AResultsGrouper grouper;
-        if (null ==groupBy ) {
+        if (null == groupBy ) {
             grouper = (new NoGroup()).getGrouper(new TopDocsDocumentProvider(tdocs,searcher));
         } else {
             grouper = groupBy.getGrouper(new TopDocsDocumentProvider(tdocs,searcher));
@@ -338,31 +265,15 @@ final class ReloadableIndexHandler implements Stoppable {
      * @throws NoIndexActiveException if there is no index active.
      */
     public int getNumDocs() throws NoIndexActiveException {
-        // Only need to synchronize access to counters. The search operation can be left outside, as it is thread-safe.
-        // indexId is a local variable, and its indexSearcher is already marked 'in-use'.
-        // Lock is obtained over 'inUse' array to separate of new index setting sync. process.
-        int indexId = -1;
-        boolean ok = false;
-        synchronized(inUse) {
-            if (currentIndexId == -1) {
-                throw new NoIndexActiveException();
-            }
-            indexId = currentIndexId;
-
-            inUse[indexId]++;
-            usageCount[indexId]++;
-        }
+		IndexRepository ir = currentIndexRepository.get();
+		if (null == ir) {
+			throw new NoIndexActiveException();
+		}
+		IndexSearcher searcher = ir.getIndexSearcher();
         try {
-            int retVal = indexSearchersPool[indexId].last().getIndexReader().numDocs();
-            // Exceptions are thrown to upper layer, but if we got here, assume everything is ok.
-            ok = true;
-            return retVal;
+            return searcher.getIndexReader().numDocs();
         } finally {
-            synchronized(inUse) {
-                inUse[indexId]--;
-                if (ok) { okCount[indexId] ++; } // keep counting after having decided
-                else { errCount[indexId] ++; }   // what to do with the index for stats
-            }
+        	ir.releaseIndexSearcher(searcher);
         }
     }
 
@@ -387,22 +298,6 @@ final class ReloadableIndexHandler implements Stoppable {
     }
 
     /**
-     * Iterates over all index searchers in the pool until first available.
-     * @return first index id available.
-     */
-    private int getAvailableIndexId() {
-
-        int newIndexId = -1;
-        for (int i = 0; i < available.length; i++) {
-            if (available[i]) {
-                newIndexId = i;
-                break;
-            }
-        }
-        return newIndexId;
-    }
-
-    /**
      * Sets the new index searcher.
      * There should be only one thread doing this, synchronize changes just in
      * case.
@@ -411,38 +306,18 @@ final class ReloadableIndexHandler implements Stoppable {
      *             if there are too many indexes open and there is no room for
      *             the new one. Should never happen if used properly.
      */
-    public int setNewIndex(final Index newIndex) throws IOException {
-    	IndexReader index = newIndex.getReader();
-    	index.terms(); // for heating the index.
-        IndexSearcher newIndexSearcher = new IndexSearcher(index);
-        newIndexSearcher.setSimilarity(similarity);
-        int newIndexId = getAvailableIndexId();
-        if (-1 == newIndexId) {
-            // Should never happen, though, as we checked before calling this
-            // method.
-            throw new IOException("Too many indexes in use");
-        }
-        indexSearchersPool[newIndexId] = new Pair<Index, IndexSearcher>(newIndex, newIndexSearcher);
-        startTimestamp[newIndexId] = System.currentTimeMillis();
-        available[newIndexId] = false;
-        inUse[newIndexId] = 0;
-        usageCount[newIndexId] = 0;
-        errCount[newIndexId] = 0;
-        okCount[newIndexId] = 0;
-
-        // This part must be synchronized with searchers, so the same object is
-        // used to get the lock.
-        // See search() method.
-        synchronized (inUse) {
-            currentIndexId = newIndexId;
-        }
-
-        //invalidate the cache, if any
-        clearCaches();
-
- 		executeSavedQueries();
-        
-        return (currentIndexId);
+    public void setNewIndex(final Index newIndex) throws SearcherException {
+    	//first, I want to serilize (just in case) all calls to this method. For that I'll use
+    	//currentIndexRepository as a semaphore. Note that the advantage of AtomicReference is not
+    	//lost since currentIndexRepository users (search and getNumDocs) don't sync against it.
+    	synchronized (currentIndexRepository) {
+	    	IndexRepository newRepository = new IndexRepository(newIndex);
+	    	currentIndexRepository.set(newRepository);
+	        //invalidate the cache, if any
+	        clearCaches();
+	        //extensive index warming, if enabled.
+	 		executeSavedQueries();
+    	}
     }
 
    
@@ -461,42 +336,6 @@ final class ReloadableIndexHandler implements Stoppable {
     }
 
     /**
-     * Returns false if there is at least one place to hold a new index.
-     */
-    public boolean isFull() {
-        return (-1 == getAvailableIndexId());
-    }
-
-    /**
-     * Closes all open but not-in-use indexes.
-     * 
-     */
-    public void flush() {
-        for (int i = 0; i < size; i++) {
-            // Must be synchronized with searchers.
-            synchronized (inUse) {
-                if (i == currentIndexId)
-                    continue;
-                if ((!available[i]) && (inUse[i] == 0)) {
-                    if (indexSearchersPool[i] != null) {
-                        library.discardIndex(indexSearchersPool[i].first());
-                        indexSearchersPool[i] = null; // It can now be gc'ed.
-                    }
-                    logger.info("Index " +i+ " dropped, in use for " +
-                            ((System.currentTimeMillis() - startTimestamp[i])/60000)+ " minutes, with " +
-                            usageCount[i]+ " uses (errors: " +errCount[i]+ ", success: " +okCount[i]+ ")");
-                    inUse[i] = 0;
-                    usageCount[i] = 0;
-                    errCount[i] = 0;
-                    okCount[i] = 0;
-                    available[i] = true;
-                }
-            }
-        }
-    }
-
-
-    /**
      * @inheritDoc
      */
     public boolean isStopped() {
@@ -504,9 +343,9 @@ final class ReloadableIndexHandler implements Stoppable {
     }
 
     /**
-     * @inheritDoc
      * After this call, all further attempts to use the index methods (@link index , @link indexDom )
      * will throw an IllegalStateException.
+     * @inheritDoc
      */
     public void requestStop() {
         if (state == RunningState.RUNNING) {
@@ -518,6 +357,10 @@ final class ReloadableIndexHandler implements Stoppable {
     }
 
 
+    
+    
+    
+    
     //--------------------------------------------------------------------------------------------------------
     //Internal classes
     //--------------------------------------------------------------------------------------------------------
@@ -545,23 +388,93 @@ final class ReloadableIndexHandler implements Stoppable {
                 Execute.sleep(20);
             }
             logger.info("IndexLibrary stopped.");
-            logger.info("Closing open indexes...");
-            //FIXME: if there're many indexes open with long queries, this may fail.
-            int localCurrentIndexId = -1;
-            synchronized (inUse) {
-                localCurrentIndexId = currentIndexId;
-                currentIndexId = -1;
-            }
-            if (localCurrentIndexId != -1) {
-                Execute.close(indexSearchersPool[localCurrentIndexId].first());
-                Execute.close(indexSearchersPool[localCurrentIndexId].last());
-                indexSearchersPool[localCurrentIndexId] = null; // It can now be gc'ed.
-            }
-            flush();
-            logger.info("All indexes closed.");
-            logger.info("Stop sequence finished.");
+            
+            
+            logger.info("Closing current index...");
+        	synchronized (currentIndexRepository) {
+        		IndexRepository current = currentIndexRepository.getAndSet(null);
+        		Execute.close(current, logger);
+        	}
+        	logger.info("All indexes closed.");
+            
+        	
+        	logger.info("Stop sequence finished.");
             state = RunningState.STOPPED;
         }
+    }
+    
+    private class IndexRepository {
+    	private static final int POOL_SIZE = 4;
+    	BlockingQueue<IndexSearcher> searcherPool;
+    	
+    	public IndexRepository(final Index index) throws SearcherException {
+    		preheatIndex(index);
+    		searcherPool = new ArrayBlockingQueue<IndexSearcher>(POOL_SIZE);
+    		for (int i = 0; i < POOL_SIZE; i++) {
+    			IndexSearcher is = new IndexSearcher(index.getReader());
+    			is.setSimilarity(similarity);
+    			searcherPool.add(new IndexSearcher(index.getReader()));
+    		}
+    	}
+    	
+    	private void preheatIndex(final Index index) throws SearcherException {
+	    	IndexReader reader = index.getReader();
+	    	try {
+	    		reader.terms(); // for heating the index.
+	    	} catch (IOException e) {
+	    		throw new SearcherException(e);
+	    	}
+    	}
+    	
+    	IndexSearcher getIndexSearcher() {
+    		try {
+    			return searcherPool.take();
+    		} catch (InterruptedException e) {
+    			throw new RuntimeException(e);
+    		}
+    	}
+    	
+    	void releaseIndexSearcher(IndexSearcher s) {
+    		searcherPool.add(s);
+    	}
+    	
+    	void close() {
+    		for (int i = 0; i < POOL_SIZE; i++) {
+    			try {
+    				searcherPool.take().getIndexReader().close();
+    			} catch (IOException e) {
+    				logger.error("Exception while closing an indexReader.", e);
+    			}catch (InterruptedException e) {
+    				//Do nothing.
+    			}
+    		}
+    	}
+    }
+
+    private class SavedQuery {
+    	Query query;
+    	Filter filter;
+    	Sort sort;
+    	int offset;
+    	int groupCount;
+    	AGroup groupBy;
+    	int groupSize;
+    	public SavedQuery(Query query, Filter filter, Sort sort, int offset, int groupCount, AGroup groupBy, int groupSize) {
+    		this.query = query;
+    		this.filter = filter;
+    		this.sort = sort;
+    		this.offset = offset;
+    		this.groupCount = groupCount;
+    		this.groupBy = groupBy;
+    		this.groupSize = groupSize;
+    	}
+    	public void replay() {
+    		try {
+				search(query, filter, sort, offset, groupCount, groupBy, groupSize);
+			} catch (Exception e) {
+				// ignore.
+			}
+    	}
     }
 
 }

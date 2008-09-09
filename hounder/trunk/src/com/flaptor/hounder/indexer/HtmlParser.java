@@ -45,7 +45,7 @@ public class HtmlParser extends AModule {
     private final Set<Pair<String,String>> tags;
     private final boolean STORED;
     private final boolean INDEXED;
-    private com.flaptor.hounder.util.HtmlParser parser;
+    private com.flaptor.util.HtmlParser parser;
     // List of extra fields to extract. useful to extract META tags, and such.
     private final List<String> extraFields;
 
@@ -82,7 +82,7 @@ public class HtmlParser extends AModule {
             extraFields.add(pair.first());
         }
         
-        parser = new com.flaptor.hounder.util.HtmlParser(removedXPathElements, separatorTags,mapping);
+        parser = new com.flaptor.util.HtmlParser(removedXPathElements, separatorTags,mapping);
 
         STORED = conf.getBoolean("HtmlParser.stored");
         INDEXED = conf.getBoolean("HtmlParser.indexed");
@@ -138,7 +138,7 @@ public class HtmlParser extends AModule {
             return;
         }
 
-        com.flaptor.hounder.util.HtmlParser.Output out = parser.parse("",bodyElement.getText());
+        com.flaptor.util.HtmlParser.Output out = parser.parse("",bodyElement.getText());
 
 
         for (String field: extraFields) {

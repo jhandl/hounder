@@ -25,7 +25,7 @@ import org.apache.log4j.Logger;
 
 import com.flaptor.hounder.crawler.pagedb.Link;
 import com.flaptor.hounder.crawler.pagedb.Page;
-import com.flaptor.hounder.util.HtmlParser;
+import com.flaptor.util.HtmlParser;
 import com.flaptor.util.Config;
 import com.flaptor.util.Execute;
 import com.flaptor.util.Pair;
@@ -49,7 +49,7 @@ public class FetchDocument {
         Config conf = Config.getConfig("crawler.properties");
         String removedXPathElements = conf.getString("HtmlParser.removedXPath");
         String[] separatorTags = conf.getStringArray("HtmlParser.separatorTags");
-        parser = new com.flaptor.hounder.util.HtmlParser(removedXPathElements,separatorTags);
+        parser = new com.flaptor.util.HtmlParser(removedXPathElements,separatorTags);
     }
 
     private String origUrl;
