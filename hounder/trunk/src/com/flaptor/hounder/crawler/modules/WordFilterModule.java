@@ -40,12 +40,18 @@ public class WordFilterModule extends ATrueFalseModule {
     private FileMonitor monitor = null;
     private long checkDelay = 10; // ten seconds
     private long minTimeBetweenFiles = 60; // one minute
-  
+    private boolean debug = false;
+
+
+    public WordFilterModule() throws IOException {
+    	super("wordFilter", Config.getEmptyConfig().set("hotspot.tag", "hotspot").set("emitdoc.tag","emitdoc"));
+    	debug = true;
+    }
     
 	/**
 	 * Create a WordFilterModule and start the file monitor. 
 	 */
-    public WordFilterModule (String name, Config globalConfig) throws IOException{
+    public WordFilterModule(String name, Config globalConfig) throws IOException {
         super(name, globalConfig);
         String filename = getModuleConfig().getString("word.list.file");
         String filepath = FileUtil.getFilePathFromClasspath(filename);
@@ -103,7 +109,7 @@ public class WordFilterModule extends ATrueFalseModule {
     	 * @param str the phrase to add.
     	 */
     	public void add(String str) {
-    		String[] parts = str.split("\\s",2);
+    		String[] parts = str.split("\\s+",2);
     		if (parts.length > 0) {
     			String word = parts[0];
     			if (!cons.containsKey(word)) {
@@ -134,6 +140,7 @@ public class WordFilterModule extends ATrueFalseModule {
             		PhraseMatcher rest = cons.get(words[i]);
             		if (null == rest || rest.matchWords(words,i+1)) {
             			found = true;
+            			System.out.println("match: "+words[i]);
             			break;
             		}
             	}
@@ -147,7 +154,7 @@ public class WordFilterModule extends ATrueFalseModule {
     	 * @return true if a match is found.
     	 */
     	public boolean matchText(String text) {
-            return matchWords(text.split("\\s"), 0);
+            return matchWords(text.split("\\s+"), 0);
     	}
 
     }
@@ -218,6 +225,19 @@ public class WordFilterModule extends ATrueFalseModule {
             running = false;
         }
 
+    }
+    
+    public static void main(String[] args) throws Exception {
+    	if (args.length != 2) {
+    		System.out.println();
+    		System.out.println("args: [word_file] [text_file]");
+    		System.out.println();
+    		System.exit(0);
+    	}
+    	WordFilterModule mod = new WordFilterModule();
+    	mod.phrases = mod.readFile(args[0]);
+    	String text = FileUtil.readFile(new File(args[1]));
+    	System.out.println("MATCH: "+mod.phrases.matchText(text));
     }
     
 }

@@ -178,10 +178,11 @@ public class UrlPatterns {
     private boolean readPatterns (String filename, TrieTree<Vector<PatternRule>> patterns) {
         boolean matchAll = false;
         if (null != filename) {
+        	BufferedReader reader = null;
             try {
                 File hotspotFile = new File(filename);
                 if (hotspotFile.exists()) {
-                    BufferedReader reader = new BufferedReader(new FileReader(hotspotFile));
+                    reader = new BufferedReader(new FileReader(hotspotFile));
                     while (reader.ready()) {
                         String line = reader.readLine();
                         if (line.length() > 0 && line.charAt(0) != '#') {  // ignore empty lines and comments
@@ -209,10 +210,8 @@ public class UrlPatterns {
                                     stored.add(pair.last());
                                 }
                             }
-
                         }
                     }
-                    reader.close();
                 } else {
                     throw new IllegalArgumentException("Couldn't find user urls file " +filename);
                 }
@@ -220,6 +219,8 @@ public class UrlPatterns {
                 String msg="Reading hostpots file (" + filename + "): " + e;
                 logger.error(msg,e);
                 throw new IllegalArgumentException(msg,e);
+            } finally {
+            	Execute.close(reader);
             }
         }
         return matchAll;
