@@ -83,7 +83,7 @@ public class CacheModule extends AProcessorModule {
             logger.warn("Document does not have parsed text.");
             return;
         }
-        DocumentCacheItem item = new DocumentCacheItem(doc.getContent(), doc.getMimeType());
+        DocumentCacheItem item = new DocumentCacheItem(doc.getContent(), doc.getEncoding(), doc.getMimeType());
         if (null == item) {
             logger.warn("Document does not have the original content.");
             return;

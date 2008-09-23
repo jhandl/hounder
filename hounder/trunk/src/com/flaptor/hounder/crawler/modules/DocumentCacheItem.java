@@ -16,6 +16,7 @@
 package com.flaptor.hounder.crawler.modules;
 
 import java.io.Serializable;
+import java.io.UnsupportedEncodingException;
 
 /**
  * A FileCache item representing a fetched document.
@@ -28,9 +29,11 @@ public class DocumentCacheItem implements Serializable {
 	private static final long serialVersionUID = 1L;
 	private byte[] content = null;
 	private String mimeType = null;
+	private String encoding = null;
 
-	public DocumentCacheItem(byte[] content, String mimeType) {
+	public DocumentCacheItem(byte[] content, String encoding, String mimeType) {
 		this.content = content;
+		this.encoding = encoding;
 		this.mimeType = mimeType;
 	}
 
@@ -43,7 +46,11 @@ public class DocumentCacheItem implements Serializable {
 	}
 
 	public String toString() {
-		return new String(content);
+		try {
+			return "MIMETYPE: "+mimeType + "  " + new String(content,encoding);
+		} catch (UnsupportedEncodingException e) {
+			return null; //new String(content);
+		}
 	}
 
 }
