@@ -55,7 +55,7 @@ public class RmiSearcherStub extends ARmiClientStub implements IRemoteSearcher {
             super.connectionSuccess();
             return res;
         } catch (RemoteException e) {
-            logger.error(e,e);
+            logger.error("search: exception caught.", e);
             super.connectionFailure();
             throw new RpcException(e);
         }

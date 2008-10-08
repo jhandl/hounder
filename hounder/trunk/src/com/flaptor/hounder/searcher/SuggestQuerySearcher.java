@@ -84,4 +84,14 @@ public class SuggestQuerySearcher implements ISearcher{
         }
         return res;
     }
+
+    @Override
+    public void requestStop() {
+        searcher.requestStop();
+    }
+
+    @Override
+    public boolean isStopped() {
+        return searcher.isStopped();
+    }
 }

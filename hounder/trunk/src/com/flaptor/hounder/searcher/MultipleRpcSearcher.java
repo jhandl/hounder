@@ -40,52 +40,78 @@ public class MultipleRpcSearcher implements ISearcher {
     private static final Logger logger = Logger.getLogger(Execute.whoAmI());
     private final ISearcher baseSearcher;
     private RmiSearcherWrapper rmiSearcherWrapper;
-    
+    private RmiServer rmiServer = null;
+    private XmlrpcServer xmlRpcServer = null;
+    private WebServer webServer = null;
+
+
+    @Override
+    public void requestStop() {
+        if (null != rmiServer) {
+            rmiServer.requestStop();
+        }
+        if (null != xmlRpcServer) {
+            xmlRpcServer.requestStop();
+        }
+    }
+
+    @Override
+    public boolean isStopped() {
+        boolean running = true;
+        if (null != rmiServer) {
+            running = running && !rmiServer.isStopped();
+        }
+        if (null != xmlRpcServer) {
+            running = running && !xmlRpcServer.isStopped();
+        }
+        return !running;
+    }
+
     public MultipleRpcSearcher(ISearcher baseSearcher, boolean rmi, boolean xmlrpc, boolean openSearch, boolean web) {
         this.baseSearcher = baseSearcher;
         if (rmi) {
             int port = PortUtil.getPort("searcher.rmi");
             logger.info("MultipleRpcSearcher constructor: starting rmi searcher on port " + port);
             rmiSearcherWrapper = new RmiSearcherWrapper(baseSearcher);
-            RmiServer server = new RmiServer(port);
-            server.addHandler(RmiServer.DEFAULT_SERVICE_NAME, rmiSearcherWrapper);
-            server.start();
+            rmiServer = new RmiServer(port);
+            rmiServer.addHandler(RmiServer.DEFAULT_SERVICE_NAME, rmiSearcherWrapper);
+            rmiServer.start();
         }
         if (xmlrpc) {
             int port = PortUtil.getPort("searcher.xml");
             logger.info("MultipleRpcSearcher constructor: starting xmlRpc searcher on port " + port);
-            XmlrpcServer server = new XmlrpcServer(port);
-            server.addHandler(XMLRPC_CONTEXT, new XmlSearcher(baseSearcher));
-            server.start();
+            xmlRpcServer = new XmlrpcServer(port);
+            xmlRpcServer.addHandler(XMLRPC_CONTEXT, new XmlSearcher(baseSearcher));
+            xmlRpcServer.start();
         }
         if (openSearch || web) {
             Config config = Config.getConfig("searcher.properties");
             int webServerPort = PortUtil.getPort("searcher.webOpenSearch");
-            WebServer server = new WebServer(webServerPort); 
+            webServer = new WebServer(webServerPort); 
 
             if (openSearch) {
                 String context = config.getString("opensearch.context");
                 logger.info("MultipleRpcSearcher constructor: starting OpenSearch searcher on port " + webServerPort + " context "+context);
-                server.addHandler(context, new OpenSearchHandler(baseSearcher));
+                webServer.addHandler(context, new OpenSearchHandler(baseSearcher));
             }
             if (web) {
                 String context = config.getString("websearch.context");
                 logger.info("MultipleRpcSearcher constructor: starting web searcher on port " + webServerPort  + " context "+context);
                 WebSearchUtil.setSearcher(baseSearcher);
                 String webappPath = this.getClass().getClassLoader().getResource("web-searcher").getPath();
-                server.addWebAppHandler(context, webappPath);
+                webServer.addWebAppHandler(context, webappPath);
             }
             boolean redirect = config.getBoolean("websearch.redirect");
             if (redirect) {
-            	String from = config.getString("websearch.redirect.from");
-            	String to = config.getString("websearch.redirect.to");
-            	server.addHandler("/", new RedirectHandler(from,to));
+                String from = config.getString("websearch.redirect.from");
+                String to = config.getString("websearch.redirect.to");
+                webServer.addHandler("/", new RedirectHandler(from,to));
             }
-   			try {server.start();} catch (Exception e) {throw new RuntimeException(e);}
+            try {webServer.start();} catch (Exception e) {throw new RuntimeException(e);}
         }
     }
-    
-    
+
+
     public GroupedSearchResults search(AQuery query, int firstResult, int count, AGroup group, int groupSize, AFilter filter, ASort sort)  throws SearcherException{
         return baseSearcher.search(query, firstResult, count, group, groupSize, filter, sort);
     }

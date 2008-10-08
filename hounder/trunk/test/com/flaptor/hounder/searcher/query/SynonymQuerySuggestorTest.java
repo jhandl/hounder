@@ -86,6 +86,17 @@ public class SynonymQuerySuggestorTest extends TestCase {
     // PRIVATE CLASSES
 
     private class SearcherStub implements ISearcher {
+        private volatile boolean isRunning = true;
+
+        @Override
+        public void requestStop() {
+            isRunning = false;
+        }
+
+        @Override
+        public boolean isStopped() {
+            return !isRunning;
+        }
     
 
         // every query, that does not contain "bar", will return empty

@@ -172,6 +172,16 @@ public class TrafficLimitingSearcher implements ISearcher {
         return queriesInProgress;
     }
 
+    @Override
+    public void requestStop() {
+        baseSearcher.requestStop();
+    }
+
+    @Override
+    public boolean isStopped() {
+        return baseSearcher.isStopped();
+    }
+
     private static class QueryInQueue{
         private boolean executeNotDiscard = true;
         private QueryParams qparams;

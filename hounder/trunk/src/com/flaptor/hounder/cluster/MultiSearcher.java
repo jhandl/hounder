@@ -152,5 +152,15 @@ public class MultiSearcher implements ISearcher {
         AResultsGrouper grouper = group.getGrouper(new GroupedSearchResultsDocumentProvider(goodResults,sort));
         return grouper.group(count,groupSize,firstResult);
     }
+
+    @Override
+    public void requestStop() {
+        multiQueryExecutor.requestStop();
+    }
+
+    @Override
+    public boolean isStopped() {
+        return multiQueryExecutor.isStopped();
+    }
     
 }

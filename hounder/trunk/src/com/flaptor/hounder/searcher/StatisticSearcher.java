@@ -32,6 +32,7 @@ import com.flaptor.util.Statistics;
 public class StatisticSearcher implements ISearcher {
 	private static final Logger logger = Logger.getLogger(Execute.whoAmI());
 	private ISearcher searcher;
+    Statistics stats = Statistics.getStatistics();
 	
 	public StatisticSearcher(ISearcher searcher) {
 		this.searcher = searcher;
@@ -47,7 +48,7 @@ public class StatisticSearcher implements ISearcher {
 		} finally {
 			if (success) { 
 				long time = System.currentTimeMillis() - start;
-				Statistics.getStatistics().notifyEventValue("responseTimes", time);
+				stats.notifyEventValue("responseTimes", time);
 				results.setResponseTime(time);
 				if (logger.isDebugEnabled()) {
 					logger.debug("Query statistics: responding to query (success, response time " + time +" ms)" + query + " ,from " + firstResult +
@@ -55,7 +56,7 @@ public class StatisticSearcher implements ISearcher {
 							sort);
 				}
 			} else {
-				Statistics.getStatistics().notifyEventError("responseTimes");
+				stats.notifyEventError("responseTimes");
 				if (logger.isDebugEnabled()) {
 					logger.debug("Query statistics: responding to query (failure)" + query + " ,from " + firstResult +
 							", with " + count + ", filtering by" + filter + ",grouping by" + group + ", sorting by " +
@@ -66,5 +67,15 @@ public class StatisticSearcher implements ISearcher {
 		if (null == results) throw new SearcherException("GroupedSearchResults is NULL");
 		return results;		
 	}
+
+    @Override
+    public void requestStop() {
+        searcher.requestStop();
+    }
+
+    @Override
+    public boolean isStopped() {
+        return searcher.isStopped();
+    }
 
 }

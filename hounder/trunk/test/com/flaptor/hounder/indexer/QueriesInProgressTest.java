@@ -34,6 +34,7 @@ public class QueriesInProgressTest extends TestCase {
 
         public int queriesInProgress = 0;
         public volatile boolean answer = false; 
+        public volatile boolean running = true;
         
         public GroupedSearchResults search(AQuery query, int firstResult, int count, AGroup group, int groupSize, AFilter filter, ASort sort) {
             synchronized(this) {queriesInProgress++;}
@@ -46,7 +47,17 @@ public class QueriesInProgressTest extends TestCase {
                 queriesInProgress--;
                 return new GroupedSearchResults();
             }
-        }       
+        }
+
+        @Override
+        public void requestStop() {
+            running = false;
+        }
+
+        @Override
+        public boolean isStopped() {
+            return running == false;
+        }
     }
     
     private int queriesInProgress = 0;

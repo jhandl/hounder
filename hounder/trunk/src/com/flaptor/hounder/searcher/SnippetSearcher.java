@@ -771,5 +771,16 @@ private int getNext(List<Integer> lst, int pos, boolean forward){
             res.append(' ');
         }        
         return res.toString();
-    }    
+    }
+
+    @Override
+    public void requestStop() {
+        searcher.requestStop();
+    }
+
+    @Override
+    public boolean isStopped() {
+        return searcher.isStopped();
+    }
+ 
 }

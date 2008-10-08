@@ -438,7 +438,7 @@ final class ReloadableIndexHandler implements Stoppable {
     		searcherPool.add(s);
     	}
     	
-    	void close() {
+    	public void close() {
     		for (int i = 0; i < POOL_SIZE; i++) {
     			try {
     				searcherPool.take().getIndexReader().close();

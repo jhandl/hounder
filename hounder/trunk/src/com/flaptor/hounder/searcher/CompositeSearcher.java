@@ -36,6 +36,7 @@ import com.flaptor.util.Cache;
 import com.flaptor.util.Config;
 import com.flaptor.util.LRUCache;
 import com.flaptor.util.PortUtil;
+import com.flaptor.util.Execute;
 
 /**
  * The composition of Searchers in the order we are interested:
@@ -139,5 +140,29 @@ public class CompositeSearcher implements ISearcher {
     
     public TrafficLimitingSearcher getTrafficLimitingSearcher() {
     	return trafficLimitingSearcher;
+    }
+
+    @Override
+    public void requestStop() {
+        new StopperThread().start();
+    }
+
+    private class StopperThread extends Thread {
+        public StopperThread() {
+            this.setName("CompositeSearcher Stopper Thread");
+        }
+
+        public void run() {
+            searcher.requestStop();
+            while (!searcher.isStopped()) {
+                Execute.sleep(20);
+            }
+            nodeListener.requestStop();
+        }
+    }
+
+    @Override
+    public boolean isStopped() {
+        return nodeListener.isStopped();
     }
 }

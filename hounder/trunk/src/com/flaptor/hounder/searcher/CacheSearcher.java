@@ -28,7 +28,7 @@ import com.flaptor.util.Statistics;
  * This searcher has a cache and a base searcher
  * If queries arent in the cache, it uses the base searcher to get results 
  * 
- * @author Martin Massera
+ * @author Martin Massera. Spike
  */
 public class CacheSearcher implements ISearcher{
     private static final Logger logger = Logger.getLogger(com.flaptor.util.Execute.whoAmI());
@@ -72,5 +72,15 @@ public class CacheSearcher implements ISearcher{
         Statistics.getStatistics().notifyEventValue(hit ? "cacheHit" : "cacheMiss", (end-start)/1000.0f);
 
         return res;
+    }
+
+    @Override
+    public void requestStop() {
+        searcher.requestStop();
+    }
+
+    @Override
+    public boolean isStopped() {
+        return searcher.isStopped();
     }
 }

@@ -104,6 +104,15 @@ public class QueriesInProgressSearcher implements ISearcher {
         }
     }
 
+    @Override
+    public void requestStop() {
+        baseSearcher.requestStop();
+    }
+
+    @Override
+    public boolean isStopped() {
+        return baseSearcher.isStopped();
+    }
     private static class QueryResults {
         private GroupedSearchResults results = null;
         private SearcherException searcherException = null;

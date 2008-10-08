@@ -153,6 +153,16 @@ public class Searcher implements ISearcher {
         logger.info("close: ReloadableIndexHandler stopped.");
     }
 
+    @Override
+    public void requestStop() {
+        ris.requestStop();
+    }
+
+    @Override
+    public boolean isStopped() {
+        return ris.isStopped();
+    }
+
     //main method 
     public static void main (final String args[]) throws Exception {
         String log4jConfigPath = com.flaptor.util.FileUtil.getFilePathFromClasspath("log4j.properties");

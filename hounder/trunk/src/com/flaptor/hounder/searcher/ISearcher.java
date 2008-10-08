@@ -19,13 +19,13 @@ import com.flaptor.hounder.searcher.filter.AFilter;
 import com.flaptor.hounder.searcher.group.AGroup;
 import com.flaptor.hounder.searcher.query.AQuery;
 import com.flaptor.hounder.searcher.sort.ASort;
-
+import com.flaptor.util.Stoppable;
 
 /**
  * A local Searcher..
  * @author Flaptor Development Team
  */
-public interface ISearcher {
+public interface ISearcher extends Stoppable {
 
     /*@fixme writeme*/
 	public GroupedSearchResults search(AQuery query, int firstResult, int count,  AGroup group, int groupSize, AFilter filter, ASort sort) throws SearcherException;

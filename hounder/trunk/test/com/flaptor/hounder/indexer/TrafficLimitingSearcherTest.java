@@ -36,6 +36,18 @@ public class TrafficLimitingSearcherTest extends TestCase {
     private static class WaitingSearcher implements ISearcher {
         public boolean random = false;
         public int queriesInProgress = 0;
+        private volatile boolean isRunning = true;
+
+        @Override
+        public void requestStop() {
+            isRunning = false;
+        }
+
+        @Override
+        public boolean isStopped() {
+            return !isRunning;
+        }
+
         public GroupedSearchResults search(AQuery query, int firstResult, int count, AGroup group, int groupSize, AFilter filter, ASort sort) {
             synchronized(this) {queriesInProgress++;}
             ThreadUtil.sleep(random ? new Random().nextInt(1000) : 1000);
