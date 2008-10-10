@@ -50,10 +50,13 @@ public class RmiSearcherStub extends ARmiClientStub implements IRemoteSearcher {
     
 	public GroupedSearchResults search(AQuery query, int firstResult, int count,  AGroup groupBy, int groupSize, AFilter filter, ASort sort) throws RpcException {
         try { 
-            super.checkConnection();
-            GroupedSearchResults res = remoteSearcher.search(query, firstResult, count, groupBy, groupSize,filter, sort);
-            super.connectionSuccess();
-            return res;
+            if (super.checkConnection()) {
+                GroupedSearchResults res = remoteSearcher.search(query, firstResult, count, groupBy, groupSize,filter, sort);
+                super.connectionSuccess();
+                return res;
+            } else {
+                throw new RpcException("Server call skipped.");
+            }
         } catch (RemoteException e) {
             logger.error("search: exception caught.", e);
             super.connectionFailure();

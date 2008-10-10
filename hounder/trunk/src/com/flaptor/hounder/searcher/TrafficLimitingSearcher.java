@@ -44,7 +44,7 @@ public class TrafficLimitingSearcher implements ISearcher {
 
     private int maxSimultaneousQueries;
     private int maxTimeInQueue;
-    private int maxQueueSize; 
+    private volatile int maxQueueSize; 
     private Queue<QueryInQueue> queue = new LinkedList<QueryInQueue>();
     private Integer queriesInProgress = new Integer(0);
     
