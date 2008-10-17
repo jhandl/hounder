@@ -1,16 +1,16 @@
 /*
-Copyright 2008 Flaptor (flaptor.com) 
+Copyright 2008 Flaptor (flaptor.com)
 
-Licensed under the Apache License, Version 2.0 (the "License"); 
-you may not use this file except in compliance with the License. 
-You may obtain a copy of the License at 
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0 
+    http://www.apache.org/licenses/LICENSE-2.0
 
-Unless required by applicable law or agreed to in writing, software 
-distributed under the License is distributed on an "AS IS" BASIS, 
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
-See the License for the specific language governing permissions and 
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
 limitations under the License.
 */
 package com.flaptor.hounder.indexer;
@@ -90,16 +90,16 @@ public class IndexerSearcherTest extends TestCase {
     // boosted by 10, but no payload.
     private String addSmallPayload = "<documentAdd><documentId>small</documentId><boost>10</boost><field name=\"content\" stored=\"true\" indexed=\"true\" tokenized=\"true\">contentA</field><payload name=\"payload\">0</payload></documentAdd>";
     // not boosted, but payload will make it go up
-    private String addBigPayload = "<documentAdd><documentId>big</documentId><field name=\"content\" stored=\"true\" indexed=\"true\" tokenized=\"true\">contentA</field><payload name=\"payload\">"+System.currentTimeMillis()+"</payload></documentAdd>";
+    private String addBigPayload =   "<documentAdd><documentId>big</documentId><field name=\"content\" stored=\"true\" indexed=\"true\" tokenized=\"true\">contentA</field><payload name=\"payload\">"+System.currentTimeMillis()+"</payload></documentAdd>";
 
 	private Indexer indexer = null;
 
     private Searcher baseSearcher = null;
     private CompositeSearcher searcher = null;
     private ISearcher cacheSearcher = null;
-    private Cache<QueryParams, GroupedSearchResults> cache = null; 
+    private Cache<QueryParams, GroupedSearchResults> cache = null;
     private static final NoGroup noGroup = new NoGroup();
-    
+
 
     private String tmpDir = null;
 
@@ -139,14 +139,14 @@ public class IndexerSearcherTest extends TestCase {
 		searcherConfig.set("ReloadableIndexSearcher.sleepTime", "1000");
 		searcherConfig.set("clustering.enable", "false");
         searcherConfig.set("SimilarityForwarder.scorers","");
-		
+
 		//TODO see why it crashes if snippets are set
 		searcherConfig.set("Searcher.generateSnippets", "false");
 
         indexer = new Indexer();
         searcher = new CompositeSearcher();
-        baseSearcher = (Searcher)searcher.getBaseSearcher();       
-        
+        baseSearcher = (Searcher)searcher.getBaseSearcher();
+
         cache = new LRUCache<QueryParams, GroupedSearchResults>(500);
         cacheSearcher = new CacheSearcher(baseSearcher, cache); //a cacheSearcher that uses the same baseSearcher
         baseSearcher.addCache(cache);
@@ -179,9 +179,11 @@ public class IndexerSearcherTest extends TestCase {
             unfilterOutput();
         }
 
+
+
     @TestInfo(testType = TestInfo.TestType.SYSTEM,
             requiresPort = {10000, 10001, 10010, 10011, 10012})
-    public void xtestQuerySuggest() throws IOException, SearcherException{
+    public void testQuerySuggest() throws IOException, SearcherException{
         indexer.index(addC);
         indexer.index(addB);
         indexer.index(addA);
@@ -200,7 +202,7 @@ public class IndexerSearcherTest extends TestCase {
         searcherConfig.set("compositeSearcher.useSpellCheckSuggestQuery", "true");
         searcherConfig.set("searcher.suggestQuerySearcher.dictionaryDir", spellDir.getFile().getAbsolutePath());
         searcher = new CompositeSearcher();
-        
+
         GroupedSearchResults res = searcher.search(new LazyParsedQuery("contentb"), 0, 10, null, 20, null, null);
         assertEquals(1, res.totalGroupsEstimation());
         res = searcher.search(new LazyParsedQuery("content"), 0, 10, null, 20, null, null);
@@ -211,7 +213,7 @@ public class IndexerSearcherTest extends TestCase {
 
         searcherConfig.set("compositeSearcher.useSuggestQuery", "false");
     }
-    
+
 
 	/**
 	 * Test that the boost factor provided while indexing has relevance
@@ -338,7 +340,7 @@ public class IndexerSearcherTest extends TestCase {
 
         GroupedSearchResults newGsr, gsr;
         float newHitRatio, hitRatio;
-        
+
         newGsr = cacheSearcher.search(new MatchAllQuery(),0,3,new StoredFieldGroup("group"),2,null,new FieldSort(false,"group",FieldSort.OrderType.STRING));
         newHitRatio = cache.getHitRatio();
         for (int i = 0; i < 20; ++i) {
@@ -347,7 +349,7 @@ public class IndexerSearcherTest extends TestCase {
 
             newGsr = cacheSearcher.search(new MatchAllQuery(),0,3,new StoredFieldGroup("group"),2,null,new FieldSort(false,"group",FieldSort.OrderType.STRING));
             newHitRatio = cache.getHitRatio();
-            
+
             assertTrue(gsr == newGsr);
             assertTrue(hitRatio < newHitRatio);
         }
@@ -381,19 +383,19 @@ public class IndexerSearcherTest extends TestCase {
         indexer.index(addA);
         File validIndexDir1 = waitForIndex(tmpDir+"/searcher/indexes",0);
         indexes.add(new Pair<String,String>(validIndexDir1.getAbsolutePath(),tmpDir+"/validIndex1"));
-        CommandUtil.execute("cp -lr "+indexes.get(0).first()+" "+indexes.get(0).last(), wd); 
+        CommandUtil.execute("cp -lr "+indexes.get(0).first()+" "+indexes.get(0).last(), wd);
 
         // get an invalid index
         indexer.index(addA);
         File invalidIndexDir = waitForIndex(tmpDir+"/searcher/indexes",1);
         indexes.add(new Pair<String,String>(invalidIndexDir.getAbsolutePath(),tmpDir+"/invalidIndex"));
-        CommandUtil.execute("cp -lr "+indexes.get(1).first()+" "+indexes.get(1).last(), wd); 
+        CommandUtil.execute("cp -lr "+indexes.get(1).first()+" "+indexes.get(1).last(), wd);
 
         // get the second valid index
         indexer.index(addA);
         File validIndexDir2 = waitForIndex(tmpDir+"/searcher/indexes",2);
         indexes.add(new Pair<String,String>(validIndexDir2.getAbsolutePath(),tmpDir+"/validIndex2"));
-        CommandUtil.execute("cp -lr "+indexes.get(2).first()+" "+indexes.get(2).last(), wd); 
+        CommandUtil.execute("cp -lr "+indexes.get(2).first()+" "+indexes.get(2).last(), wd);
 
         // stop everything.
         stopIndexer();
@@ -413,10 +415,10 @@ public class IndexerSearcherTest extends TestCase {
         indexesDir.mkdir();
         Config searcherConfig = Config.getConfig("searcher.properties");
         searcherConfig.set("IndexLibrary.cleanupOnStartup",cleanup?"true":"false");
-        for (int i = 0; i<3; i++) { 
+        for (int i = 0; i<3; i++) {
             if (indexUse[i]) {
                 Execute.sleep(1010); // needed to ensure the order of the last modification time of the index dirs (has to be greater than 1 sec).
-                CommandUtil.execute("cp -lr "+indexes.get(i).last()+" "+indexes.get(i).first(), wd); 
+                CommandUtil.execute("cp -lr "+indexes.get(i).last()+" "+indexes.get(i).first(), wd);
                 (new File(indexes.get(i).first())).setLastModified(System.currentTimeMillis());
             }
         }
@@ -438,7 +440,7 @@ public class IndexerSearcherTest extends TestCase {
         }
         unfilterOutput();
 
-        for (int i = 0; i<3; i++) { 
+        for (int i = 0; i<3; i++) {
             if (indexUse[i]) {
                 File indexDir = new File(indexes.get(i).first());
                 if (cleanup) {
@@ -459,15 +461,12 @@ public class IndexerSearcherTest extends TestCase {
                 }
             }
         }
-
         stopSearcher();
     }
 
-
-
     @TestInfo(testType = TestInfo.TestType.SYSTEM,
             requiresPort = {10000, 10001, 10010, 10011, 10012})
-    public void xtestPayloads() throws Exception {
+    public void testPayloads() throws Exception {
         Config searcherConfig = Config.getConfig("searcher.properties");
 
         indexer.index(addSmallPayload);
@@ -484,26 +483,22 @@ public class IndexerSearcherTest extends TestCase {
         assertEquals(gsr.getGroup(0).last().get(0).get("docId"),"small");
         assertEquals(gsr.getGroup(1).last().get(0).get("docId"),"big");
 
-       
+
         // override config, so payloads are used
         searcherConfig.set("SimilarityForwarder.scorers","payload:com.flaptor.hounder.searcher.payload.DatePayloadScorer");
-   
+
         // restart searcher
-        System.out.println("aaaaaaaaa");
         stopSearcher();
         searcher = new CompositeSearcher();
         Execute.sleep(10000);
-        System.out.println("bbbbbbbbb");
 
         // perform query
         gsr = searcher.search(new AndQuery(new TermQuery("content", "contenta"),new PayloadQuery("payload")), 0, 10, new NoGroup(), 1, null, null);
         assertEquals(gsr.groups(),2);
 
         // check that now, using payloads, big payload is first
-        assertEquals(gsr.getGroup(0).last().get(0).get("docId"),"big");
-        assertEquals(gsr.getGroup(1).last().get(0).get("docId"),"small");
-
-
+        assertEquals("big", gsr.getGroup(0).last().get(0).get("docId"));
+        assertEquals("small", gsr.getGroup(1).last().get(0).get("docId"));
     }
 
 }

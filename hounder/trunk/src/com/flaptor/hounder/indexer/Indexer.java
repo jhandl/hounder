@@ -1,16 +1,16 @@
 /*
-Copyright 2008 Flaptor (flaptor.com) 
+Copyright 2008 Flaptor (flaptor.com)
 
-Licensed under the Apache License, Version 2.0 (the "License"); 
-you may not use this file except in compliance with the License. 
-You may obtain a copy of the License at 
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0 
+    http://www.apache.org/licenses/LICENSE-2.0
 
-Unless required by applicable law or agreed to in writing, software 
-distributed under the License is distributed on an "AS IS" BASIS, 
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
-See the License for the specific language governing permissions and 
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
 limitations under the License.
 */
 package com.flaptor.hounder.indexer;
@@ -43,19 +43,19 @@ import com.flaptor.util.Stoppable;
  * This class implements the Hounder indexer. It parses the supplied String
  * into a DOM Document and sequentially processes it through a list of modules
  * supplied in the configuration file. Requests are received asynchronously and
- * sent to a queue for sequential indexing. If journaling is turned on, a 
+ * sent to a queue for sequential indexing. If journaling is turned on, a
  * &lt;transactionId&gt;(long)&lt;/transactionId&gt; element is added as a child of the
  * root element.
  * @author Flaptor Development Team
  */
 public class Indexer implements IRmiIndexer, IIndexer, Stoppable {
-    
+
     private static final Logger logger = Logger.getLogger(Execute.whoAmI());
-    
+
     //clusterfest
     private NodeListener nodeListener;
-    private IndexerMonitoredNode indexerMonitoredNode; 
-    
+    private IndexerMonitoredNode indexerMonitoredNode;
+
     /**
      * Possible return values for the index method.
      */
@@ -71,20 +71,20 @@ public class Indexer implements IRmiIndexer, IIndexer, Stoppable {
     private DocumentParser parser = new DocumentParser();
     private ModulePipe pipe;
 	private final IndexManager indexManager;
-    
+
     //State related te the shutdown sequence.
     private RunningState state = RunningState.RUNNING;
 
     // Statistics instance, to report events, and constants
     private final Statistics statistics = Statistics.getStatistics();
     public static final String DOCUMENT_ENQUEUED = "Indexer.DocumentEnqueued";
-    
-    
+
+
     /**
      * Constructor.
      */
     public Indexer() {
-    	
+
         Config config = Config.getConfig("indexer.properties");
         if (config.getBoolean("clustering.enable")) {
         	int port = PortUtil.getPort("clustering.rpc.indexer");
@@ -133,7 +133,7 @@ public class Indexer implements IRmiIndexer, IIndexer, Stoppable {
         }
         logger.info("Modules ready");
         // Modules created
-        
+
 
         queue = new Queue<Document>(maxQueueSize);
         qpt = new QueueProcessorThread();
@@ -172,7 +172,7 @@ public class Indexer implements IRmiIndexer, IIndexer, Stoppable {
             return RETRY_QUEUE_FULL;
         }
     }
-    
+
     /**
      * Adds a document to the indexing queue.
      * @param text the request in xml formatted text
@@ -195,21 +195,21 @@ public class Indexer implements IRmiIndexer, IIndexer, Stoppable {
         } else {
             Document doc = parser.genDocument(text);
             if (null == doc) {
-                return (PARSE_ERROR);                
+                return (PARSE_ERROR);
             } else {
                 return index(doc);
             }
         }
-        
+
     }
-    
+
     /**
      * @inheritDoc
      */
     public boolean isStopped() {
         return (state == RunningState.STOPPED);
     }
-    
+
     /**
      * @inheritDoc
      * After this call, all further attempts to use the index methods (@link index , @link indexDom )
@@ -235,14 +235,14 @@ public class Indexer implements IRmiIndexer, IIndexer, Stoppable {
      */
     private class QueueProcessorThread extends AStoppableThread {
         private final long MAX_TIME_ASLEEP = 1000;
-        
+
         /**
          * Default constructor.
          */
         public QueueProcessorThread() {
             thrd.setName("Indexer:QueueProcessorThread");
         }
-        
+
         /**
          * Continuously checks for data on the queue and calls process with it.
          * Uses a blocking call with timeout, to make sure it can exit when
@@ -260,23 +260,25 @@ public class Indexer implements IRmiIndexer, IIndexer, Stoppable {
                 if (doc != null) {
                     logger.debug("Processing a request from the queue...");
                     pipe.push(doc);
+                } else {
+                    logger.debug("Indexer queue is empty");
                 }
             }
             stopped = true;
         }
     }
-    
+
     /**
      * This class handles the sequence of events that stops the Indexer.
      */
     private class StopperThread extends Thread {
         private final Logger logger = Logger.getLogger(StopperThread.class);
-        
+
         public StopperThread() {
             super();
             setName("Indexer.StopperThread");
         }
-        
+
         /**
          * Executes the Indexer shutdown sequence asynchronously
          * After that, sets the Indexer state to Stopped.
@@ -300,8 +302,8 @@ public class Indexer implements IRmiIndexer, IIndexer, Stoppable {
 			indexManager.requestStop();
             while (!indexManager.isStopped()) {
                 Execute.sleep(20,logger);
-            }            
-           
+            }
+
             // Stop clustering if it was enabled
             if (null != nodeListener) {
                 logger.debug("Stopping clustering listener");
@@ -310,7 +312,7 @@ public class Indexer implements IRmiIndexer, IIndexer, Stoppable {
                     Execute.sleep(20,logger);
                 }
                 logger.debug("clustering listener stopped.");
-            }            
+            }
 
             logger.debug("IndexManager stopped.");
             logger.info("Stop sequence finished.");

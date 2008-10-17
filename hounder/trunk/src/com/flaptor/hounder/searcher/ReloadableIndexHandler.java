@@ -1,16 +1,16 @@
 /*
-Copyright 2008 Flaptor (flaptor.com) 
+Copyright 2008 Flaptor (flaptor.com)
 
-Licensed under the Apache License, Version 2.0 (the "License"); 
-you may not use this file except in compliance with the License. 
-You may obtain a copy of the License at 
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0 
+    http://www.apache.org/licenses/LICENSE-2.0
 
-Unless required by applicable law or agreed to in writing, software 
-distributed under the License is distributed on an "AS IS" BASIS, 
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
-See the License for the specific language governing permissions and 
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
 limitations under the License.
 */
 package com.flaptor.hounder.searcher;
@@ -54,7 +54,7 @@ final class ReloadableIndexHandler implements Stoppable {
 	private static final Logger logger = Logger.getLogger(Execute.whoAmI());
 	private static final Config config = Config.getConfig("searcher.properties");
 	private static final Statistics statistics = Statistics.getStatistics();
-	
+
 	protected final int maxOffset;
 	protected final int maxHitsPerPage;
     protected final int slackFactor;
@@ -70,7 +70,7 @@ final class ReloadableIndexHandler implements Stoppable {
 
     private IndexLibrary library;
     AtomicReference<IndexRepository> currentIndexRepository = new AtomicReference<IndexRepository>(null);
-    
+
 
     // Sample one every N queries
     private int querySamplePeriod = 0;
@@ -78,7 +78,7 @@ final class ReloadableIndexHandler implements Stoppable {
     private int savedQueryindex = 0;
     private int numberOfSavedQueries = 0;
     private SavedQuery[] savedQueries = null;
-    
+
 
     /**
      * Constructor.
@@ -94,23 +94,22 @@ final class ReloadableIndexHandler implements Stoppable {
     public ReloadableIndexHandler() {
         maxOffset = config.getInt("ReloadableIndexSearcher.maxOffset");
         maxHitsPerPage = config.getInt("ReloadableIndexSearcher.maxHitsPerPage");
-        slackFactor = config.getInt("ReloadableIndexSearcher.lookupLimit"); 
-        
+        slackFactor = config.getInt("ReloadableIndexSearcher.lookupLimit");
+
         similarity = new SimilarityForwarder();
-
-        library = new IndexLibrary(this);
-        //FIXME: This is a potential but unlikely race condition, as we are publishing "this" to another thread
-        //	before the object is fully constructed (the constructor hasn't ended yet).
-
         querySamplePeriod = config.getInt("Searcher.query.sample.period");
         numberOfSavedQueries = config.getInt("Searcher.query.sample.size");
         savedQueries = new SavedQuery[numberOfSavedQueries];
+
+        //FIXME: This is a potential but unlikely race condition, as we are publishing "this" to another thread
+        //	before the object is fully constructed (the constructor hasn't ended yet).
+        library = new IndexLibrary(this);
     }
 
-    
-    
+
+
 	/**
-	 * Determine if the time has come to save another query 
+	 * Determine if the time has come to save another query
 	 * as a sample for future use for re-heating the searcher.
 	 * @return true if it is time to take another query sample.
 	 */
@@ -125,7 +124,7 @@ final class ReloadableIndexHandler implements Stoppable {
 		}
 		return should;
 	}
-	
+
 	/**
 	 * Save a query for future use in re-heating the searcher after a new index has been loaded.
 	 */
@@ -134,12 +133,12 @@ final class ReloadableIndexHandler implements Stoppable {
 	    savedQueries[savedQueryindex] = new SavedQuery(query, filter, sort, offset, groupCount, groupBy, groupSize);
 	    savedQueryindex++;
 	}
-	
+
 	/**
 	 * This method will be called whenever a new index is read.
 	 * The purpose of this is to make a search to cause the new index to be used for the first
-	 * time and avoid a user the honor of waiting for the searcher to load and prepare its 
-	 * internal (lazy) data structures. 
+	 * time and avoid a user the honor of waiting for the searcher to load and prepare its
+	 * internal (lazy) data structures.
 	 */
 	public void executeSavedQueries() {
         if (null != savedQueries && null != currentIndexRepository.get()) {
@@ -181,7 +180,7 @@ final class ReloadableIndexHandler implements Stoppable {
 			if (shouldSaveQuery()) {
 				saveQuery(query, filter, sort, offset, groupCount, groupBy, groupSize);
 			}
-	
+
 			TopDocs tdocs;
 			long startTime = System.currentTimeMillis();
 			if (null == sort) { //Lucene's documentation is not clear about whether search may take a null sort, so...
@@ -190,7 +189,7 @@ final class ReloadableIndexHandler implements Stoppable {
 				tdocs= searcher.search(query,filter, offset + groupSize * groupCount * slackFactor, sort);
 			}
 			statistics.notifyEventValue("lucene work time", System.currentTimeMillis() - startTime);
-	
+
 			// Exceptions are thrown to upper layer, but if we got here, assume everything is ok.
 			Query rewrittenQuery = searcher.rewrite(query);
 			GroupedSearchResults results = pageResults(tdocs, searcher, offset, groupCount, groupBy, groupSize);
@@ -204,9 +203,9 @@ final class ReloadableIndexHandler implements Stoppable {
 		} finally {
 			ir.releaseIndexSearcher(searcher);
 		}
-		
+
     }
-			
+
 
     /**
 	  Fetches the actual documents for the requested interval.
@@ -218,7 +217,7 @@ final class ReloadableIndexHandler implements Stoppable {
 	  @param hitsPerPage the number of documents to return, starting from offset.
 	  @return a SearchResults object, containing the un-normalized (real) score information.
      */
-    private void checkQueryParameters(final TopDocs tdocs, final int offset, int hitsPerPage) { 
+    private void checkQueryParameters(final TopDocs tdocs, final int offset, int hitsPerPage) {
 
         //check for weird parameters
         if (offset > tdocs.totalHits) {
@@ -280,7 +279,7 @@ final class ReloadableIndexHandler implements Stoppable {
     /**
      * Sets the handle to result caches to be cleared
      * when a new index is loaded. This is necessary because the owner of
-     * the cache does not know when this happens, and the cache 
+     * the cache does not know when this happens, and the cache
      * needs to be invalidated.
      */
     public void setCaches(List<Cache> caches) {
@@ -290,7 +289,7 @@ final class ReloadableIndexHandler implements Stoppable {
     /**
      * Adds the handle to a result cache to be cleared
      * when a new index is loaded. This is necessary because the owner of
-     * the cache does not know when this happens, and the cache 
+     * the cache does not know when this happens, and the cache
      * needs to be invalidated.
      */
     public void addCache(Cache cache) {
@@ -320,7 +319,7 @@ final class ReloadableIndexHandler implements Stoppable {
     	}
     }
 
-   
+
     /**
      * Clear the caches.
      * Invalidates all the caches, after printing statistics about their hitrate.
@@ -357,10 +356,10 @@ final class ReloadableIndexHandler implements Stoppable {
     }
 
 
-    
-    
-    
-    
+
+
+
+
     //--------------------------------------------------------------------------------------------------------
     //Internal classes
     //--------------------------------------------------------------------------------------------------------
@@ -388,35 +387,35 @@ final class ReloadableIndexHandler implements Stoppable {
                 Execute.sleep(20);
             }
             logger.info("IndexLibrary stopped.");
-            
-            
+
+
             logger.info("Closing current index...");
         	synchronized (currentIndexRepository) {
         		IndexRepository current = currentIndexRepository.getAndSet(null);
         		Execute.close(current, logger);
         	}
         	logger.info("All indexes closed.");
-            
-        	
+
+
         	logger.info("Stop sequence finished.");
             state = RunningState.STOPPED;
         }
     }
-    
+
     private class IndexRepository {
     	private static final int POOL_SIZE = 4;
     	BlockingQueue<IndexSearcher> searcherPool;
-    	
+
     	public IndexRepository(final Index index) throws SearcherException {
     		preheatIndex(index);
     		searcherPool = new ArrayBlockingQueue<IndexSearcher>(POOL_SIZE);
     		for (int i = 0; i < POOL_SIZE; i++) {
     			IndexSearcher is = new IndexSearcher(index.getReader());
     			is.setSimilarity(similarity);
-    			searcherPool.add(new IndexSearcher(index.getReader()));
+    			searcherPool.add(is);
     		}
     	}
-    	
+
     	private void preheatIndex(final Index index) throws SearcherException {
 	    	IndexReader reader = index.getReader();
 	    	try {
@@ -425,7 +424,7 @@ final class ReloadableIndexHandler implements Stoppable {
 	    		throw new SearcherException(e);
 	    	}
     	}
-    	
+
     	IndexSearcher getIndexSearcher() {
     		try {
     			return searcherPool.take();
@@ -433,20 +432,27 @@ final class ReloadableIndexHandler implements Stoppable {
     			throw new RuntimeException(e);
     		}
     	}
-    	
+
     	void releaseIndexSearcher(IndexSearcher s) {
     		searcherPool.add(s);
     	}
-    	
+
     	public void close() {
     		for (int i = 0; i < POOL_SIZE; i++) {
-    			try {
-    				searcherPool.take().getIndexReader().close();
-    			} catch (IOException e) {
-    				logger.error("Exception while closing an indexReader.", e);
-    			}catch (InterruptedException e) {
-    				//Do nothing.
-    			}
+    		    boolean done= false;
+    		    while (!done){
+    		        try {
+    		            IndexReader cir = searcherPool.take().getIndexReader();
+    		            cir.close();
+    		            done=true;
+    		        } catch (IOException e) {
+    		            logger.error("Exception while closing an indexReader.", e);
+    		            done=true;
+    		        } catch (InterruptedException e) {
+    		            done=false;
+    		            logger.error("InterruptedException while closing an indexReader.", e);
+    		        }
+    		    }
     		}
     	}
     }

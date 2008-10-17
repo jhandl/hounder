@@ -1,16 +1,16 @@
 /*
-Copyright 2008 Flaptor (flaptor.com) 
+Copyright 2008 Flaptor (flaptor.com)
 
-Licensed under the Apache License, Version 2.0 (the "License"); 
-you may not use this file except in compliance with the License. 
-You may obtain a copy of the License at 
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0 
+    http://www.apache.org/licenses/LICENSE-2.0
 
-Unless required by applicable law or agreed to in writing, software 
-distributed under the License is distributed on an "AS IS" BASIS, 
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
-See the License for the specific language governing permissions and 
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
 limitations under the License.
 */
 package com.flaptor.hounder.searcher;
@@ -40,7 +40,6 @@ public class IndexLibrary implements LocalIndexUpdater, Stoppable {
     private DelayQueue<DeleteIndexTask> deletes;
     private final ReloadableIndexHandler rih;
     private Index currentIndex;
-    private File invalidIndex;
     private IndexUpdatesListener iul;
 
     public IndexLibrary(ReloadableIndexHandler rih) {
@@ -56,7 +55,7 @@ public class IndexLibrary implements LocalIndexUpdater, Stoppable {
             workingDir = FileUtil.createOrGetDir(workingDir.getAbsolutePath(), true, true);
         } catch (IOException e1) {
             throw new RuntimeException(e1);
-        } 
+        }
         File[] files = listFilesByDate_NewestFirst(workingDir);
 
         // find the newest valid index.
@@ -69,9 +68,9 @@ public class IndexLibrary implements LocalIndexUpdater, Stoppable {
                     indexFile = file;
                     break; // if successful, this is the latest valid index.
                 }
-            } catch (Exception e) { 
+            } catch (Exception e) {
                 logger.error("Trying to open the file "+file.getAbsolutePath()+" as an index: "+e,e);
-            } 
+            }
         }
 
         if (null == currentIndex) {
@@ -101,11 +100,11 @@ public class IndexLibrary implements LocalIndexUpdater, Stoppable {
         new DeleteIndexTaskRunner().start();
 
     }
-    
+
     public void requestStop() {
         iul.requestStop();
     }
-    
+
     public boolean isStopped() {
         return iul.isStopped();
     }
@@ -178,7 +177,7 @@ public class IndexLibrary implements LocalIndexUpdater, Stoppable {
 
         public void deleteIndex() {
             if (index.exists()) {
-                index.eraseFromDisk(); 
+                index.eraseFromDisk();
             } else {
                 logger.warn("Trying to delete an index that no longer exists");
             }
