@@ -61,6 +61,10 @@ public class IndexerActionModule extends ActionModule implements WebModule {
     }
     public String doPage(String page, HttpServletRequest request, HttpServletResponse response) {return null;}
     public String getModuleHTML() {return null;}
-    public List<String> getPages() {return null;}
+    
+    public List<String> getPages() {
+        return new ArrayList<String>();
+    }
+
     public void setup(WebServer server) {}
 }
