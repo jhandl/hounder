@@ -1,16 +1,16 @@
 /*
-Copyright 2008 Flaptor (flaptor.com) 
+Copyright 2008 Flaptor (flaptor.com)
 
-Licensed under the Apache License, Version 2.0 (the "License"); 
-you may not use this file except in compliance with the License. 
-You may obtain a copy of the License at 
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0 
+    http://www.apache.org/licenses/LICENSE-2.0
 
-Unless required by applicable law or agreed to in writing, software 
-distributed under the License is distributed on an "AS IS" BASIS, 
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
-See the License for the specific language governing permissions and 
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
 limitations under the License.
 */
 package com.flaptor.hounder.searcher;
@@ -33,7 +33,7 @@ import com.flaptor.util.Statistics;
  * to the base searcher, but they are internally stored until the result of
  * the first one returns.
  *
- * 
+ *
  * @author Martin Massera, Spike.
  */
 public class QueriesInProgressSearcher implements ISearcher {
@@ -81,10 +81,12 @@ public class QueriesInProgressSearcher implements ISearcher {
             synchronized (inProgress) {
                 inProgress.remove(params);
             }
+
             synchronized (results) {
                 results.setResults(retvalue, searcherException, runtimeException);
                 results.notifyAll();
             }
+            //FIXME: possible race condition synchronized(results)
         } else {
             stats.notifyEventValue("mergedQueries", 1);
             synchronized (results) {
@@ -97,7 +99,7 @@ public class QueriesInProgressSearcher implements ISearcher {
                 }
             }
         }
-    	if (results.getResults() != null) return results.getResults(); 
+    	if (results.getResults() != null) return results.getResults();
         else {
         	if (results.getSearcherException() != null) throw results.getSearcherException();
         	else throw results.getRuntimeException();
@@ -118,11 +120,11 @@ public class QueriesInProgressSearcher implements ISearcher {
         private SearcherException searcherException = null;
         private RuntimeException runtimeException = null;
         private boolean valid = false;
-      
+
         public GroupedSearchResults getResults() {
             return results;
         }
-        
+
         public SearcherException getSearcherException() {
             return searcherException;
         }

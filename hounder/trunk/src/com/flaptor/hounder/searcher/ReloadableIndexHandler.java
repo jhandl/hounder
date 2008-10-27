@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.apache.log4j.Logger;
@@ -170,7 +171,7 @@ final class ReloadableIndexHandler implements Stoppable {
      * @throws NoIndexActiveException if there is no index active or if <code>IndexSearcher.search()</code> failed.
      * See #org.apache.lucene.search.IndexSearcher for details.
      */
-	public Pair<GroupedSearchResults, Query> search(final Query query, final Filter filter, final Sort sort, final int offset, final int groupCount, AGroup groupBy, int groupSize) throws IOException, NoIndexActiveException {
+	public Pair<GroupedSearchResults, Query> search(final Query query, final Filter filter, final Sort sort, final int offset, final int groupCount, AGroup groupBy, int groupSize) throws IOException, NoIndexActiveException, SearchTimeoutException, SearcherException {
 		IndexRepository ir = currentIndexRepository.get();
 		if (null == ir) {
 			throw new NoIndexActiveException();
@@ -263,7 +264,7 @@ final class ReloadableIndexHandler implements Stoppable {
      * @return The number of (undeleted) documents in the active index.
      * @throws NoIndexActiveException if there is no index active.
      */
-    public int getNumDocs() throws NoIndexActiveException {
+    public int getNumDocs() throws NoIndexActiveException, SearchTimeoutException, SearcherException {
 		IndexRepository ir = currentIndexRepository.get();
 		if (null == ir) {
 			throw new NoIndexActiveException();
@@ -405,10 +406,22 @@ final class ReloadableIndexHandler implements Stoppable {
     private class IndexRepository {
     	private static final int POOL_SIZE = 4;
     	BlockingQueue<IndexSearcher> searcherPool;
+        private final long timeout;
 
     	public IndexRepository(final Index index) throws SearcherException {
-    		preheatIndex(index);
-    		searcherPool = new ArrayBlockingQueue<IndexSearcher>(POOL_SIZE);
+    	    Config conf = Config.getConfig("searcher.properties");
+    	    if (conf.getBoolean("compositeSearcher.useTrafficLimiting")) {
+    		    timeout = conf.getInt("searcher.trafficLimiting.maxTimeInQueue");
+    		    if (timeout < 0L) {
+    		        throw new IllegalArgumentException("timeout is a negative number (" + timeout + ")");
+    		    }
+    		    logger.info("IndexRepository constructor: setting the max time to wait for an available index searcher to " + timeout);
+    		} else {
+    		    timeout = 0L;
+    		    logger.info(" IndexRepository constructor: setting the max time to wait for an available index searcher to infinity.");
+    		}
+    	    preheatIndex(index);
+    		searcherPool = new ArrayBlockingQueue<IndexSearcher>(POOL_SIZE, true);
     		for (int i = 0; i < POOL_SIZE; i++) {
     			IndexSearcher is = new IndexSearcher(index.getReader());
     			is.setSimilarity(similarity);
@@ -425,16 +438,41 @@ final class ReloadableIndexHandler implements Stoppable {
 	    	}
     	}
 
-    	IndexSearcher getIndexSearcher() {
-    		try {
-    			return searcherPool.take();
+    	IndexSearcher getIndexSearcher() throws SearcherException {
+            IndexSearcher retVal;
+            if (logger.isDebugEnabled()) {
+                logger.debug("getIndexSearcher: remaining capacity is " + searcherPool.remainingCapacity() + " , with a max size of " + POOL_SIZE);
+            }
+            try {
+    		    if (timeout == 0L) {
+    		        retVal = searcherPool.take();
+    		    } else {
+    		        retVal = searcherPool.poll(timeout, TimeUnit.MILLISECONDS);
+    		    }
+    		    if (null == retVal) {
+    	            if (logger.isDebugEnabled()) {
+    	                logger.debug("getIndexSearcher: (retVal is null) remaining capacity is " + searcherPool.remainingCapacity() + " , with a max size of " + POOL_SIZE);
+    	            }
+    		        throw new SearchTimeoutException(timeout ,"timeout exceeded while waiting for an indexSearcher");
+    		    }
     		} catch (InterruptedException e) {
-    			throw new RuntimeException(e);
+                if (logger.isDebugEnabled()) {
+                    logger.debug("getIndexSearcher: (interrupted while waiting) remaining capacity is " + searcherPool.remainingCapacity() + " , with a max size of " + POOL_SIZE);
+                }
+    			throw new SearcherException(e);
     		}
+    		return retVal;
     	}
 
     	void releaseIndexSearcher(IndexSearcher s) {
-    		searcherPool.add(s);
+            if (logger.isDebugEnabled()) {
+                logger.debug("releaseIndexSearcher: remaining capacity is " + searcherPool.remainingCapacity() + " , with a max size of " + POOL_SIZE);
+            }
+    		if (!searcherPool.offer(s)) {
+                logger.debug("release: remaining capacity is " + searcherPool.remainingCapacity() + " , with a max size of " + POOL_SIZE);
+                logger.fatal("releaseIndexSearcher: could not return an indexSearcher to the queue");
+                System.exit(-1);
+    		}
     	}
 
     	public void close() {

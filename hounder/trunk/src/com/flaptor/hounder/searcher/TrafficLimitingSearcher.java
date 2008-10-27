@@ -103,7 +103,8 @@ public class TrafficLimitingSearcher implements ISearcher {
             queueSize.decrementAndGet();
             logger.info("TrafficLimitingSearcher: dropping a query, the query queue reached " +
                     "the maximum of " + maxQueueSize + " queries." );
-            throw new SearcherException("The search was discarded by TrafficLimitingSearcher - " +
+            //TODO:change the SearchTimeoutException class to reflect the reality of an early drop.
+            throw new SearchTimeoutException(-1 ,"The search was discarded by TrafficLimitingSearcher - " +
             		"there is no place in the queue (earlyDrop)");
         }
 
@@ -121,7 +122,7 @@ public class TrafficLimitingSearcher implements ISearcher {
         long now = System.currentTimeMillis();
         if (now - enqueuedTime > maxTimeInQueue) {
             sem.release();
-            throw new SearcherException("The search was discarded by TrafficLimitingSearcher - " +
+            throw new SearchTimeoutException(maxTimeInQueue ,"The search was discarded by TrafficLimitingSearcher - " +
             		"the query was too much time on queue (lateDrop). " +
                     "maxTimeInQ: " + maxTimeInQueue+", in: " +  enqueuedTime +
                     ", now: " + now + " --> " + (now - enqueuedTime));
@@ -132,9 +133,6 @@ public class TrafficLimitingSearcher implements ISearcher {
         GroupedSearchResults results = baseSearcher.search(query, firstResult, count, group, groupSize, filter, sort);
         sem.release();
 
-        if (null == results){ // TODO move this to the lowest searcher
-            throw new SearcherException("GroupedSearchResults is NULL");
-        }
         return results;
     }
 

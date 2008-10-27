@@ -1,16 +1,16 @@
 /*
-Copyright 2008 Flaptor (flaptor.com) 
+Copyright 2008 Flaptor (flaptor.com)
 
-Licensed under the Apache License, Version 2.0 (the "License"); 
-you may not use this file except in compliance with the License. 
-You may obtain a copy of the License at 
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0 
+    http://www.apache.org/licenses/LICENSE-2.0
 
-Unless required by applicable law or agreed to in writing, software 
-distributed under the License is distributed on an "AS IS" BASIS, 
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
-See the License for the specific language governing permissions and 
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
 limitations under the License.
 */
 package com.flaptor.hounder.cluster;
@@ -46,22 +46,25 @@ import com.flaptor.util.Execution.Results;
 /**
  * This class implements a server that sends a query to a number of searchers
  * (possibly remote), waits for the results and merges them.
- * 
+ *
  * @author Martin Massera
  */
 public class MultiSearcher implements ISearcher {
 
     private static Logger logger = Logger.getLogger(Execute.whoAmI());
+    static {
+        logger.setAdditivity(false);
+    }
 
     private List<IRemoteSearcher> searchers = new ArrayList<IRemoteSearcher>();
     private MultiExecutor<GroupedSearchResults> multiQueryExecutor;
     private List<String> searcherIPs = new ArrayList<String>();
     private long timeout;
-    
+
     public MultiSearcher() {
         Config config = Config.getConfig("multiSearcher.properties");
         String[] hosts = config.getStringArray("multiSearcher.hosts");
-        
+
         for (int i = 0; i < hosts.length; i++) {
             Pair<String, Integer> host = PortUtil.parseHost(hosts[i]);
             searchers.add(new RmiSearcherStub(host.last(), host.first()));
@@ -84,7 +87,7 @@ public class MultiSearcher implements ISearcher {
     public GroupedSearchResults search(AQuery query, int firstResult, int count, AGroup group, int groupSize, AFilter filter, ASort sort) {
 
         final QueryParams queryParams = new QueryParams(query, 0, firstResult + count, group, 1, filter, sort);
-        
+
         Execution<GroupedSearchResults> execution= new Execution<GroupedSearchResults>();
         for (int i = 0; i < searchers.size(); ++i) {
         	final int numSearcher = i;
@@ -104,13 +107,13 @@ public class MultiSearcher implements ISearcher {
             logger.warn("timeout of some searchers");
             execution.forget();
         }
-        
+
         //a treeMap for sorting values according to the searcher number
         Map<Integer, GroupedSearchResults> goodResultsMap = new TreeMap<Integer, GroupedSearchResults>();
         List<GroupedSearchResults> goodResults = new ArrayList<GroupedSearchResults>();
         //List<Results<GroupedSearchResults>> badResults = new ArrayList<Results<GroupedSearchResults>>();
         int badResults = 0;
-        
+
         int totalDocuments = 0;
         //we take a snapshot of the results
         //other results may come after the timeout, a change in the size of the result set could cause problems
@@ -131,13 +134,13 @@ public class MultiSearcher implements ISearcher {
                 }
             }
         }
-        
-		
+
+
         //move (sorted) entries to a list
         for (Map.Entry<Integer, GroupedSearchResults> entry : goodResultsMap.entrySet()) {
         	goodResults.add(entry.getValue());
         }
-        int resultsSize = goodResults.size(); 
+        int resultsSize = goodResults.size();
         logger.debug("obtained " + totalDocuments + " documents in "+ resultsSize + " good responses and " +  badResults + " exceptions in " + (System.currentTimeMillis() - start) + " ms ");
 
         if (goodResults.size() == 0) {
@@ -162,5 +165,5 @@ public class MultiSearcher implements ISearcher {
     public boolean isStopped() {
         return multiQueryExecutor.isStopped();
     }
-    
+
 }
