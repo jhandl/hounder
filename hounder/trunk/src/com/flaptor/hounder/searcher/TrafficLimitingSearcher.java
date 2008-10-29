@@ -130,10 +130,13 @@ public class TrafficLimitingSearcher implements ISearcher {
         synchronized (queryCountMutex) {
             queryCount++;
         }
-        GroupedSearchResults results = baseSearcher.search(query, firstResult, count, group, groupSize, filter, sort);
-        sem.release();
+        try {
+            GroupedSearchResults results = baseSearcher.search(query, firstResult, count, group, groupSize, filter, sort);
+            return results;
+        } finally {
+            sem.release();
+        }
 
-        return results;
     }
 
     /**
