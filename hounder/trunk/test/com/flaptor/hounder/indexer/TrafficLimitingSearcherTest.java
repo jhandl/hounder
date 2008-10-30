@@ -19,6 +19,7 @@ import java.util.Random;
 
 import com.flaptor.hounder.searcher.GroupedSearchResults;
 import com.flaptor.hounder.searcher.ISearcher;
+import com.flaptor.hounder.searcher.SearcherException;
 import com.flaptor.hounder.searcher.TrafficLimitingSearcher;
 import com.flaptor.hounder.searcher.filter.AFilter;
 import com.flaptor.hounder.searcher.group.AGroup;
@@ -62,6 +63,27 @@ public class TrafficLimitingSearcherTest extends TestCase {
             synchronized(this) {queriesInProgress++;}
             ThreadUtil.sleep(random ? new Random().nextInt(waitingTime) : waitingTime);
             synchronized(this) {queriesInProgress--;return new GroupedSearchResults();}
+        }
+    }
+
+    private static class AlwaysFailSearcher implements ISearcher {
+        private volatile boolean isRunning = true;
+        public AlwaysFailSearcher(){
+        };
+
+
+        @Override
+        public void requestStop() {
+            isRunning = false;
+        }
+
+        @Override
+        public boolean isStopped() {
+            return !isRunning;
+        }
+
+        public GroupedSearchResults search(AQuery query, int firstResult, int count, AGroup group, int groupSize, AFilter filter, ASort sort) throws SearcherException {
+            throw new SearcherException("I always fail");
         }
     }
 
@@ -143,4 +165,51 @@ public class TrafficLimitingSearcherTest extends TestCase {
             Thread.sleep(50);
         }
     }
+
+
+
+
+
+    boolean semaphorePassed = false;
+    /**
+     * Tests that queries that throw an Exception on baseSearcher release their semaphore.
+     */
+    @TestInfo(testType = TestInfo.TestType.UNIT)
+    public void testReleaseSemaphoreOnBaseException() {
+        // how many simultaneous queries to support
+        int slots = 5;
+        AlwaysFailSearcher baseSearcher = new AlwaysFailSearcher();
+        final TrafficLimitingSearcher searcher = new TrafficLimitingSearcher(baseSearcher,slots,1/*no timeout*/);
+        for (int i = 0; i < slots +1 ; i++){
+            try {
+                searcher.search(null, 0, 1, null, 1, null, null);
+                fail(); // should not happen, as AlwaysFailSearcher will throw a SearcherException
+            }  catch (SearcherException se){
+                // do nothing .. 
+            } 
+        }
+
+        // now, try with another query. If the slots were not released, it should fail with TrafficLimitingSearcher Exception.
+        // if it failed with "I always fail", it is ok.
+        Thread searchThread  = new Thread() {
+            public void run() {
+                try {
+                    searcher.search(null, 0, 1, null, 1, null, null);
+                } catch (Throwable t) {
+                    assertFalse(t.getMessage().contains("TrafficLimitingSearcher"));
+                    assertTrue(t.getMessage().contains("I always fail"));
+                    semaphorePassed = true;
+                }
+            }
+        };
+        searchThread.setDaemon(true);
+        searchThread.start();
+
+        com.flaptor.util.Execute.sleep(5000);
+        if (!semaphorePassed) {
+            fail("query got stuck waiting for semaphore");
+        }
+    }
+
+
 }
