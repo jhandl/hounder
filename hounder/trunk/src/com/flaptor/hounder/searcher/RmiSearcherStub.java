@@ -1,16 +1,16 @@
 /*
-Copyright 2008 Flaptor (flaptor.com) 
+Copyright 2008 Flaptor (flaptor.com)
 
-Licensed under the Apache License, Version 2.0 (the "License"); 
-you may not use this file except in compliance with the License. 
-You may obtain a copy of the License at 
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0 
+    http://www.apache.org/licenses/LICENSE-2.0
 
-Unless required by applicable law or agreed to in writing, software 
-distributed under the License is distributed on an "AS IS" BASIS, 
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
-See the License for the specific language governing permissions and 
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
 limitations under the License.
 */
 package com.flaptor.hounder.searcher;
@@ -29,6 +29,7 @@ import com.flaptor.hounder.searcher.sort.ASort;
 import com.flaptor.util.PortUtil;
 import com.flaptor.util.remote.ARmiClientStub;
 import com.flaptor.util.remote.ExponentialFallbackPolicy;
+import com.flaptor.util.remote.IRetryPolicy;
 import com.flaptor.util.remote.RpcException;
 
 /**
@@ -39,17 +40,23 @@ import com.flaptor.util.remote.RpcException;
 public class RmiSearcherStub extends ARmiClientStub implements IRemoteSearcher {
     private static Logger logger = Logger.getLogger(com.flaptor.util.Execute.whoAmI());
     private IRmiSearcher remoteSearcher = null;
-    
-	/**
-	 * @todo the searcher should be able to specify the connection policy.
-	 */
+
+    /**
+     * Ctor with ExponentialFallbackPolicy
+     * @param basePort
+     * @param host
+     */
     public RmiSearcherStub(final int basePort, final String host) {
-        super(PortUtil.getPort(basePort,"searcher.rmi"), host, new ExponentialFallbackPolicy());
+    	this(basePort, host, new ExponentialFallbackPolicy());
+    }
+
+   	public RmiSearcherStub(final int basePort, final String host, IRetryPolicy policy) {
+        super(PortUtil.getPort(basePort,"searcher.rmi"), host, policy);
         logger.info("Creating RmiSearcherStub for Searcher located at " + host + ":" + PortUtil.getPort(basePort,"searcher.rmi"));
     }
-    
+
 	public GroupedSearchResults search(AQuery query, int firstResult, int count,  AGroup groupBy, int groupSize, AFilter filter, ASort sort) throws RpcException {
-        try { 
+        try {
             if (super.checkConnection()) {
                 GroupedSearchResults res = remoteSearcher.search(query, firstResult, count, groupBy, groupSize,filter, sort);
                 super.connectionSuccess();
