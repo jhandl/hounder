@@ -1,16 +1,16 @@
 <!--
-Copyright 2008 Flaptor (flaptor.com) 
+Copyright 2008 Flaptor (flaptor.com)
 
-Licensed under the Apache License, Version 2.0 (the "License"); 
-you may not use this file except in compliance with the License. 
-You may obtain a copy of the License at 
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0 
+    http://www.apache.org/licenses/LICENSE-2.0
 
-Unless required by applicable law or agreed to in writing, software 
-distributed under the License is distributed on an "AS IS" BASIS, 
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
-See the License for the specific language governing permissions and 
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
 limitations under the License.
 -->
 <project name="hounder" default="product" basedir=".">
@@ -29,7 +29,7 @@ limitations under the License.
 	<property name="output.dir"  location="${basedir}/output"/>
 	<property name="gen.src.dir"  location="${basedir}/jsp_to_java"/>
 	<property name="gen.build.dir"  location="${basedir}/jsp_build"/>
-	<property name="bin.dir" location="${basedir}/bin"/>	
+	<property name="bin.dir" location="${basedir}/bin"/>
 	<property name="tmp.dir" location="${basedir}/tmp"/>
 	<property name="tmp.bin.dir" location="${tmp.dir}/bin"/>
 	<property name="tmp.conf.dir" location="${tmp.dir}/conf"/>
@@ -47,7 +47,7 @@ limitations under the License.
             <include name="clusterfest-*.jar" />
             <include name="hist4j-*.jar" />
             <include name="wiz4j-*.jar" />
-        	
+
         	<include name="nutch-0.7.2.jar" />
 			<include name="commons-cli-1.1.jar" />
 			<include name="commons-httpclient-2.0.2.jar" />
@@ -63,7 +63,7 @@ limitations under the License.
             <include name="dom4j-1.6.1.jar" />
             <include name="jaxen-1.1-beta-8.jar" />
             <include name="language-identifier.jar" />
-            <include name="log4j-1.2.11.jar" />
+            <include name="log4j-*.jar" />
             <include name="javassist.jar" />
             <include name="jetty-6.1.1.jar" />
             <include name="jetty-util-6.1.1.jar" />
@@ -104,13 +104,13 @@ limitations under the License.
         <pathelement location="${build.dir}" />
         <fileset dir="${basedir}/plugins/parse-html">
             <include name="**/*.jar" />
-        </fileset>       
+        </fileset>
         <fileset dir="${basedir}/plugins/language-identifier">
             <include name="**/*.jar" />
-        </fileset>        
+        </fileset>
         <fileset dir="${basedir}/plugins/language-identifier">
             <include name="**/*.jar" />
-        </fileset>        
+        </fileset>
     </path>
 
     <!--******************************************************************************************************-->
@@ -133,7 +133,7 @@ limitations under the License.
 
 
     <target name="check-jsp"  description="compiles jsp files to java files, for verification">
-       
+
 
         <delete dir="${gen.src.dir}"/>
         <delete dir="${gen.build.dir}"/>
@@ -144,7 +144,7 @@ limitations under the License.
             <classpath refid="classpath.jars.tools" />
             <arg line="-uriroot ${webapp.dir} -d ${gen.src.dir} -p com.flaptor.jsp -webapp ${webapp.dir}" />
         </java>
-        
+
         <javac srcdir="${gen.src.dir}" destdir="${gen.build.dir}" >
             <classpath refid="classpath.jsp.tools" />
         </javac>
@@ -168,12 +168,12 @@ limitations under the License.
             <fileset dir="${basedir}" includes="TEST-*.txt" />
         </delete>
     </target>
-	
+
     <target name="clean-tmp">
         <delete dir="${tmp.dir}"/>
     </target>
 
-	
+
     <!--******************************************************************************************************-->
     <target name="prepare">
         <delete dir="${output.dir}"/>
@@ -205,9 +205,9 @@ limitations under the License.
 				<include name="*.properties.defaults" />
 			</fileset>
 			<zipgroupfileset dir="${lib.dir}">
-				<include name="lucene*.jar" />		
-			    <include name="commons-codec-1.3.jar" />		
-				<include name="log4j-1.2.11.jar" />				
+				<include name="lucene*.jar" />
+			    <include name="commons-codec-1.3.jar" />
+				<include name="log4j-1.2.11.jar" />
 				<include name="dom4j-1.6.1.jar" />
 			</zipgroupfileset>
 		</jar>
@@ -250,8 +250,8 @@ limitations under the License.
 			</zipgroupfileset>
 		</jar>
     </target>
-	
-	
+
+
     <!--******************************************************************************************************-->
     <target name="jar" depends="compile" description="builds the Hounder jar file" >
 		<jar jarfile="${output.dir}/${project}-${version}.jar" >
@@ -444,7 +444,7 @@ limitations under the License.
         <property name="webapp.dir" value="${src.dir}/web-admin/"/>
         <antcall target="check-jsp"/>
         <war warfile="output/admin.war" webxml="${src.dir}/web-admin/web.xml">
-		
+
             <classes dir="${build.dir}">
                 <include name="com/flaptor/hounder/crawler/bean/*.class"/>
                 <include name="com/flaptor/hounder/crawler/pagedb/*.class"/>
@@ -452,12 +452,12 @@ limitations under the License.
                 <include name="com/flaptor/hounder/crawler/UrlPatterns*.class"/>
                 <include name="com/flaptor/hounder/crawler/PageRank*.class"/>
             </classes>
-        	
+
             <fileset dir="${src.dir}/web-admin/">
                 <include name="*jsp"/>
                 <include name="*css"/>
             </fileset>
-	
+
             <lib dir="${output.dir}">
                 <include name="*jar"/>
             </lib>
@@ -467,8 +467,8 @@ limitations under the License.
             </lib>
 	    </war>
 	</target>
-	
-	
+
+
     <!--**************************************************************************************************-->
     <!--DIST *********************************************************************************************-->
     <!--**************************************************************************************************-->
@@ -477,7 +477,7 @@ limitations under the License.
         <mkdir dir="${tmp.dir}"/>
 	</target>
 
-	
+
     <!--******************************************************************************************************-->
     <target name="dist-bin-all">
         <antcall target="prepare-dist"/>
@@ -488,7 +488,7 @@ limitations under the License.
             <tarfileset dir="${tmp.bin.dir}" mode="755" />
         </tar>
     </target>
-    
+
     <!--******************************************************************************************************-->
 	<target name="dist-lib" depends="jar, depjar">
 	<!--target name="dist-lib"-->
@@ -499,7 +499,7 @@ limitations under the License.
             </tarfileset>
         </tar>
    	</target>
-	
+
     <!--******************************************************************************************************-->
     <target name="dist-plugin">
         <tar destfile="${dist.dir}/plugin.tgz" compression="gzip">
@@ -508,7 +508,7 @@ limitations under the License.
             </tarfileset>
         </tar>
     </target>
-	
+
     <!--******************************************************************************************************-->
 	<target name="dist-indexer"  depends="dist-lib, dist-plugin">
 		<antcall target="prepare-dist"/>
@@ -523,7 +523,7 @@ limitations under the License.
                 <exclude name="*.properties.defaults"/>
             </fileset>
         </copy>
-        
+
         <tar destfile="${dist.dir}/indexer.tgz" compression="gzip">
             <tarfileset dir="${tmp.bin.dir}" prefix="indexer" mode="755" />
             <tarfileset dir="${tmp.conf.dir}" prefix="indexer/conf" />
@@ -538,7 +538,7 @@ limitations under the License.
             <fileset dir="${bin.dir}/crawler"/>
         </copy>
 
-        <!-- Copy the global crawler scripts 
+        <!-- Copy the global crawler scripts
     	<copy todir="${tmp.dir}">
             <fileset dir="${bin.dir}/multicrawler"/>
         </copy -->
@@ -574,12 +574,12 @@ limitations under the License.
 		<antcall target="prepare-dist"/>
         <!-- Copy xmlrpc searcher scripts -->
         <copy todir="${tmp.bin.dir}">
-            <fileset dir="${bin.dir}/searcher"/>        	
+            <fileset dir="${bin.dir}/searcher"/>
         </copy>
     	<copy todir="${tmp.bin.dir}/web-searcher/">
     		<fileset dir="${src.dir}/web-searcher/"/>
    		</copy>
-    	
+
         <copy todir="${tmp.conf.dir}">
             <fileset dir="${conf.dir}">
                 <include name="*.properties"/>
@@ -609,7 +609,7 @@ limitations under the License.
                 <exclude name="*.properties.defaults"/>
             </fileset>
         </copy>
-        
+
         <tar destfile="${dist.dir}/cache-server.tgz" compression="gzip">
             <tarfileset dir="${tmp.bin.dir}" prefix="cache-server" mode="755" />
             <tarfileset dir="${tmp.conf.dir}" prefix="cache-server/conf" />
@@ -619,11 +619,11 @@ limitations under the License.
     <!--******************************************************************************************************-->
 	<target name="dist-clustering-web"  depends="dist-lib, dist-plugin">
 		<antcall target="prepare-dist"/>
-		
+
         <copy todir="${tmp.bin.dir}">
             <fileset dir="${bin.dir}/clustering-web"/>
         </copy>
-		
+
 		<unjar dest="${tmp.bin.dir}">
 			<fileset dir="${lib.dir}">
 			  <include name="clusterfest-*.jar"/>
@@ -632,7 +632,7 @@ limitations under the License.
 			    <include name="web-clusterfest/**"/>
 			</patternset>
 		</unjar>
-		
+
         <copy todir="${tmp.conf.dir}">
             <fileset dir="${conf.dir}">
                 <include name="*.properties"/>
@@ -641,7 +641,7 @@ limitations under the License.
                 <exclude name="*.properties.defaults"/>
             </fileset>
         </copy>
-        
+
         <tar destfile="${dist.dir}/clustering-web.tgz" compression="gzip">
             <tarfileset dir="${tmp.bin.dir}" prefix="clustering-web" mode="755" />
             <tarfileset dir="${tmp.conf.dir}" prefix="clustering-web/conf" />
@@ -666,9 +666,9 @@ limitations under the License.
               	<include name="crawler.properties"/>
               	<include name="nutch-site.xml"/>
 	          	<include name="nutchfetcher.properties"/>
-            </fileset>      	
+            </fileset>
         </copy>
-        
+
         <tar destfile="${dist.dir}/learning-web.tgz" compression="gzip">
             <tarfileset dir="${tmp.bin.dir}" prefix="learning-web" mode="755" />
             <tarfileset dir="${tmp.conf.dir}" prefix="learning-web/conf" />
@@ -689,7 +689,7 @@ limitations under the License.
                 <exclude name="*.properties.defaults"/>
             </fileset>
         </copy>
-        
+
         <tar destfile="${dist.dir}/loganalysis.tgz" compression="gzip">
             <tarfileset dir="${tmp.bin.dir}" prefix="loganalysis" mode="755" />
             <tarfileset dir="${tmp.conf.dir}" prefix="loganalysis/conf" />
@@ -703,7 +703,7 @@ limitations under the License.
     <target name="distsrc" depends="prepare, doc" description="builds the source distribution tar ball">
         <property name="prefix" value="${project}-${version}"/>
         <tar destfile="${product.output.dir}/${project}-${version}-src.tgz" compression="gzip">
-        	
+
             <tarfileset file="*.xml" prefix="${prefix}"/>
             <tarfileset file="${docs.dir}/LICENSE" prefix="${prefix}"/>
             <tarfileset dir="${src.dir}" prefix="${prefix}/src"/>
@@ -711,7 +711,7 @@ limitations under the License.
             <tarfileset dir="${conf.dir}" prefix="${prefix}/conf" />
             <tarfileset dir="${docs.dir}/javadoc" prefix="${prefix}/javadoc"/>
             <tarfileset dir="${bin.dir}" mode="755" prefix="${prefix}/bin"/>
-            <tarfileset dir="${lib.dir}" prefix="${prefix}/lib"/>            
+            <tarfileset dir="${lib.dir}" prefix="${prefix}/lib"/>
             <tarfileset dir="${tools.dir}" prefix="${prefix}/tools"/>
             <tarfileset dir="${plugins.dir}" prefix="${prefix}/plugins"/>
         </tar>
@@ -727,7 +727,7 @@ limitations under the License.
             </tarfileset>
         </tar>
 	</target>
-	
+
     <!--******************************************************************************************************-->
     <target name="prepareproduct" depends="dist, installer-jar" >
         <antcall target="prepare-dist"/>
@@ -748,7 +748,7 @@ limitations under the License.
     </target>
 
 	<target name="product" depends="prepareproduct" description="creates the product (but doesnt tar it)" >
-   		<copy todir="${product.output.dir}"> 
+   		<copy todir="${product.output.dir}">
             <fileset dir="${tmp.dir}"/>
         </copy>
    		<chmod perm="777" file="${product.output.dir}/*.sh"/>
