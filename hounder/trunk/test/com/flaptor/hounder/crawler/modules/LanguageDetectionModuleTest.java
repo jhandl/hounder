@@ -71,21 +71,21 @@ public class LanguageDetectionModuleTest extends TestCase {
         FetchDocument doc;
         String lang= LanguageDetectionModule.LANGUAGE_TAG+"es"; 
         doc= new FetchDocument(new Page("",1f), null, SP_TEXT1, null, null, null, null,
-                true, false, true);
+                true, false, false, true);
         assertEquals(0,doc.getTags().size());
         ldm.process(doc);
         assertEquals(1,doc.getTags().size());
         assertTrue(doc.getTags().contains(lang));
         
         doc= new FetchDocument(new Page("",1f), null, SP_TEXT2, null, null, null, null,
-                true, false, true);
+                true, false, false, true);
         assertEquals(0,doc.getTags().size());
         ldm.process(doc);
         assertEquals(1,doc.getTags().size());
         assertTrue(doc.getTags().contains(lang));
 
         doc= new FetchDocument(new Page("",1f), null, SP_TEXT3, null, null, null, null,
-                true, false, true);
+                true, false, false, true);
         assertEquals(0,doc.getTags().size());
         ldm.process(doc);
         assertEquals(1,doc.getTags().size());
@@ -97,21 +97,21 @@ public class LanguageDetectionModuleTest extends TestCase {
         FetchDocument doc;
         String lang= LanguageDetectionModule.LANGUAGE_TAG+"en";
         doc= new FetchDocument(new Page("",1f), null, EN_TEXT1, null, null, null, null,
-                true, false, true);
+                true, false, false, true);
         assertEquals(0,doc.getTags().size());
         ldm.process(doc);
         assertEquals(1,doc.getTags().size());
         assertTrue(doc.getTags().contains(lang));
         
         doc= new FetchDocument(new Page("",1f), null, EN_TEXT2, null, null, null, null,
-                true, false, true);
+                true, false, false, true);
         assertEquals(0,doc.getTags().size());
         ldm.process(doc);
         assertEquals(1,doc.getTags().size());
         assertTrue(doc.getTags().contains(lang));
 
         doc= new FetchDocument(new Page("",1f), null, EN_TEXT3, null, null, null, null,
-                true, false, true);
+                true, false, false, true);
         assertEquals(0,doc.getTags().size());
         ldm.process(doc);
         assertEquals(1,doc.getTags().size());

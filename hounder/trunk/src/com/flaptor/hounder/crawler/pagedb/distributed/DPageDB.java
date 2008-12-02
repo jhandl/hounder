@@ -27,6 +27,8 @@ import com.flaptor.util.Execute;
 import com.flaptor.util.NetUtil;
 import com.flaptor.util.remote.RpcException;
 
+import com.flaptor.hounder.crawler.APageMapper;
+
 
 /**
  * The DPageDB implements one node in a cluster of PageDBs. 
@@ -39,6 +41,8 @@ public class DPageDB extends PageDB {
     private PageDistributor distributor = null;
     private PageCatcher pageCatcher = null;
     private boolean catcherIsLocal = false;
+    ArrayList<NodeAddress> nodes = null;
+    NodeAddress localNode = null;
 
 
     /**
@@ -57,15 +61,24 @@ public class DPageDB extends PageDB {
     public DPageDB (String dirname, PageCatcher catcher) {
         super(dirname);
         Config config = Config.getConfig("crawler.properties");
-        ArrayList<NodeAddress> nodes = getNodeList(config);
-        NodeAddress localNode = getLocalNode(nodes);
+        nodes = getNodeList(config);
+        localNode = getLocalNode(nodes);
         APageMapper mapper = getPageMapper(config, nodes.size());
         pageCatcher = catcher;
         pageCatcher.start(localNode);
         distributor = new PageDistributor(nodes, localNode, mapper);
     }
+    
+    /**
+     * Synchronize all nodes of the distributed PageDB. 
+     * This method waits for all the other nodes to pass through this point.
+     */
+    public void synch() {
+        SyncPoint sync = new SyncPoint(nodes, localNode);
+        sync.sync();
+    }
 
-    // Parse the configured list of nodes and return a map of IPs and port numbers.
+	// Parse the configured list of nodes and return a map of IPs and port numbers.
     private ArrayList<NodeAddress> getNodeList (Config config) {
         ArrayList<NodeAddress> nodeList = new ArrayList<NodeAddress>();
         String[] nodeSpecs = config.getStringArray("pagedb.node.list");
@@ -108,7 +121,7 @@ public class DPageDB extends PageDB {
 
     // Return the IP and port of the local node, matching each node with the local network interfaces.
     public NodeAddress getLocalNode (ArrayList<NodeAddress> nodes) {
-        NodeAddress localNode = null;
+        NodeAddress local = null;
         boolean found = false;
         try {
             for (String localIP : NetUtil.getLocalIPs()) {
@@ -116,7 +129,7 @@ public class DPageDB extends PageDB {
                     String remoteIP = node.getIP();
                     Integer remotePort = node.getPort();
                     if (!found && localIP.equals(remoteIP)) {
-                        localNode = node;
+                        local = node;
                         found = true;
                     }
                 }
@@ -127,13 +140,14 @@ public class DPageDB extends PageDB {
         if (!found) {
             throw new RuntimeException("The local host is not among the list of nodes for the distributed PageDB");
         }
-        return localNode;
+        return local;
     }
 
     /**
      * Open the pagedb.
      * @param action @see com.flaptor.hounder.crawler.pagedb.PageDB#open(int)
      */
+    @Override
     public void open (int action) throws IOException {
         super.open(action);
     }
@@ -143,7 +157,8 @@ public class DPageDB extends PageDB {
      * Write a page to the pagedb.
      * @param page Page that should be written to the pagedb.
      */
-    public synchronized void addPage (Page page) throws IOException {
+    @Override
+    public void addPage (Page page) throws IOException {
         boolean sent = false;
         page.setLocal(true);
         try {
@@ -154,7 +169,7 @@ public class DPageDB extends PageDB {
                 sent = true;
             }
         } catch (RpcException e) {
-            logger.error("Attempting to send a page to a remote PageCatcher",e);
+            logger.warn("Attempting to send a page to a remote PageCatcher (will store locally): "+e);
             page.setLocal(false);
         }
         if (!sent) {
@@ -165,6 +180,7 @@ public class DPageDB extends PageDB {
     /**
      * Close the distributed pagedb.
      */
+    @Override
     public void close () throws IOException {
         if ((mode & 0x0F) != READ) {
             logger.info("DPageDB ready for close. Will merge "+pageCatcher.catches()+" catched pages.");

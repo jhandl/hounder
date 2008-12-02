@@ -167,7 +167,7 @@ public class PageDBTest extends TestCase {
     public void testPageDB() throws Exception {
         boolean sorted = true;
         build(1,sorted);
-        build(1000,sorted);
+        build(10000,sorted);
     }
 
 

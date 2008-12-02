@@ -100,8 +100,8 @@ public class PageDBStats {
             buf.newLine();
             buf.write("score="+String.valueOf(fetchedScore));
             buf.newLine();
-            writeSamples(buf, priorityHistogram, "priority");
-            writeSamples(buf, scoreHistogram, "score");
+            writeSamples(buf, priorityHistogram, prioritySamples, "priority");
+            writeSamples(buf, scoreHistogram, scoreSamples, "score");
         } catch (Exception e) {
             logger.error("Writing data file " + file + ": " + e, e);
         } finally {
@@ -159,7 +159,7 @@ public class PageDBStats {
     }
 
     // write histogram samples to a file.
-    private void writeSamples (BufferedWriter writer, AdaptiveHistogram histogram, String name) throws IOException {
+    private void writeSamples (BufferedWriter writer, AdaptiveHistogram histogram, float[] samples, String name) throws IOException {
         writer.write(name+" histogram: sampleSize="+String.valueOf(sampleSize));
         writer.newLine();
         for (int s = 0; s <= sampleSize; s++) {
@@ -167,8 +167,8 @@ public class PageDBStats {
             float value = 0;
             if (null != histogram) {
                 value = histogram.getValueForPercentile(p);
-            } else if (null != prioritySamples) {
-                value = prioritySamples[s];
+            } else if (null != samples) {
+                value = samples[s];
             }
             writer.write(" sample"+s+"="+String.valueOf(value));
             writer.newLine();

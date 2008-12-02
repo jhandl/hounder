@@ -198,6 +198,7 @@ public class WordFilterModule extends ATrueFalseModule {
 
         // Start monitoring the file.
         public void run() {
+            Thread.currentThread().setName("WordFilterFileMonitor("+filename+")");
             running = true;
             while (running) {
             	File file = new File(filename);

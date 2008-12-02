@@ -51,6 +51,7 @@ public class SimFetcher implements IFetcher {
             int pageid = SimWeb.urlToPage(url);
             boolean success = (web.getStatus(pageid) == SimWeb.SUCCESS);
             boolean recoverable = true;
+            boolean internalError = false;
             boolean changed = true;
             if (success) {
                 web.markAsReached(pageid);
@@ -67,7 +68,7 @@ public class SimFetcher implements IFetcher {
                 content = text.getBytes();
                 header.put("length",String.valueOf(content.length));
             }
-            FetchDocument doc = new FetchDocument(page, url, text, title, links, content, header, success, recoverable, changed);
+            FetchDocument doc = new FetchDocument(page, url, text, title, links, content, header, success, recoverable, internalError, changed);
             fetchdata.addDoc(doc);
         }
         return fetchdata;

@@ -58,6 +58,7 @@ public class FetchDocument {
     private Link[] links;
     private boolean success;
     private boolean recoverable;
+    private boolean internalError;
     private boolean changed; // fetcher informs the server told it the page changed and has thus been refetched.
     private boolean textChanged; // the page text has significantly changed (according to the text signature).
     private byte[] content;
@@ -65,7 +66,7 @@ public class FetchDocument {
     private boolean alreadyParsed;
 
 
-    public FetchDocument(Page page, String origUrl, String text, String title, Link[] links, byte[] content, Map<String,String> header, boolean success, boolean recoverable, boolean changed) {
+    public FetchDocument(Page page, String origUrl, String text, String title, Link[] links, byte[] content, Map<String,String> header, boolean success, boolean recoverable, boolean internalError, boolean changed) {
         this(page);
         this.origUrl = origUrl;
         this.text = text;
@@ -75,6 +76,7 @@ public class FetchDocument {
         this.header = header;
         this.success = success;
         this.recoverable = recoverable;
+        this.internalError = internalError;
         this.changed = changed;
         this.alreadyParsed = true;
         checkTextChanges();
@@ -82,13 +84,14 @@ public class FetchDocument {
 
 
     // LAZY PARSE CONSTRUCTOR
-    public FetchDocument(Page page, String origUrl, byte[] content, Map<String,String> header, boolean success, boolean recoverable, boolean changed) {
+    public FetchDocument(Page page, String origUrl, byte[] content, Map<String,String> header, boolean success, boolean recoverable, boolean internalError, boolean changed) {
         this(page);
         this.origUrl = origUrl;
         this.content = content;
         this.header = header;
         this.success = success;
         this.recoverable = recoverable;
+        this.internalError = internalError;
         this.changed = changed;
         this.alreadyParsed = false;
     }
@@ -114,7 +117,14 @@ public class FetchDocument {
 
     private void parse () {
         try {
-            HtmlParser.Output out = parser.parse(page.getUrl(), new String(content,getEncoding()));
+            String enc_content;
+            try {
+                enc_content = new String(content,getEncoding());
+            } catch (Exception ee) {
+                logger.warn("Encoding String with charset ("+getEncoding()+"): "+ee);
+                enc_content = new String(content);
+            }
+            HtmlParser.Output out = parser.parse(page.getUrl(), enc_content);
             this.text = out.getText();
             this.title = out.getTitle();
             List<Pair<String,String>> ol = out.getLinks();
@@ -206,6 +216,7 @@ public class FetchDocument {
             for (String token: tokens) {
                 if (token.toLowerCase().contains("charset") && token.contains("=")){
                     encoding = token.split("=")[1].trim().toUpperCase();
+                    encoding.replaceAll("\"", "");
                     break;
                 }
             }
@@ -239,6 +250,10 @@ public class FetchDocument {
 
     public boolean recoverable () {
         return recoverable;
+    }
+
+    public boolean internalError () {
+        return internalError;
     }
 
     public boolean pageChanged () {

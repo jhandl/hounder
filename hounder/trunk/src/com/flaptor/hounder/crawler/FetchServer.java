@@ -55,24 +55,27 @@ public class FetchServer {
 
     // This thread handles the fetcher.
     private class ServerThread extends Thread {
+        @Override
         public void run () {
+            setName("FetcherThread");
             FetchList fetchlist = null;
             FetchData fetchdata = null;
             boolean continueAfterException;
             do {
-                continueAfterException= false;
+                continueAfterException = false;
                 try {
                     fetchlist = crawler.getFetchlist();
                     fetchdata = null;
                     if (null != fetchlist) {
                         fetchdata = fetcher.fetch(fetchlist);
+                        fetchlist.remove();
                     } else {
-                        logger.debug("Got null fetchlist");
+                        logger.debug("Got null fetchlist, indicating end of cycle.");
                     }
                     crawler.takeFetchdata(fetchdata);
                 } catch (Exception e) {
                     logger.error(e,e);
-                    continueAfterException= true;
+                    continueAfterException = true;
                 }
             } while ((continueAfterException || (null != fetchdata)) && Crawler.running());
             logger.info("Local fetcher is done. ("+((null==fetchdata)?"fetchdata==null":"crawler.running()==false")+")");

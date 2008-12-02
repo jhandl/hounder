@@ -130,6 +130,7 @@ public class UrlPatterns {
 
         // Start monitoring the file.
         public void run() {
+            Thread.currentThread().setName("UrlPatternFileMonitor("+filename+")");
             running = true;
             while (running) {
                 File file = new File(filename);

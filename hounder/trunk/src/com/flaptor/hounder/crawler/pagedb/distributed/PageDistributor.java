@@ -22,6 +22,8 @@ import org.apache.log4j.Logger;
 import com.flaptor.hounder.crawler.pagedb.Page;
 import com.flaptor.util.Execute;
 
+import com.flaptor.hounder.crawler.APageMapper;
+
 
 /**
  * The page distributor maps pages to physical DPageDB nodes.
@@ -58,21 +60,6 @@ public class PageDistributor {
             } else {
                 throw new RuntimeException("Could not create PageCatcherStub for " + node);
             } 
-           /* 
-            boolean connected = false;
-            while (!connected) {
-                //IRemotePageCatcher catcher = (IRemotePageCatcher) RmiUtil.getRemoteService(node.getIP(), node.getPort(), RmiServer.DEFAULT_SERVICE_NAME);//TODO replace this line with a STUB
-                if (null != catcher) {
-                    catchers[nodeID++] = catcher;
-                    if (node.equals(localNode)) {
-                        localCatcher = catcher;
-                    }
-                    connected = true;
-                } else {
-                    Execute.sleep(1000);
-                }
-            }
-            */
         }
         if (null == localCatcher) {
             throw new RuntimeException("Local address not found among the distributed PageDB nodes");

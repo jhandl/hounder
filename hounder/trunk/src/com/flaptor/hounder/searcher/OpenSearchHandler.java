@@ -126,7 +126,7 @@ public class OpenSearchHandler extends AbstractHandler {
         request.setCharacterEncoding("utf-8");
         
         // Parameter processing
-        int minHitsPerPage=5;
+        int minHitsPerPage=3;
         int maxHitsPerPage=50;
         int maxOffset=1000;       // Max number of hit the results page can start with
         // parameters:

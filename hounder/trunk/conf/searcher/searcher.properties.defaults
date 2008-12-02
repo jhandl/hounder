@@ -35,7 +35,7 @@ Sort.cacheSize=20
 ######
 # Snippet configuration
 ######
-## Searcher.snippetOfField was deprecated (use snippetOfFields) to allow snippeting of many fields
+## Searcher.snippetOfField was deprecated (use Searcher.snippetOfFields [note the 's']) to allow snippeting of many fields
 ## Now for each field in snippetOfFields there will be a new field called snippet_<snippetOfFields[i]>
 # (ie text --> snippet_text) 
 # snippetOfFields is a comma separated list of fields to snippet. (ie text,title).

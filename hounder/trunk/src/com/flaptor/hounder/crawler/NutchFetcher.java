@@ -168,6 +168,27 @@ public class NutchFetcher implements IFetcher {
     }
 
     /**
+     * Determine if the fetch error is internal, for example a self-imposed retry.
+     * @return true if the fetch error is internal.
+     */
+    private static boolean internalError (FetcherOutput fo) {
+        boolean isInternal = false;
+        ProtocolStatus protStatus = fo.getProtocolStatus();
+        int protCode = protStatus.getCode();
+        switch (protCode) {
+            case ProtocolStatus.EXCEPTION:
+                String[] args = protStatus.getArgs();
+                if (args.length > 0) {
+                    if (args[0].startsWith("org.apache.nutch.protocol.RetryLater")) {
+                        isInternal = true;
+                    }
+                }
+                break;
+        }
+        return isInternal;
+    }
+    
+    /**
      * Obtain the redirected url, or null if there is no redirect.
      * @return null if no redirect, the new url if there is a redirect.
      */
@@ -260,6 +281,7 @@ public class NutchFetcher implements IFetcher {
             boolean changed = true; // nutch ignores the server change status of the page.
             boolean success = success(fo);
             boolean recoverable = recoverable(fo);
+            boolean internalError = internalError(fo);
 
             // parse java.util.Properties, inserting lowercased keys on header map.
             Map<String,String> header = new HashMap<String,String>();
@@ -275,6 +297,7 @@ public class NutchFetcher implements IFetcher {
             		header,
             		success,
             		recoverable,
+                    internalError,
             		changed);
 
             fetchdata.addDoc(doc);

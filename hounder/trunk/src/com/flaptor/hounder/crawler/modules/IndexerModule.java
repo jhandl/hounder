@@ -31,6 +31,8 @@ import org.dom4j.Element;
 
 import com.flaptor.hounder.crawler.pagedb.Page;
 import com.flaptor.hounder.crawler.pagedb.PageDB;
+import com.flaptor.hounder.crawler.APageMapper;
+import com.flaptor.hounder.crawler.UrlHashMapper;
 import com.flaptor.hounder.indexer.IRemoteIndexer;
 import com.flaptor.hounder.indexer.Indexer;
 import com.flaptor.hounder.indexer.MockIndexer;
@@ -61,11 +63,12 @@ public class IndexerModule extends AProcessorModule {
     private int logBoostDamp; // the amount of damping for the log value in the boost formula.
     private int freshnessBoostDamp; // the amount of damping for the freshnessBoost value in the boost formula.
     private QuadCurve freshnessCurve; // the curve that describes the amount of boost for any given freshness.
-    private IRemoteIndexer indexer; // the Hounder indexer.
+    private IRemoteIndexer[] indexers; // a list of Hounder indexer.
+    private APageMapper pageMapper; // a mapper to choose an indexer for a given page.
     private String crawlName; // the name of the crawl, added to the index so searches can be restricted to the results of this crawler.
     private float[] scoreThreshold; // the values for the (0 to 100 step 10) percentiles in the page score histogram.
     private HashSet hostStopWords; // the parts of web host names that are not interesting, like www.
-    private boolean sendContent; //  if true the page content will be sent to the indexer in a <body> tag.
+    private boolean sendContent; // if true the page content will be sent to the indexer in a <body> tag.
     
 
     public IndexerModule (String moduleName, Config globalConfig) {
@@ -87,12 +90,47 @@ public class IndexerModule extends AProcessorModule {
         // instantiate the indexer.
         if (mdlConfig.getBoolean("use.mock.indexer")) {
             logger.warn("Using a mock indexer. This should be used only for testing.");
-            this.indexer = new MockIndexer();
+            this.indexers = new IRemoteIndexer[1];
+            this.indexers[0] = new MockIndexer();
+            pageMapper = new UrlHashMapper(mdlConfig, 1);
         } else {
-        	Pair<String, Integer> host = PortUtil.parseHost(mdlConfig.getString("remoteRmiIndexer.host"), "indexer.rmi");
-            this.indexer = new RmiIndexerStub(host.last(), host.first());
+        	String[] specs = null;
+        	try {
+        		specs = mdlConfig.getStringArray("indexer.node.list");
+        	} catch (Exception e) {
+        		// for backward compatibility:
+            	specs = mdlConfig.getStringArray("remoteRmiIndexer.host");
+        	}
+        	this.indexers = new IRemoteIndexer[specs.length];
+        	for (int i=0; i<specs.length; i++) {
+        		Pair<String, Integer> host = PortUtil.parseHost(specs[i], "indexer.rmi");
+        		this.indexers[i] = new RmiIndexerStub(host.last(), host.first());
+        	}
+            pageMapper = getPageMapper(mdlConfig, specs.length);
         }        
     }
+
+    // Return the configured page mapper.
+    private APageMapper getPageMapper (Config config, int numberOfNodes) {
+        String[] parts = config.getStringArray("indexer.node.mapper");
+        if (null == parts || 0 == parts.length) {
+            throw new RuntimeException("No mapper defined for the distributed indexer");
+        } 
+        String mapperClass = parts[0].trim();
+        Config mapperConfig = config;
+        if (parts.length > 1) {
+            String mapperName = parts[1].trim();
+            mapperConfig = Config.getConfig(mapperName + "Mapper.properties");
+        }
+        APageMapper mapper;
+        try {
+            mapper = (APageMapper)Class.forName(mapperClass).getConstructor(new Class[]{Config.class, Integer.TYPE}).newInstance(new Object[]{mapperConfig, numberOfNodes});
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        return mapper;
+    }
+
 
 
     /**
@@ -128,7 +166,8 @@ public class IndexerModule extends AProcessorModule {
 
         root.addElement("documentId").addText(getDocumentId(page));
         try {
-            while (indexer.index(dom) == Indexer.RETRY_QUEUE_FULL) {
+        	int i = pageMapper.mapPage(page);
+            while (indexers[i].index(dom) == Indexer.RETRY_QUEUE_FULL) {
                 try {
                     Thread.sleep(indexerBusyRetryTime*1000);
                 } catch (InterruptedException e) {
@@ -352,7 +391,8 @@ public class IndexerModule extends AProcessorModule {
         }
         // Send the document to the indexer. If the queue is full, wait and retry.
         try {
-            while (indexer.index(dom) == Indexer.RETRY_QUEUE_FULL) {
+        	int i = pageMapper.mapPage(page);
+            while (indexers[i].index(dom) == Indexer.RETRY_QUEUE_FULL) {
                 try { 
                     Thread.sleep(indexerBusyRetryTime*1000); 
                 } catch (InterruptedException e) {
@@ -500,7 +540,9 @@ public class IndexerModule extends AProcessorModule {
             try {
                 org.dom4j.Document dom = DocumentHelper.createDocument();
                 dom.addElement("command").addAttribute("name", "optimize");
-                indexer.index(dom);
+                for (int i=0; i<indexers.length; i++) {
+                	indexers[i].index(dom);
+                }
             } catch (Exception e) {
                 logger.error(e,e);
             }

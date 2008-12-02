@@ -74,7 +74,7 @@ public class PageTest extends TestCase {
                 page.setLastSuccess(succ);
                 if (succ > 0) {
                     page.setLastChange(Math.abs(rnd.nextLong()));
-                    page.setSignature(new TextSignature(TestUtils.randomText(100,100)));
+                    page.setSignature(new TextSignature(TestUtils.randomText(100,500)));
                     page.setScore(rnd.nextFloat());
                     page.setEmitted(rnd.nextBoolean());
                     page.setLocal(rnd.nextBoolean());
@@ -119,7 +119,7 @@ public class PageTest extends TestCase {
 
     @TestInfo(testType = TestInfo.TestType.UNIT)
     public void testPageSerialization() throws Exception {
-        for (int i=0; i<1000; i++) {
+        for (int i=0; i<100000; i++) {
             ByteArrayOutputStream buff = new ByteArrayOutputStream();
             ObjectOutputStream out = new ObjectOutputStream(buff);
             Page page1 = randomPage();

@@ -15,6 +15,7 @@ limitations under the License.
 */
 package com.flaptor.hounder.crawler.pagedb.distributed;
 
+import com.flaptor.hounder.crawler.APageMapper;
 import com.flaptor.hounder.crawler.pagedb.Page;
 import com.flaptor.util.Config;
 

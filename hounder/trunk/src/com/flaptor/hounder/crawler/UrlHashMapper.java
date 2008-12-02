@@ -13,7 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and 
 limitations under the License.
 */
-package com.flaptor.hounder.crawler.pagedb.distributed;
+package com.flaptor.hounder.crawler;
 
 import com.flaptor.hounder.crawler.pagedb.Page;
 import com.flaptor.util.Config;
@@ -28,9 +28,14 @@ public class UrlHashMapper extends APageMapper {
     }
 
     public int mapPage (Page page) {
-        int hash = Math.abs(page.getUrlHash().hashCode());
-        return hash % nodeCount;
+//        int hash = Math.abs(page.getUrlHash().hashCode());
+//        return hash % nodeCount;
+        byte[] hash = page.getUrlHashBytes();
+		int target = ((128 + hash[0])* 256 + (128 + hash[1])) % nodeCount;
+        return target;
     }
+        
+
 
     public static void main (String[] args) throws Exception {
         APageMapper.test(UrlHashMapper.class, args);

@@ -12,7 +12,7 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
 See the License for the specific language governing permissions and 
 limitations under the License.
-*/
+ */
 package com.flaptor.hounder.crawler;
 
 import java.io.IOException;
@@ -34,8 +34,7 @@ import com.flaptor.hounder.crawler.pagedb.Page;
 import com.flaptor.hounder.crawler.pagedb.PageDB;
 import com.flaptor.util.Config;
 import com.flaptor.util.Execute;
-
-
+import java.util.concurrent.BlockingQueue;
 
 /**
  * This class processes the results of a fetch.
@@ -56,28 +55,26 @@ public class FetchdataProcessor {
     /** 
      * Class initializer.
      */
-    public FetchdataProcessor () throws IOException {
+    public FetchdataProcessor() throws IOException {
         Config config = Config.getConfig("crawler.properties");
         maxDistance = config.getInt("max.distance");
         IS_HOTSPOT = config.getString("hotspot.tag");
         hotspots = new UrlPatterns(config.getString("hotspot.file"));
         recordParents = config.getBoolean("record.parents");
         modules = ModulesManager.getInstance();
-
         int cpus = Runtime.getRuntime().availableProcessors();
-        workerCount = (int)Math.ceil(cpus * config.getFloat("workers.per.cpu"));
-        logger.info("FetchDocument processor using "+workerCount+" workers on "+cpus+" cpus");
+        workerCount = (int) Math.ceil(cpus * config.getFloat("workers.per.cpu"));
+        logger.info("FetchDocument processor using " + workerCount + " workers on " + cpus + " cpus");
     }
 
-    private /*synchronized */void newDiscoveryPage () {
+    private /*synchronized */ void newDiscoveryPage() {
         discoveryPages++;
     }
 
-    public void optimizeIndex (){
+    public void optimizeIndex() {
         // Forward command to modules manager.
         modules.applyCommand("optimize");
     }
-
 
     /** 
      * Go through the fetched data, index it if needed, and store the outlinks for the next cycle.
@@ -91,12 +88,12 @@ public class FetchdataProcessor {
      * during the crawl cycle so that a page is no longer a hotspot, all pages that were considered 
      * hotspots earlier in the cycle will be dumped without sending a delete command to the document pipe.
      */
-    public synchronized long processFetchdata (Iterable<FetchDocument> fetchdata, PageDB oldPageDB, PageDB newPageDB) throws IOException {
+    public synchronized long processFetchdata(Iterable<FetchDocument> fetchdata, PageDB oldPageDB, PageDB newPageDB) throws IOException {
         // Create new pool to process.
-        int queueLen = workerCount * 10;
-        ArrayBlockingQueue<Runnable> queue = new ArrayBlockingQueue<Runnable>(queueLen);
+        int queueLen = workerCount; // * 10; // TODO: explain why *10.
+        BlockingQueue<Runnable> queue = new ArrayBlockingQueue<Runnable>(queueLen);
         RejectedExecutionHandler handler = new ThreadPoolExecutor.CallerRunsPolicy();
-        pool = new ThreadPoolExecutor(queueLen,queueLen,0,TimeUnit.SECONDS,queue,handler);
+        pool = new ThreadPoolExecutor(queueLen, queueLen, 0, TimeUnit.SECONDS, queue, handler);
         // set discoveryPages to 0, as there is a new "batch"
         discoveryPages = 0;
         logger.debug("Processing the fetched data");
@@ -108,7 +105,7 @@ public class FetchdataProcessor {
         // Feed the thread pool queue.
         while (iter.hasNext() && Crawler.running()) {
             FetchDocument doc = iter.next();
-            Runnable processorJob = new ProcessorJob(doc,oldPageDB,newPageDB);
+            Runnable processorJob = new ProcessorJob(doc, oldPageDB, newPageDB);
             pool.execute(processorJob);
             submitted++;
         }
@@ -128,7 +125,7 @@ public class FetchdataProcessor {
 
         return discoveryPages;
     }
-        
+
 
 
 
@@ -138,31 +135,44 @@ public class FetchdataProcessor {
         private final PageDB oldPageDB;
         private final PageDB newPageDB;
 
-        public ProcessorJob (FetchDocument doc,PageDB oldPageDB, PageDB newPageDB) {
+        public ProcessorJob(FetchDocument doc, PageDB oldPageDB, PageDB newPageDB) {
             this.doc = doc;
             this.oldPageDB = oldPageDB;
             this.newPageDB = newPageDB;
         }
 
-
-        public void run () {
-
+        public void run() {
             try {
                 boolean wasHotspot = false;
                 Page page = doc.getPage();
                 String pageurl = page.getUrl();
-
+                if (!"main".equals(Thread.currentThread().getName())) {
+                    Thread.currentThread().setName("FetchdataProcessorJob("+pageurl+")");
+                }
+                
+                String text = doc.getText(100);
+                String title = doc.getTitle(100);
                 Link[] links = doc.getLinks();
-                boolean success = doc.success() && (doc.getText().length() > 0 || links.length > 0 || page.getAnchors().length > 0);
+                String[] anchors = page.getAnchors();
+                boolean success = doc.success() 
+                        && (null != title && title.length() > 0) 
+                        && (   (null != text && text.length() > 0) 
+                            || (null != anchors && anchors.length > 0)
+                            || (null != links && links.length > 0)
+                           );
 
                 if (!success) { // the page could not be fetched
 
                     logger.debug("  page " + pageurl + " could not be fetched");
                     boolean keep = false;
                     if (doc.recoverable()) {
-                        page.setRetries(page.getRetries() + 1);
-                        if (!PageDBTrimmer.tooManyRetries(page)) {
+                        if (doc.internalError()) { // the recoverable error is our own fault
                             keep = true;
+                        } else {
+                            page.setRetries(page.getRetries() + 1);
+                            if (!PageDBTrimmer.tooManyRetries(page)) {
+                                keep = true;
+                            }
                         }
                     } else {
                         logger.debug("  discarding page " + pageurl);
@@ -193,65 +203,68 @@ public class FetchdataProcessor {
                     // send it to modules manager
                     modules.process(doc);
 
-                    // Now add the page's outlinks to the next pagedb, 
-                    // so they can be fetched in the next cycle
-                    if (links.length == 0) {
-                        // We need to avoid dangling nodes. 
-                        // A simple way is to add a link to itself
-                        links = new Link[1];
-                        links[0] = new Link(pageurl, "");
-                    }
-                    for (Link link : links) {
-                        try {
-                            if (! (page.getDistance() > maxDistance && pageurl.equals(link.getUrl()))) { // dont add self-links in a discovery front page
-                                if (Crawler.urlFilter(link.getUrl()) != null) { // if the url is a valid web page (not an image, etc)
-                                    logger.debug("    Adding link to " + link + " to the pagedb");
-                                    Page child = new Page(link.getUrl(), 1.0f);
-                                    child.setRetries(0);
-                                    child.setLastAttempt(0L);
-                                    child.setLastSuccess(0L);
-                                    if (recordParents) child.addParent(pageurl);
-                                    child.addAnchor(link.getAnchor()); // at this point it can only be one anchor
-                                    child.setScore(PageRank.parentContribution(page.getScore(), links.length));
-                                    // unless the child is a hotspot, it is removed from the fetched page by 1 level
-                                    child.setDistance(page.getDistance() + 1);
-
-                                    if ( ! hotspots.matchAll() && (maxDistance == 0)) {
-                                        // If hotspots is "*", all links are set at distance>0 and the trimmer 
-                                        // will keep those that make it into the front line.
-                                        // If hotspots restricts the crawl and maxDistance is 0, we want to make 
-                                        // sure the distance is 0 when the child is a hotspot, so it will not be 
-                                        // dropped by the trimmer.
-                                        // TODO: check if this is true, or if the presence of a frontline should 
-                                        // be checked before setting distances to 0.
-                                        if (hotspots.match(link.getUrl())) {
-                                            child.setDistance(0);
-                                            logger.debug("    child hotspot: "+link);
-                                        } else {
-                                            logger.debug("    child not hotspot: "+link);
+                    if (null != links) {
+                        // Now add the page's outlinks to the next pagedb, 
+                        // so they can be fetched in the next cycle
+                        if (links.length == 0) {
+                            // We need to avoid dangling nodes. 
+                            // A simple way is to add a link to itself
+                            links = new Link[1];
+                            links[0] = new Link(pageurl, "");
+                        }
+                        for (Link link : links) {
+                            try {
+                                if (!(page.getDistance() > maxDistance && pageurl.equals(link.getUrl()))) { // dont add self-links in a discovery front page
+                                    if (Crawler.urlFilter(link.getUrl()) != null) { // if the url is a valid web page (not an image, etc)
+                                        logger.debug("    Adding link to " + link + " to the pagedb");
+                                        Page child = new Page(link.getUrl(), 1.0f);
+                                        child.setRetries(0);
+                                        child.setLastAttempt(0L);
+                                        child.setLastSuccess(0L);
+                                        if (recordParents) {
+                                            child.addParent(pageurl);
                                         }
+                                        child.addAnchor(link.getAnchor()); // at this point it can only be one anchor
+                                        child.setScore(PageRank.parentContribution(page.getScore(), links.length));
+                                        // unless the child is a hotspot, it is removed from the fetched page by 1 level
+                                        child.setDistance(page.getDistance() + 1);
 
+                                        if (!hotspots.matchAll() && (maxDistance == 0)) {
+                                            // If hotspots is "*", all links are set at distance>0 and the trimmer 
+                                            // will keep those that make it into the front line.
+                                            // If hotspots restricts the crawl and maxDistance is 0, we want to make 
+                                            // sure the distance is 0 when the child is a hotspot, so it will not be 
+                                            // dropped by the trimmer.
+                                            // TODO: check if this is true, or if the presence of a frontline should 
+                                            // be checked before setting distances to 0.
+                                            if (hotspots.match(link.getUrl())) {
+                                                child.setDistance(0);
+                                                logger.debug("    child hotspot: " + link);
+                                            } else {
+                                                logger.debug("    child not hotspot: " + link);
+                                            }
+
+                                        }
+                                        newPageDB.addPage(child);
+                                        if (child.getDistance() > maxDistance) {
+                                            newDiscoveryPage();
+                                        }
+                                    } else {
+                                        logger.debug("    Dropping uninteresting url " + link);
                                     }
-                                    newPageDB.addPage(child); 
-                                    if (child.getDistance() > maxDistance) {
-                                        newDiscoveryPage();
-                                    }
-                                } else {
-                                    logger.debug("    Dropping uninteresting url " + link);
                                 }
+                            } catch (MalformedURLException e) {
+                                logger.warn("Processing page outlinks: " + e, e);
                             }
-                        } catch (MalformedURLException e) {
-                            logger.warn("Processing page outlinks: " + e, e);
                         }
                     }
-                    
 
                     if (doc.hasTag(IS_HOTSPOT)) {
                         page.setDistance(0); // the distance of this page to a hotspot is 0.
                     } else {
                         // if this page is not a hotspot (either by the regex file or because the modules said so)
                         // we place this page at the discovery front line. If any other page links to it, it will 
-                        // reaquire its original distance during the trimm process. Otherwise, it really doesn't 
+                        // re-aquire its original distance during the trimm process. Otherwise, it really doesn't 
                         // matter what its original distance was.
                         page.setDistance(maxDistance + 2); // +1 would be the birthline
                     }
@@ -260,12 +273,11 @@ public class FetchdataProcessor {
                 }
 
             } catch (IOException e) {
-                logger.error(e,e);
-                throw new RuntimeException(e);
+                logger.error(e, e);
+            } catch (Throwable e) {
+                logger.error(e, e);
             }
         }
     }
-
-
 }
 

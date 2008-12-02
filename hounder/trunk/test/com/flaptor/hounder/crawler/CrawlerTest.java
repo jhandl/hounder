@@ -163,18 +163,18 @@ public class CrawlerTest extends TestCase {
     }
 
     @TestInfo(testType = TestInfo.TestType.INTEGRATION,
-        requiresPort = {8086})
+        requiresPort = {8085})
     public void testPageRetention () throws Exception {
         if (!testingPageRetention) return;
         System.out.println("...Testing page retention");
-        String url = "http://localhost:8086/test.html";
+        String url = "http://localhost:8085/test.html";
         TestUtils.writeFile(tmpDir+"/testhotspot", url);
         config.set("max.distance", "0");
         config.set("discovery.front.size", "0");
         config.set("keep.original.url.on.redirect", "true");
 
         TestUtils.writeFile(tmpDir+"/web/test.html", "<html><head><title>title</title></head><body>"+TestUtils.randomText(25,25)+"</body></html>");
-        WebServer server = new WebServer(8086);
+        WebServer server = new WebServer(8085);
         server.addResourceHandler("/", tmpDir+"/web");
         server.start();
 
@@ -228,11 +228,11 @@ public class CrawlerTest extends TestCase {
 
 
     @TestInfo(testType = TestInfo.TestType.SYSTEM,
-            requiresPort = {8086})
+            requiresPort = {8087})
     public void testLinkFollowing () throws Exception {
         if (!testingLinkFollowing) return;
         System.out.println("...Testing link following");
-        String url = "http://localhost:8086/one.html";
+        String url = "http://localhost:8087/one.html";
         TestUtils.writeFile(tmpDir+"/testhotspot", "http:// | .*");
         config.set("max.distance", "0");
         config.set("discovery.front.size", "0");
@@ -240,7 +240,7 @@ public class CrawlerTest extends TestCase {
 
         TestUtils.writeFile(tmpDir+"/web/one.html", "<a href='page two.html?a <b> c#d'>two</a>");
         TestUtils.writeFile(tmpDir+"/web/page two.html", "content");
-        WebServer server = new WebServer(8086);
+        WebServer server = new WebServer(8087);
         server.addResourceHandler("/", tmpDir+"/web");
         server.start();
 
@@ -429,7 +429,7 @@ public class CrawlerTest extends TestCase {
 
 
     @TestInfo(testType = TestInfo.TestType.SYSTEM,
-            requiresPort = {8086})
+            requiresPort = {8089})
     public void testPriorityCrawl () throws Exception {
         if (!testingPriorityCrawl) return;
 
@@ -439,7 +439,7 @@ public class CrawlerTest extends TestCase {
         final int PERCENTILE = 50;
 
         // prepare the pagedb
-        TestUtils.writeFile(tmpDir+"/testurls", "http://localhost:8086/page1.htm");
+        TestUtils.writeFile(tmpDir+"/testurls", "http://localhost:8089/page1.htm");
         PageDB.main(new String[] {"create", tmpDir+"/testdb", tmpDir+"/testurls", "-q"});
 
         // prepare the pages
@@ -451,7 +451,7 @@ public class CrawlerTest extends TestCase {
         //FIXME: jetty doesn't stop right after calling stop. Use com.flaptor.webserver instead.
         System.out.println("FIXME:  jetty doesn't stop right after calling stop. Use com.flaptor.webserver instead.");
         // run the web server
-        Server server = new Server(8086);
+        Server server = new Server(8089);
         ResourceHandler resource_handler = new myResourceHandler();
         resource_handler.setResourceBase(tmpDir+"/testweb");
         HandlerList handlers = new HandlerList();

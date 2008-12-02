@@ -21,18 +21,22 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.HashSet;
 
 import com.flaptor.util.Config;
+import com.flaptor.util.Execute;
 import com.flaptor.util.TextSignature;
 import com.flaptor.util.TranscodeUtil;
+import org.apache.log4j.Logger;
 
 /**
  * @author Flaptor Development Team
  */
 public class Page implements Serializable {
     
+    private static final Logger logger = Logger.getLogger(Execute.whoAmI());
     private static final long serialVersionUID = 5L;
     private static final int CURRENT_VERSION = 5;
 
@@ -51,6 +55,7 @@ public class Page implements Serializable {
     private HashSet<String> anchors;
     private HashSet<String> parents;
     private TextSignature signature;
+    private MessageDigest digester;
     private static boolean configured = false;
     private static float similarityThreshold;
 
@@ -85,6 +90,11 @@ public class Page implements Serializable {
         anchors = new HashSet<String>();
         parents = new HashSet<String>();
         signature = new TextSignature("");
+        try {
+            digester = MessageDigest.getInstance("MD5");
+        } catch (NoSuchAlgorithmException ex) {
+            logger.error("Initializing message digester", ex);
+        }
     }
 
 
@@ -134,11 +144,8 @@ public class Page implements Serializable {
      */
     public void setUrl (String url) throws MalformedURLException {
         this.url = url;
-        try {
-            urlHash = MessageDigest.getInstance("MD5").digest(url.getBytes());
-        } catch (java.security.NoSuchAlgorithmException e) {
-            throw new RuntimeException("Security algorithm MD5 not implemented");
-        }
+        digester.reset();
+        urlHash = digester.digest(url.getBytes());
     }
 
     /**
@@ -268,6 +275,14 @@ public class Page implements Serializable {
         return TranscodeUtil.binToHex(urlHash);
     }
 
+    /**
+     * Getter for the urlHash metadata in byte array form.
+     * #return the hash bytes of the page url
+     */
+    public byte[] getUrlHashBytes() {
+        return urlHash;
+    }
+    
     /** 
      * Setter for the distance metadata.
      * @param distance the distance of this page to a hotspot.
@@ -431,66 +446,70 @@ public class Page implements Serializable {
 
     // Serialization method to write to a stream
     private void writeObject(ObjectOutputStream oos) throws IOException {
-        oos.writeByte(CURRENT_VERSION);
-        oos.writeObject(url);
-        oos.writeObject(urlHash);
-        oos.writeFloat(score);
-        oos.writeFloat(priority);
-        oos.writeLong(lastAttempt);
-        oos.writeLong(lastSuccess);
-        oos.writeInt(retries);
-        oos.writeInt(distance);
-        oos.writeInt(numInlinks);
-        oos.writeInt(parents.size());
-        for (String parent: parents) {
-            oos.writeObject(parent);
+        synchronized(oos) {
+            oos.writeByte(CURRENT_VERSION);
+            oos.writeObject(url);
+            oos.writeObject(urlHash);
+            oos.writeFloat(score);
+            oos.writeFloat(priority);
+            oos.writeLong(lastAttempt);
+            oos.writeLong(lastSuccess);
+            oos.writeInt(retries);
+            oos.writeInt(distance);
+            oos.writeInt(numInlinks);
+            oos.writeInt(parents.size());
+            for (String parent: parents) {
+                oos.writeObject(parent);
+            }
+            oos.writeInt(anchors.size());
+            for (String anchor:anchors) {
+                oos.writeObject(anchor);
+            }
+            if (0L != lastSuccess) { 
+                oos.writeLong(lastChange);
+                oos.writeBoolean(isLocal);
+                oos.writeBoolean(emitted);
+                oos.writeObject(signature);
+            }
         }
-        oos.writeInt(anchors.size());
-        for (String anchor:anchors) {
-            oos.writeObject(anchor);
-        }
-        if (0L != lastSuccess) { 
-            oos.writeLong(lastChange);
-            oos.writeBoolean(isLocal);
-            oos.writeBoolean(emitted);
-            oos.writeObject(signature);
-        } 
     }
 
     // Serialization method to read from a stream
     private void readObject(ObjectInputStream ois) throws IOException, ClassNotFoundException {
         init();
-        int version = ois.readByte();
-        // Page got redesigned in version 5, making it incompatible with all prior versions.
-        if (version < 5 || version > CURRENT_VERSION) {
-            throw new IOException("Incompatible Page version: v"+version+", expected v5 through v"+CURRENT_VERSION);
-        }
-        url = (String)ois.readObject();
-        urlHash = (byte[])ois.readObject();
-        score = ois.readFloat();
-        priority = ois.readFloat();
-        lastAttempt = ois.readLong();
-        lastSuccess = ois.readLong();
-        retries = ois.readInt();
-        distance = ois.readInt();
-        numInlinks = ois.readInt();
-        parents.clear();
-        int parentSize = ois.readInt(); // not necessarily = numInlinks; parent tracking may be disabled.
-        for (int i = 0; i < parentSize; i++) {
-            String p = (String)ois.readObject();
-            parents.add(p);
-        }
-        anchors.clear();
-        int anchorSize = ois.readInt();
-        for (int i = 0; i < anchorSize; i++) {
-            String a = (String)ois.readObject();
-            anchors.add(a);
-        }
-        if (0L != lastSuccess) {
-            lastChange = ois.readLong();
-            isLocal = ois.readBoolean();
-            emitted = ois.readBoolean();
-            signature = (TextSignature)ois.readObject();
+        synchronized(ois) {
+            int version = ois.readByte();
+            // Page got redesigned in version 5, making it incompatible with all prior versions.
+            if (version < 5 || version > CURRENT_VERSION) {
+                throw new IOException("Incompatible Page version: v"+version+", expected v5 through v"+CURRENT_VERSION);
+            }
+            url = (String)ois.readObject();
+            urlHash = (byte[])ois.readObject();
+            score = ois.readFloat();
+            priority = ois.readFloat();
+            lastAttempt = ois.readLong();
+            lastSuccess = ois.readLong();
+            retries = ois.readInt();
+            distance = ois.readInt();
+            numInlinks = ois.readInt();
+            parents.clear();
+            int parentSize = ois.readInt(); // not necessarily = numInlinks; parent tracking may be disabled.
+            for (int i = 0; i < parentSize; i++) {
+                String p = (String)ois.readObject();
+                parents.add(p);
+            }
+            anchors.clear();
+            int anchorSize = ois.readInt();
+            for (int i = 0; i < anchorSize; i++) {
+                String a = (String)ois.readObject();
+                anchors.add(a);
+            }
+            if (0L != lastSuccess) {
+                lastChange = ois.readLong();
+                isLocal = ois.readBoolean();
+                emitted = ois.readBoolean();
+                signature = (TextSignature)ois.readObject();
+            }
         }
         readConfig();
     }

@@ -43,8 +43,11 @@ import com.flaptor.hounder.util.UrlFilter;
 import com.flaptor.util.CloseableQueue;
 import com.flaptor.util.Config;
 import com.flaptor.util.Execute;
+import com.flaptor.util.FileUtil;
 import com.flaptor.util.PortUtil;
 import com.flaptor.util.cache.FileCache;
+import org.apache.log4j.Level;
+import org.apache.log4j.Priority;
 
 /**
  * This class implements Hounder's web crawler.
@@ -66,6 +69,9 @@ public class Crawler {
     private static StopMonitor stopMonitor; // the monitor for the stop file.
     private ModulesManager modules; // this holds the modules that will process the crawled pages.
     private boolean distributed; // if true, the underlying pagedb will be distributed.
+    private boolean starting; // if true, this is the first cycle since the crawler started.
+    private long pagedbSize; // the size of the current pagedb.
+    private CrawlerProgress progress; // the progress stats for the current crawl cycle
     private PageCatcher pageCatcher = null;
     private NodeListener nodeListener;
     private static UrlFilter urlFilter;
@@ -92,9 +98,10 @@ public class Crawler {
         pagedbDir = config.getString("pagedb.dir");
         injectedPagedbDir = config.getString("injected.pagedb.dir");
         distributed = config.getBoolean("pagedb.is.distributed");
-        fetchlistQueue = new CloseableQueue<FetchList>(3); // max three fetchlists in the queue
-        injectedFetchlistQueue = new CloseableQueue<FetchList>(); 
-        fetchdataQueue = new CloseableQueue<FetchData>(3); //TODO: analyze if the fetchdata should be written to disk.
+        starting = true;
+        fetchlistQueue = new CloseableQueue<FetchList>(1); // max three fetchlists in the queue
+        injectedFetchlistQueue = new CloseableQueue<FetchList>(); //TODO: put a limit, a large injectdb causes an OutOfMemoryError.
+        fetchdataQueue = new CloseableQueue<FetchData>(1); //TODO: analyze if the fetchdata should be written to disk.
         cycleFinishedMonitor = new Object();
         stopMonitor = new StopMonitor("stop");
         modules = ModulesManager.getInstance();
@@ -180,6 +187,7 @@ public class Crawler {
         }
 
 
+        @Override
         public void run () {
             FetchList fetchlist;
             boolean couldEnqueue;
@@ -188,11 +196,16 @@ public class Crawler {
 
                 if (null == fetchlist) {
                     fetchlistQueue.close();
-                    logger.debug("Enqueued last fetchlist of this cycle.");
+                    logger.debug("No more fetchlists for this cycle.");
                     break;
                 } 
                 // else
-                seen += fetchlist.getSize();
+                
+                progress.addSeen(fetchlist.getSize());
+                if (logger.isDebugEnabled()) {
+                    progress.report();
+                }
+                
                 if (skip > seen) {
                     fetchlist.remove();
                 } else {
@@ -223,6 +236,7 @@ public class Crawler {
             this.setName("InjectedFetchlistQueueMonitor");
         }
 
+        @Override
         public void run() {
             while (running() && !cycleFinished) {
 
@@ -271,21 +285,25 @@ public class Crawler {
         private PageDB tmpPageDB;
         private PageDB oldPageDB;
         private FetchdataProcessor processor;
+        private long processed;
+        
         public FetchdataQueueMonitor (PageDB oldPageDB, PageDB tmpPageDB, FetchdataProcessor processor) {
             this.tmpPageDB = tmpPageDB;
             this.oldPageDB = oldPageDB;
             this.processor = processor;
             discoveryPages = 0;
+            processed = 0;
             this.setName("FetchdataQueueMonitor");
         }
 
+        @Override
         public void run () {
 
             FetchData fetchdata = null;
             do {
                 boolean couldDequeue = false;
                 while (!couldDequeue && !fetchdataQueue.isClosed() && running()) {
-                    // Try to get a fetchlist from the queue with a 10s timeout
+                    // Try to get a fetchlist from the queue with a small timeout
                     fetchdata = fetchdataQueue.dequeueBlock(100);
                     couldDequeue = (null != fetchdata);
                 }
@@ -293,8 +311,15 @@ public class Crawler {
                 if (couldDequeue) {
                     try {
                         discoveryPages += processor.processFetchdata(fetchdata, oldPageDB, tmpPageDB);
+                        progress.addProcessed(fetchdata.getSize());
+                        if (logger.isEnabledFor(Level.ERROR)) {
+                            progress.report();
+                        }
                     } catch (Exception e) {
                         logger.error(e,e);
+                    } catch (Throwable e) {
+                        logger.fatal(e,e);
+                        System.exit(-1);
                     }
                     fetchdata.remove();
                 } else if (fetchdataQueue.isClosed()) { //could not dequeue
@@ -331,8 +356,12 @@ public class Crawler {
             couldDequeue = (null != fetchlist);
         }    
 
-        if (couldDequeue && fetchlistQueue.isClosed()) {
-            logger.debug("Dequeued the last fetchlist of this cycle.");
+        if (couldDequeue) {
+            if (fetchlistQueue.isClosed()) {
+                logger.debug("Dequeued the last fetchlist of this cycle.");
+            } else {
+                logger.debug("Dequeued normal fetchlist");
+            }
         }
         return fetchlist;
     }
@@ -346,6 +375,10 @@ public class Crawler {
             fetchdataQueue.close();
             logger.debug("Closing fetchdataQueue. No more fetchdata will be received.");
             return;
+        }
+        progress.addFetched(fetchdata.getSize());
+        if (logger.isInfoEnabled()) {
+            progress.report();
         }
         // else, enqueue it
         boolean enqueued = false;
@@ -567,6 +600,12 @@ public class Crawler {
         if (createNewPageDB) {
             if (distributed) {
                 tmpPageDB = new DPageDB(pagedbDir + ".tmp", pageCatcher);
+//                if (starting) {
+//                    logger.info("Waiting for other nodes to start...");
+//                    ((DPageDB)tmpPageDB).synch();
+//                    logger.info("All nodes started");
+//                    starting = false;
+//                }
             } else {
                 tmpPageDB = new PageDB(pagedbDir + ".tmp");
             }
@@ -583,6 +622,8 @@ public class Crawler {
         tmpPageDB.open(PageDB.WRITE);
         tmpPageDB.setNextCycleOf(oldPageDB);
 
+        progress = new CrawlerProgress(tmpPageDB.getCycles(), oldPageDB.getSize());
+        
         logger.info("Starting crawl cycle " + oldPageDB.getCycles());
         declareStartCycle(oldPageDB);
 
@@ -635,8 +676,9 @@ public class Crawler {
                 }
             }
         } else {
-            logger.info("Stopping, not closing or trimming the temporary pagedbs");
+            logger.info("Stopping, not closing or trimming the temporary pagedb");
         }
+        progress.close();
         return newPageDB;
     }
 
@@ -650,25 +692,11 @@ public class Crawler {
     }
 
 
-    // Show help.
-    private static void usage (String msg) {
-        System.out.println();
-        System.out.println(msg);
-        System.out.println();
-        System.out.println("Usage:");
-        System.out.println("  Crawler                (crawls one cycle)");
-        System.out.println("  Crawler runforever     (crawls until stopped)");
-        System.out.println("  Crawler cycles=<N>     (crawls N cycles)");
-        System.out.println();
-        System.exit(1);
-    }
-
-
     /**
      * Starts the crawler. 
      */
     public static void main (String args[]) throws Exception { 
-        String log4jConfigPath = com.flaptor.util.FileUtil.getFilePathFromClasspath("log4j.properties");
+        String log4jConfigPath = FileUtil.getFilePathFromClasspath("log4j.properties");
         if (null != log4jConfigPath) {
             PropertyConfigurator.configureAndWatch(log4jConfigPath);
         } else {

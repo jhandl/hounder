@@ -60,7 +60,11 @@ record.parents = false
 
 # if true, the underlying pagedb will be distributed, and the crawler.properties file must define the pagedb.node.list property, which is a comma-separated list of the IP address of each node, including the local node. This list has to be exactly the same in each node, and in the same order.
 pagedb.is.distributed = false
-pagedb.node.mapper = com.flaptor.hounder.crawler.pagedb.distributed.UrlHashMapper
+pagedb.node.mapper = com.flaptor.hounder.crawler.UrlHashMapper
+pagedb.node.list = 
+
+# Base filename for the crawler progress report. Each cycle will produce one file, with the cycle number appended to the name.
+progress.report.filename = progress
 
 clustering.enable=yes
 clustering.node.type=crawler

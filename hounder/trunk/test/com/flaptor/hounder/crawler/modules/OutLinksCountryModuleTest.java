@@ -108,19 +108,19 @@ public class OutLinksCountryModuleTest extends TestCase {
         Link[] allGl={GL_1, GL_2, GL_3, GL_4};
         Link[] allOg={OG_1, OG_2, OG_3, OG_4};
 
-        doc= new FetchDocument(new Page("",1f), null, null, null, allAr, null, null, true, false, true);
+        doc= new FetchDocument(new Page("",1f), null, null, null, allAr, null, null, true, false, false, true);
         res= module.tInternalProcess(doc);
         assertEquals(res, Double.MAX_VALUE);
 
-        doc= new FetchDocument(new Page("",1f), null, null, null, allOt, null, null, true, false, true);
+        doc= new FetchDocument(new Page("",1f), null, null, null, allOt, null, null, true, false, false, true);
         res= module.tInternalProcess(doc);
         assertEquals(res, 0.0);
 
-        doc= new FetchDocument(new Page("",1f), null, null, null, allGl, null, null, true, false, true);
+        doc= new FetchDocument(new Page("",1f), null, null, null, allGl, null, null, true, false, false, true);
         res= module.tInternalProcess(doc);
         assertEquals(res, 0.0);
 
-        doc= new FetchDocument(new Page("",1f), null, null, null, allOg, null, null, true, false, true);
+        doc= new FetchDocument(new Page("",1f), null, null, null, allOg, null, null, true, false, false, true);
         res= module.tInternalProcess(doc);
         assertEquals(res, 0.0);        
     }
@@ -135,19 +135,19 @@ public class OutLinksCountryModuleTest extends TestCase {
         Link[] a025={OT_2, AR_2, OT_3, OT_4};
         Link[] a000={OT_1, OT_2, OT_3, OT_4};
 
-        doc= new FetchDocument(new Page("",1f), null, null, null, a075, null, null, true, false, true);
+        doc= new FetchDocument(new Page("",1f), null, null, null, a075, null, null, true, false, false, true);
         res= module.tInternalProcess(doc);
         assertEquals(res, 3/1.0);
 
-        doc= new FetchDocument(new Page("",1f), null, null, null, a050, null, null, true, false, true);
+        doc= new FetchDocument(new Page("",1f), null, null, null, a050, null, null, true, false, false, true);
         res= module.tInternalProcess(doc);
         assertEquals(res, 2/2.0);
 
-        doc= new FetchDocument(new Page("",1f), null, null, null, a025, null, null, true, false, true);
+        doc= new FetchDocument(new Page("",1f), null, null, null, a025, null, null, true, false, false, true);
         res= module.tInternalProcess(doc);
         assertEquals(res, 1/3.0);
 
-        doc= new FetchDocument(new Page("",1f), null, null, null, a000, null, null, true, false, true);
+        doc= new FetchDocument(new Page("",1f), null, null, null, a000, null, null, true, false, false, true);
         res= module.tInternalProcess(doc);
         assertEquals(res, 0.0);        
     }
@@ -162,19 +162,19 @@ public class OutLinksCountryModuleTest extends TestCase {
         Link[] a025={OT_2, GL_3, AR_2, OT_3, OT_4, GL_1};
         Link[] a000={GL_2, OT_1, OT_2, OT_3, OT_4, GL_4, OG_1, OG_2};
 
-        doc= new FetchDocument(new Page("",1f), null, null, null, a075, null, null, true, false, true);
+        doc= new FetchDocument(new Page("",1f), null, null, null, a075, null, null, true, false, false, true);
         res= module.tInternalProcess(doc);
         assertEquals(res, 3/1.0);
 
-        doc= new FetchDocument(new Page("",1f), null, null, null, a050, null, null, true, false, true);
+        doc= new FetchDocument(new Page("",1f), null, null, null, a050, null, null, true, false, false, true);
         res= module.tInternalProcess(doc);
         assertEquals(res, 2/2.0);
 
-        doc= new FetchDocument(new Page("",1f), null, null, null, a025, null, null, true, false, true);
+        doc= new FetchDocument(new Page("",1f), null, null, null, a025, null, null, true, false, false, true);
         res= module.tInternalProcess(doc);
         assertEquals(res, 1/3.0);
 
-        doc= new FetchDocument(new Page("",1f), null, null, null, a000, null, null, true, false, true);
+        doc= new FetchDocument(new Page("",1f), null, null, null, a000, null, null, true, false, false, true);
         res= module.tInternalProcess(doc);
         assertEquals(res, 0.0);        
     }
@@ -190,19 +190,19 @@ public class OutLinksCountryModuleTest extends TestCase {
         Link[] a025={OT_2, GL_3, KA_2, OT_3, OT_4, GL_1};
         Link[] a000={GL_2, OT_1, OT_2, OT_3, OT_4, GL_4};
 
-        doc= new FetchDocument(new Page("",1f), null, null, null, a075, null, null, true, false, true);
+        doc= new FetchDocument(new Page("",1f), null, null, null, a075, null, null, true, false, false, true);
         res= module.tInternalProcess(doc);
         assertEquals(3/1.0, res);
 
-        doc= new FetchDocument(new Page("",1f), null, null, null, a050, null, null, true, false, true);
+        doc= new FetchDocument(new Page("",1f), null, null, null, a050, null, null, true, false, false, true);
         res= module.tInternalProcess(doc);
         assertEquals(2/2.0, res);
 
-        doc= new FetchDocument(new Page("",1f), null, null, null, a025, null, null, true, false, true);
+        doc= new FetchDocument(new Page("",1f), null, null, null, a025, null, null, true, false, false, true);
         res= module.tInternalProcess(doc);
         assertEquals(1/3.0, res);
 
-        doc= new FetchDocument(new Page("",1f), null, null, null, a000, null, null, true, false, true);
+        doc= new FetchDocument(new Page("",1f), null, null, null, a000, null, null, true, false, false, true);
         res= module.tInternalProcess(doc);
         assertEquals(0.0, res);        
     }

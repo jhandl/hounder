@@ -105,7 +105,7 @@ public class PageDB implements IPageStore {
         this.mode = mode;
         int action = (mode & 0x0F);
         boolean append = (mode & APPEND) != 0;
-        boolean sortDisabled = (mode & UNSORTED) != 0;
+        sortDisabled = (mode & UNSORTED) != 0;
         switch (action) {
             case READ:
                 // logger.debug("PAGEDB open read "+dirname+" ("+new Throwable().getStackTrace()[1].getClassName()+")");
@@ -160,14 +160,17 @@ public class PageDB implements IPageStore {
      * Write a page to the pagedb.
      * @param page Page that should be written to the pagedb.
      */
-    public synchronized void addPage (Page page) throws IOException {
+    public void addPage (Page page) throws IOException {
         logger.debug("PAGEDB addPage fetched=" +(page.getLastSuccess()>0)+" ("+page.getUrl()+")");
         if (null == outputStream) {
             throw new IOException("PageDB not open for writing.");
         }
         // write page to the file
-        page.write(outputStream);
-        outputStream.reset();
+        synchronized(outputStream) {
+            page.write(outputStream);
+            outputStream.reset();
+        }
+
         // check for sorted addition
         if (sorted) {
             String hash = page.getUrlHash();
@@ -175,16 +178,18 @@ public class PageDB implements IPageStore {
             maxHash = hash;
         }
         // accumulate stats
-        stats.pageCount++;
-        if (page.getLastAttempt() > 0) {
-            if (page.getLastSuccess() > 0) {
-                stats.fetchedPages++;
-                stats.fetchedScore += page.getScore();
-                if (priorityScope == FETCHED_PAGES) {
-                    stats.priorityHistogram.addValue(page.getPriority());
+        synchronized(stats) {
+            stats.pageCount++;
+            if (page.getLastAttempt() > 0) {
+                if (page.getLastSuccess() > 0) {
+                    stats.fetchedPages++;
+                    stats.fetchedScore += page.getScore();
+                    if (priorityScope == FETCHED_PAGES) {
+                        stats.priorityHistogram.addValue(page.getPriority());
+                    }
+                } else {
+                    stats.failedPages++;
                 }
-            } else {
-                stats.failedPages++;
             }
         }
         if (priorityScope == ALL_PAGES) {
@@ -207,7 +212,7 @@ public class PageDB implements IPageStore {
             pageCount = 0;
             File inputFile = new File(dirname, md5FileName);
             if (!inputFile.exists()) {
-                logger.error("Sorted pages file not found. Maybe the pagedb has not been closed?");
+                logger.error("Sorted pages file not found in '"+dirname+"'. Maybe the pagedb has not been closed?");
             } else {
                 try {
                     inputStream = new ObjectInputStream(new BufferedInputStream(new FileInputStream(inputFile), BUFFERSIZE));
@@ -293,78 +298,78 @@ public class PageDB implements IPageStore {
 
     // Merge sorted files aliminating duplicates and return the resulting file size.
     @SuppressWarnings("unchecked")
-        private static void mergeSortedFiles (File orig1, File orig2, File dest, PageDataGetter dataGetter) throws IOException {
-            ObjectInputStream in1= new ObjectInputStream(new BufferedInputStream(new FileInputStream(orig1), BUFFERSIZE));
-            ObjectInputStream in2 = new ObjectInputStream(new BufferedInputStream(new FileInputStream(orig2), BUFFERSIZE));
-            ObjectOutputStream out = new ObjectOutputStream(new BufferedOutputStream(new FileOutputStream(dest), BUFFERSIZE));
-            Comparable val1 = null;
-            Comparable val2 = null;
-            Comparable valout = null;
-            Comparable valold = null;
-            Page page1 = null;
-            Page page2 = null;
-            Page pageout = null;
-            Page pageold = null;
-            boolean eof1 = false;
-            boolean eof2 = false;
+    private static void mergeSortedFiles (File orig1, File orig2, File dest, PageDataGetter dataGetter) throws IOException {
+        ObjectInputStream in1= new ObjectInputStream(new BufferedInputStream(new FileInputStream(orig1), BUFFERSIZE));
+        ObjectInputStream in2 = new ObjectInputStream(new BufferedInputStream(new FileInputStream(orig2), BUFFERSIZE));
+        ObjectOutputStream out = new ObjectOutputStream(new BufferedOutputStream(new FileOutputStream(dest), BUFFERSIZE));
+        Comparable val1 = null;
+        Comparable val2 = null;
+        Comparable valout = null;
+        Comparable valold = null;
+        Page page1 = null;
+        Page page2 = null;
+        Page pageout = null;
+        Page pageold = null;
+        boolean eof1 = false;
+        boolean eof2 = false;
 
-            // read the first page from file 1
-            try {
-                page1 = Page.read(in1);
-                val1 = dataGetter.getData(page1);
-            } catch (EOFException e) {
-                eof1 = true;
-            }
-            // read the first page from file 2
-            try {
-                page2 = Page.read(in2);
-                val2 = dataGetter.getData(page2);
-            } catch (EOFException e) {
-                eof2 = true;
-            }
-            // while any of the files has unread data
-            while (!eof1 || !eof2) {
-                if (!eof2 && (eof1 || val1.compareTo(val2) >= 0)) {  
-                    // if val1 >= val2, select page2 for output
-                    pageout = page2;
-                    valout = val2;
-                    // and read a new page from file 2
-                    try {
-                        page2 = Page.read(in2);
-                        val2 = dataGetter.getData(page2);
-                    } catch (EOFException e) {
-                        eof2 = true;
-                    }
-                } else {              
-                    // if val1 < val2, select page1 for output
-                    pageout = page1;
-                    valout = val1;
-                    // and read a new page from file 1
-                    try {
-                        page1 = Page.read(in1);
-                        val1 = dataGetter.getData(page1);
-                    } catch (EOFException e) {
-                        eof1 = true;
-                    }
+        // read the first page from file 1
+        try {
+            page1 = Page.read(in1);
+            val1 = dataGetter.getData(page1);
+        } catch (EOFException e) {
+            eof1 = true;
+        }
+        // read the first page from file 2
+        try {
+            page2 = Page.read(in2);
+            val2 = dataGetter.getData(page2);
+        } catch (EOFException e) {
+            eof2 = true;
+        }
+        // while any of the files has unread data
+        while (!eof1 || !eof2) {
+            if (!eof2 && (eof1 || val1.compareTo(val2) >= 0)) {  
+                // if val1 >= val2, select page2 for output
+                pageout = page2;
+                valout = val2;
+                // and read a new page from file 2
+                try {
+                    page2 = Page.read(in2);
+                    val2 = dataGetter.getData(page2);
+                } catch (EOFException e) {
+                    eof2 = true;
                 }
-                // if the page selected for output is different from the last one
-                if (null != valold && valout.compareTo(valold) != 0) {
-                    // write that page to the output file
-                    pageold.write(out);
-                    out.reset();
+            } else {              
+                // if val1 < val2, select page1 for output
+                pageout = page1;
+                valout = val1;
+                // and read a new page from file 1
+                try {
+                    page1 = Page.read(in1);
+                    val1 = dataGetter.getData(page1);
+                } catch (EOFException e) {
+                    eof1 = true;
                 }
-                pageold = pageout;
-                valold = valout;
             }
-            // the last page must be written
-            if (null != pageold) {
+            // if the page selected for output is different from the last one
+            if (null != valold && valout.compareTo(valold) != 0) {
+                // write that page to the output file
                 pageold.write(out);
                 out.reset();
             }
-            Execute.close(in1);
-            Execute.close(in2);
-            Execute.close(out);
+            pageold = pageout;
+            valold = valout;
         }
+        // the last page must be written
+        if (null != pageold) {
+            pageold.write(out);
+            out.reset();
+        }
+        Execute.close(in1);
+        Execute.close(in2);
+        Execute.close(out);
+    }
 
 
     /**

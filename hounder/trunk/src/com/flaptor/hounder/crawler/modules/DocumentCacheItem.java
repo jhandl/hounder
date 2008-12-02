@@ -47,7 +47,7 @@ public class DocumentCacheItem implements Serializable {
 
 	public String toString() {
 		try {
-			return "MIMETYPE: "+mimeType + "  " + new String(content,encoding);
+			return new String(content,encoding);
 		} catch (UnsupportedEncodingException e) {
 			return null; //new String(content);
 		}

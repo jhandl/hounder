@@ -18,6 +18,7 @@ package com.flaptor.hounder.crawler.pagedb.distributed;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 
+import java.util.logging.Level;
 import org.apache.log4j.Logger;
 
 import com.flaptor.hounder.crawler.pagedb.Page;
@@ -35,16 +36,38 @@ import com.flaptor.util.remote.RpcException;
 public class PageCatcherStub extends ARmiClientStub implements IRemotePageCatcher {
     private static Logger logger = Logger.getLogger(com.flaptor.util.Execute.whoAmI());
     private IRemotePageCatcher remotePageCatcher = null;
-    
+    private static long CONNECTION_TIMEOUT = 5 * 60 * 1000L; // 5 min.
 	/**
-	 * @todo the searcher should be able to specify the connection policy.
+	 * Constructor.
 	 */
     public PageCatcherStub(final int basePort, final String host) {
-        super(PortUtil.getPort(basePort,"pagecatcher.rmi"), host, new ExponentialFallbackPolicy(),true);
-        logger.info("Creating PageCatcherStub for PageCatcher located at " + host + ":" + PortUtil.getPort(basePort,"pagecatcher.rmi"));
+        super(PortUtil.getPort(basePort,"pagecatcher.rmi"), host, new ExponentialFallbackPolicy(),false);
+        int catcherPort = PortUtil.getPort(basePort,"pagecatcher.rmi");
+        logger.info("Creating PageCatcherStub for PageCatcher located at " + host + ":" + catcherPort);
+        boolean connected = false;
+        long start = System.currentTimeMillis();
+        while (!connected) {
+            try {
+                super.checkConnection();
+                connected = true;
+            } catch (RemoteException ex) { }
+            if (!connected) {
+                long now = System.currentTimeMillis();
+                if (now-start > CONNECTION_TIMEOUT) {
+                    logger.error("Failed to connect to remote PageCatcher at " + host + ":" + catcherPort);
+                }
+                try { Thread.sleep(1000); } catch (InterruptedException ex) { }
+            }
+        }
     }
     
-    public void addPage(Page page) throws  RpcException{
+  
+    /**
+     * Adds a page to a remote pagedb catcher.
+     * @param page the page to add.
+     * @throws com.flaptor.util.remote.RpcException
+     */
+    public void addPage(Page page) throws RpcException {
         try {
             super.checkConnection();
             remotePageCatcher.addPage(page);
