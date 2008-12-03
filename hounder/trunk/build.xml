@@ -47,8 +47,8 @@ limitations under the License.
             <include name="clusterfest-*.jar" />
             <include name="hist4j-*.jar" />
             <include name="wiz4j-*.jar" />
-
-        	<include name="nutch-0.7.2.jar" />
+		<include name="hadoop-0.12.2-core.jar" />
+        	<include name="nutch-0.9.jar" />
 			<include name="commons-cli-1.1.jar" />
 			<include name="commons-httpclient-2.0.2.jar" />
 			<include name="commons-logging-1.0.2.jar" />

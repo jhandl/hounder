@@ -9,7 +9,7 @@ crawler.mode.cycles=2
 workers.per.cpu = 0.8
 
 # The fetcher plugin. By default it is the Nutch Fetcher, but any fetcher that implements the IFetcher interface will work.
-fetcher.plugin = com.flaptor.hounder.crawler.NutchFetcher
+fetcher.plugin = com.flaptor.hounder.crawler.Nutch9Fetcher
 
 # The directory of the pagedb.
 pagedb.dir = pagedb

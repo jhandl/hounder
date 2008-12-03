@@ -45,7 +45,7 @@ import com.flaptor.util.FileUtil;
  * to be used as a plugin in the Hounder Crawler.
  * @author Flaptor Development Team
  */
-public class NutchFetcher implements IFetcher {
+public class Nutch7Fetcher implements IFetcher {
 
     private static Logger logger = Logger.getLogger(Execute.whoAmI());
     private static BasicUrlNormalizer urlNormalizer;
@@ -55,7 +55,7 @@ public class NutchFetcher implements IFetcher {
     /**
      * Initialize the fetcher.
      */
-    public NutchFetcher() {
+    public Nutch7Fetcher() {
         Config config = Config.getConfig("nutchfetcher.properties");
         segmentsDir = config.getString("fetchlist.dir");
         keepUrl = config.getBoolean("keep.original.url.on.redirect");

@@ -1,100 +1,126 @@
 <?xml version="1.0"?>
-<?xml-stylesheet type="text/xsl" href="nutch-conf.xsl"?>
+<?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
 
 <!-- Put site-specific property overrides in this file. -->
 
-<nutch-conf>
-
-<!-- Fetcher properties -->
-
-  <property>
-    <name>fetcher.server.delay</name>
-    <value>1.0</value>
-  </property>
-
-  <property>
-    <name>fetcher.threads.fetch</name>
-    <value>5</value>
-  </property>
-
-  <property>
-    <name>fetcher.threads.per.host</name>
-    <value>1</value>
-  </property>
-
-  <property>
-    <name>http.timeout</name>
-    <value>60000</value>
-  </property>
-
-  <property>
-    <name>http.max.delays</name>
-    <value>50</value>
-  </property>
-
-  <property>
-    <name>http.content.limit</name>
-    <value>262144</value>
-  </property>
-
-  <property>
-    <name>file.content.limit</name>
-    <value>262144</value>
-  </property>
-
-  <property>
-    <name>db.max.outlinks.per.page</name>
-    <value>999512</value>
-  </property>
-
-  <property>
-    <name>db.max.anchor.length</name>
-    <value>256</value>
-  </property>
+<configuration>
 
 
-  <!-- Agent properties -->
+<property>
+  <name>http.agent.name</name>
+  <value>nutch</value>
+  <description>HTTP 'User-Agent' request header. MUST NOT be empty - 
+  please set this to a single word uniquely related to your organization.
 
-  <property>
-    <name>http.agent.name</name>
-    <value>HounderCrawl</value>
-  </property>
+  NOTE: You should also check other related properties:
 
-  <property>
-    <name>http.robots.agents</name>
-    <value>HounderCrawl,*</value>
-  </property>
+    http.robots.agents
+    http.agent.description
+    http.agent.url
+    http.agent.email
+    http.agent.version
 
-  <property>
-    <name>http.agent.description</name>
-    <value>Hounder Search Bot</value>
-  </property>
+  and set their values appropriately.
 
-  <property>
-    <name>http.agent.url</name>
-    <value>http://www.flaptor.com/</value>
-  </property>
+  </description>
+</property>
 
-  <property>
-    <name>http.agent.email</name>
-    <value>bot@flaptor.com</value>
-  </property>
+<property>
+  <name>http.agent.description</name>
+  <value>nutch</value>
+  <description>Further description of our bot- this text is used in
+  the User-Agent header.  It appears in parenthesis after the agent name.
+  </description>
+</property>
+
+<property>
+  <name>http.agent.url</name>
+  <value>nutch</value>
+  <description>A URL to advertise in the User-Agent header.  This will 
+   appear in parenthesis after the agent name. Custom dictates that this
+   should be a URL of a page explaining the purpose and behavior of this
+   crawler.
+  </description>
+</property>
+
+<property>
+  <name>http.agent.email</name>
+  <value>nutch</value>
+  <description>An email address to advertise in the HTTP 'From' request
+   header and User-Agent header. A good practice is to mangle this
+   address (e.g. 'info at example dot com') to avoid spamming.
+  </description>
+</property>
+
+<property>
+  <name>http.robots.agents</name>
+  <value>nutch,*</value>
+  <description>The agent strings we'll look for in robots.txt files,
+  comma-separated, in decreasing order of precedence. You should
+  put the value of http.agent.name as the first agent name, and keep the
+  default * at the end of the list. E.g.: BlurflDev,Blurfl,*
+  </description>
+</property>
+
+<property>
+  <name>fetcher.parse</name>
+  <value>false</value>
+  <description>If true, fetcher will parse content.</description>
+</property>
+
+<property>
+  <name>fetcher.store.content</name>
+  <value>true</value>
+  <description>If true, fetcher will store content.</description>
+</property>
 
 
-  <!-- Plugin properties -->
+<property>
+  <name>fetcher.server.delay</name>
+  <value>1.0</value>
+  <description>The number of seconds the fetcher will delay between
+   successive requests to the same server.</description>
+</property>
+
+<property>
+  <name>fetcher.max.crawl.delay</name>
+  <value>30</value>
+  <description>
+  If the Crawl-Delay in robots.txt is set to greater than this value (in
+  seconds) then the fetcher will skip this page, generating an error report.
+  If set to -1 the fetcher will never skip such pages and will wait the
+  amount of time retrieved from robots.txt Crawl-Delay, however long that
+  might be.
+  </description>
+</property>
+
+<property>
+  <name>fetcher.threads.fetch</name>
+  <value>10</value>
+  <description>The number of FetcherThreads the fetcher should use.
+    This is also determines the maximum number of requests that are
+    made at once (each FetcherThread handles one connection).</description>
+</property>
+
+<property>
+  <name>fetcher.threads.per.host</name>
+  <value>1</value>
+  <description>This number is the maximum number of threads that
+    should be allowed to access a host at one time.</description>
+</property>
+
+<property>
+  <name>plugin.includes</name>
+  <value>protocol-http|scoring-opic</value>
+  <description>Regular expression naming plugin directory names to
+  include.  Any plugin not matching this expression is excluded.
+  In any case you need at least include the nutch-extensionpoints plugin. By
+  default Nutch includes crawling just HTML and plain text via HTTP,
+  and basic indexing and search plugins. In order to use HTTPS please enable
+  protocol-httpclient, but be aware of possible intermittent problems with the
+  underlying commons-httpclient library.
+  </description>
+</property>
 
 
-  <property>
-    <name>plugin.folders</name>
-    <value>plugins</value>
-  </property>
-
-  <property>
-    <name>plugin.includes</name>
-    <value>nutch-extensionpoints|protocol-http|urlfilter-regex|parse-(text|html)|index-(basic|more)|query-(basic|site|url)</value>
-  </property>
-
-<!--
--->
-
-</nutch-conf>
+</configuration>

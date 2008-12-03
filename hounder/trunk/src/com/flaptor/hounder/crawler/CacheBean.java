@@ -89,7 +89,7 @@ public class CacheBean {
      * @param url
      * @return true iff the page was succesfully fetched and saved.
      */
-    private IFetcher fetcher = new NutchFetcher();
+    private IFetcher fetcher = new Nutch9Fetcher();
     
     private boolean fetchPage(String url){
         float page_similarity_threshold=0f;
