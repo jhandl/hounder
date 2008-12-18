@@ -112,7 +112,7 @@ public class MultiIndexer implements IRmiIndexer, IIndexer {
      * @throws IllegalStateException if the state of the indexer is not running.
      * @see com.flaptor.util.remote.XmlrpcServer
      */
-    public int index(Document doc) {
+    public IndexerReturnCode index(Document doc) {
         if (state != RunningState.RUNNING) {
             throw new IllegalStateException("index: Trying to index a document but the MultiIndexer is no longer running.");
         }
@@ -127,6 +127,8 @@ public class MultiIndexer implements IRmiIndexer, IIndexer {
                 String error = "XsltModule did not return 1 document. It returned " + ((null == docs ) ? "null" : String.valueOf(docs.length)) +". This is wrong and we will not continue";
                 logger.fatal(error);
                 System.exit(-1);
+                //this is just to make the damn compiler happy
+                return IndexerReturnCode.FAILURE;
             }
             // else
             doc = docs[0];
@@ -152,7 +154,7 @@ public class MultiIndexer implements IRmiIndexer, IIndexer {
         if (null == node) {
             logger.error("Document missing documentId. Will not index it.");
             logger.error("Document was : " + DomUtil.domToString(doc));
-            return Indexer.FAILURE;
+            return IndexerReturnCode.FAILURE;
         }
 
 
@@ -165,14 +167,14 @@ public class MultiIndexer implements IRmiIndexer, IIndexer {
         try {
             IRemoteIndexer indexer = indexers.get(target);
             logger.debug("Sending " + node.getText() + " to indexer " + target);
-            int res = indexer.index(doc);
-            if (res != Indexer.SUCCESS){
+            IndexerReturnCode res = indexer.index(doc);
+            if (res != IndexerReturnCode.SUCCESS){
                 logger.debug("Problem ("+res+") indexing " + node.getText() + " to indexer " + target);
             }
             return res;
         } catch (com.flaptor.util.remote.RpcException e) {
             logger.error("Connection failed: ",e);
-            return Indexer.FAILURE;
+            return IndexerReturnCode.FAILURE;
         }
     }
 
@@ -184,10 +186,10 @@ public class MultiIndexer implements IRmiIndexer, IIndexer {
      * @throws IllegalStateException if the indexer is not in the "running" state.
      * @see com.flaptor.util.remote.XmlrpcServer
      */
-    public int index(final String text) {
+    public IndexerReturnCode index(final String text) {
         Document doc = parser.genDocument(text);
         if (null == doc) {
-            return (Indexer.PARSE_ERROR);
+            return (IndexerReturnCode.PARSE_ERROR);
         } else {
             return index(doc);
         }
@@ -195,7 +197,7 @@ public class MultiIndexer implements IRmiIndexer, IIndexer {
 
 
 
-    protected int processCommand(final Document doc) {
+    protected IndexerReturnCode processCommand(final Document doc) {
         Node commandNode = doc.selectSingleNode("/command");
         Node attNode = commandNode.selectSingleNode("@node");
 
@@ -208,8 +210,8 @@ public class MultiIndexer implements IRmiIndexer, IIndexer {
                 // try until accepted, or too much retries.
                 while (!accepted && retries < RETRY_LIMIT ) {
                     try {
-                        int retValue = indexer.index(doc);
-                        if (Indexer.SUCCESS == retValue) {
+                        IndexerReturnCode retValue = indexer.index(doc);
+                        if (IndexerReturnCode.SUCCESS == retValue) {
                             accepted = true;
                         } else {
                             retries++;
@@ -222,12 +224,12 @@ public class MultiIndexer implements IRmiIndexer, IIndexer {
                 // if could not send to indexer
                 if (!accepted) {
                     logger.error("processCommand: tried " + RETRY_LIMIT + " times to index command, but failed on node " + indexer.toString() + ". Will not continue with other indexers.");
-                    return Indexer.FAILURE;
+                    return IndexerReturnCode.FAILURE;
 
                 }
             }
             // in case no one returned Indexer.FAILURE
-            return Indexer.SUCCESS;
+            return IndexerReturnCode.SUCCESS;
         } else { // specific node
 
             try {
@@ -238,15 +240,15 @@ public class MultiIndexer implements IRmiIndexer, IIndexer {
                         return indexer.index(doc);
                     } catch (com.flaptor.util.remote.RpcException e) {
                         logger.error("processCommand: while sending command to single node " + indexer.toString() + " " + e.getMessage(),e);
-                        return Indexer.FAILURE;
+                        return IndexerReturnCode.FAILURE;
                     }
                 } else {
                     logger.error("processCommand: received command for node number out of indexers range. Received " + indexerNumber + " and have " + indexers.size() + " indexers. Ignoring command.");
-                    return Indexer.FAILURE;
+                    return IndexerReturnCode.FAILURE;
                 }
             } catch (NumberFormatException e) {
                 logger.error("processCommand: can not parse node number: " + e,e);
-                return Indexer.PARSE_ERROR;
+                return IndexerReturnCode.PARSE_ERROR;
             }
         }
     }

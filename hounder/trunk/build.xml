@@ -83,6 +83,7 @@ limitations under the License.
             <include name="commons-digester-1.8.jar" />
             <include name="commons-fileupload-1.2.jar" />
             <include name="commons-digester-1.8.jar" />
+            <include name="google-collect-snapshot-20071022.jar" />
         </fileset>
     </path>
 

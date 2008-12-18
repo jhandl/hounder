@@ -26,8 +26,8 @@ import com.flaptor.util.Stoppable;
  */
 public interface IIndexer extends IRemoteIndexer, Stoppable {
 
-    public int index(final Document doc);
+    public IndexerReturnCode index(final Document doc);
     
-    public int index(final String text);
+    public IndexerReturnCode index(final String text);
 
 }

@@ -62,12 +62,7 @@ public class Writer extends AInternalModule {
 
     private final IndexWriteProvider iwp = indexer.getIndexManager();
 
-    private HashSet<String> requiredFields;   // mandatory fields for a document
-    private HashSet<String> compressedFields; // mandatory fields for a document
-    private HashSet<String> requiredPayloads; // mandatory fields for a document
-
     private String docIdName = null;
-
     private static final Logger logger = Logger.getLogger(Execute.whoAmI());
 
     public Writer(final Indexer indexer) {
@@ -78,33 +73,6 @@ public class Writer extends AInternalModule {
             throw new IllegalArgumentException("The docIdName cannot be empty");
         }
 
-		requiredFields = new HashSet<String>();
-		compressedFields = new HashSet<String>();
-		requiredPayloads = new HashSet<String>();
-
-		String[] fields = config.getStringArray("Writer.compressedFields");
-		for (int j = 0; j < fields.length; j++) {
-			compressedFields.add(fields[j]);
-			logger.info("The field \"" + fields[j] + "\" will be stored compressed in the index.");
-			if (fields[j].equals(docIdName)) {
-				logger.warn("Asked to compress the documentId field. It won't be compressed.");
-			}
-		}
-
-		fields = config.getStringArray("Writer.fields");
-		for (int j = 0; j < fields.length; j++) {
-			requiredFields.add(fields[j]);
-			logger.info("The field \"" + fields[j] + "\" will be checked for in every document.");
-		}
-
-        String[] payloads = config.getStringArray("Writer.payloads");
-        for (String payload: payloads) {
-            if ("".equals(payload)) {
-                throw new IllegalArgumentException("\"\" can not be a payload.");
-            }
-            requiredPayloads.add(payload);
-            logger.info("The payload \"" + payload + "\" will be checked for in every document.");
-        }
     }
 
     /**
@@ -116,7 +84,7 @@ public class Writer extends AInternalModule {
     protected Document[] internalProcess(final Document doc) {
         Element root = doc.getRootElement();
         if (root.getName().equals("documentAdd")) {
-            processAdd(root);
+			iwp.addDocument(DocumentConverter.getInstance().convert(doc));
         } else if (root.getName().equals("documentDelete")) {
             processDelete(root);
         } else {
@@ -124,186 +92,6 @@ public class Writer extends AInternalModule {
         }
         return null;
     }
-
-	/**
-	 * @todo refactor this method, is too long
-	 */
-    private void processAdd(final Element e) {
-        // TODO: This method is too long, refactor.
-        logger.debug("Processing Add");
-
-		float documentBoost;
-		Node node = e.selectSingleNode("boost");
-		if (null == node) {
-			documentBoost = 1.0F;
-		} else {
-			documentBoost = Float.parseFloat(node.getText());
-            if ( logger.isEnabledFor(Level.DEBUG)) { 
-                logger.debug("Using non-default document boost of " + documentBoost);
-            }
-		}
-        if (Float.isNaN(documentBoost) || Float.isInfinite(documentBoost) || documentBoost <= 0) {
-            logger.error("Document with invalid boost received. Ignoring addition.");
-            return;
-        }
-
-        org.apache.lucene.document.Document ldoc = new org.apache.lucene.document.Document();
-        ldoc.setBoost(documentBoost);
-		
-		// For comparison with the required fields we keep track of the added
-		// fields.
-		HashSet<String> providedFields = new HashSet<String>();
-
-		//First, we add the documentId as a field under the name provided in the configuration (docIdName)
-        node = e.selectSingleNode("documentId");
-		if (null == node) {
-			logger.error("Document missing documentId. Cannot index it.");
-			return;
-		}
-		String docIdText = node.getText();
-		//now we add the documentId as another field, using the name provided in the configuration (docIdName)
-		Field lfield = new Field(docIdName, docIdText, Field.Store.YES, Field.Index.UN_TOKENIZED);
-		ldoc.add(lfield);
-		providedFields.add(docIdName);
-        if ( logger.isEnabledFor(Level.DEBUG)) { 
-            logger.debug("Writer - adding documentId field:" + docIdName + ", index: true, store: true, token: false, text: "
-				+ docIdText);
-        }
-		// Now we add the regular fields
-		for (Iterator iter = e.elementIterator("field"); iter.hasNext();) {
-			Element field = (Element) iter.next();
-			String fieldName, storedS, indexedS, tokenizedS, boostS, fieldText;
-			boolean stored, tokenized, indexed;
-			float boost = 1;
-
-			fieldName = field.valueOf("@name");
-			if (fieldName.equals("")) {
-				logger.error("Field without name. Ignoring add.");
-				return;
-			}
-
-			//There cannot be a field with the name used to store the documentId (docIdName)
-			//as it would collide with the documentId per se when saved to the lucene index.
-			fieldText = field.getText();
-			if (fieldName.equals(docIdName)) {
-				logger.error("This document contains a field with the same name as the configured name to save the documentId( "
-						+ docIdName + "). Cannot index this document.");
-				return;
-			}
-
-			storedS = field.valueOf("@stored");
-			if (storedS.equals("")) {
-				logger.error("Field without stored attribute. Ignoring add");
-				return;
-			}
-			stored = Boolean.valueOf(storedS);
-
-			indexedS = field.valueOf("@indexed");
-			if (indexedS.equals("")) {
-				logger.error("Field without indexed attribute. Ignoring add.");
-				return;
-			}
-			indexed = Boolean.valueOf(indexedS);
-			//Lucene complains of an unindexed unstored field with a runtime exception
-			//and it makes no sense anyway
-			if (!(indexed || stored)) {
-				logger.error("processAdd: unindexed unstored field \"" + fieldName + "\". Ignoring add.");
-				return;
-			}
-
-			tokenizedS = field.valueOf("@tokenized");
-			if (tokenizedS.equals("")) {
-				logger.error("Field without tokenized attribute. Ignoring add.");
-				return;
-			}
-			tokenized = Boolean.valueOf(tokenizedS);
-
-			boostS = field.valueOf("@boost");
-			if (!boostS.equals("")) {
-				try {
-					boost = new Float(boostS).floatValue();
-				} catch (NumberFormatException exception) {
-					logger.error("Error in input format while adding document.", exception);
-					return;
-				}
-			}
-
-			// Now we add the fields. Depending on the parameter stored, indexed
-			// and tokenized we call a different field constructor.
-			lfield = null;
-			Field.Index indexType = (indexed ? (tokenized ? Field.Index.TOKENIZED : Field.Index.UN_TOKENIZED) : Field.Index.NO);
-			Field.Store storeType;
-			if (!stored) {
-				storeType = Field.Store.NO;
-			} else {
-				if (compressedFields.contains(fieldName)) {
-					storeType = Field.Store.COMPRESS;
-				} else {
-					storeType = Field.Store.YES;
-				}
-			}
-			lfield = new Field(fieldName, fieldText, storeType, indexType);
-
-			lfield.setBoost(boost);
-			providedFields.add(fieldName); // for later comparison with the required fields
-
-			ldoc.add(lfield);
-            if ( logger.isEnabledFor(Level.DEBUG)) { 
-                logger.debug("Writer - adding field:" + fieldName + ", index:" + indexed + ", store:" + stored + ", token:" + tokenized
-                        + " ,boost: " + boost + ", text: " + fieldText);
-            }
-		} // for  (field iterator)
-
-       
-
-        HashSet<String> providedPayloads = new HashSet<String>();
-		// Now we add the payloads
-		for (Iterator iter = e.elementIterator("payload"); iter.hasNext();) {
-			Element payload = (Element) iter.next();
-			
-            String payloadName = payload.valueOf("@name");
-			if (payloadName.equals("")) {
-				logger.error("Payload without name. Ignoring add.");
-				return;
-			}
-            providedPayloads.add(payloadName);
-            try { 
-                Long payloadValue = Long.parseLong(payload.getText());
-                ldoc.add(new Field(payloadName,new FixedValueTokenStream(payloadName,payloadValue)));
-                logger.debug("Adding payload \""+payloadName+"\" to document \"" + docIdText + "\" with value " + payloadValue);
-            } catch (NumberFormatException nfe) {
-                logger.error("Writer - while parsing Long payload: " + nfe.getMessage() + " ignoring add." ,nfe);
-                return;
-            }
-        }
-
-
-		// no we test for the presence of the required fields
-		if (providedFields.containsAll(requiredFields) && providedPayloads.containsAll(requiredPayloads)) {
-			iwp.addDocument(ldoc);
-		} else {
-            StringBuffer sb = new StringBuffer();
-			sb.append("Document with missing required fields or payloads. Ignoring addition.\n");
-            sb.append("Provided fields are: \n");
-			for (String field : providedFields ) {
-				sb.append(field + "\n");
-			}
-			sb.append("The fields required are: \n");
-			for (String field : requiredFields ) {
-				sb.append(field + "\n");
-			}
-
-            sb.append("Provided payloads are: \n");
-            for (String payload: providedPayloads) {
-				sb.append(payload + "\n");
-            }
-            sb.append("Required payloads are: \n");
-            for (String payload: requiredPayloads) {
-				sb.append(payload + "\n");
-            }
-            logger.error(sb.toString());
-		}
-	}
 
 	private void processDelete(final Element e) {
         if ( logger.isEnabledFor(Level.DEBUG)) { 

@@ -24,9 +24,9 @@ import org.dom4j.Document;
  */
 public interface IRmiIndexer extends Remote {
     
-    public int index(final Document doc) throws RemoteException;
+    public IndexerReturnCode index(final Document doc) throws RemoteException;
     
-    public int index(final String text)throws RemoteException;
+    public IndexerReturnCode index(final String text)throws RemoteException;
     
 }
 

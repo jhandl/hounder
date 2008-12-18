@@ -69,10 +69,10 @@ public class RmiIndexerStub extends ARmiClientStub implements IRemoteIndexer {
     }
 
 
-    public int index(Document doc) throws RpcException {
+    public IndexerReturnCode index(Document doc) throws RpcException {
         try {
             super.checkConnection();
-            int res = remoteIndexer.index(doc);
+            IndexerReturnCode res = remoteIndexer.index(doc);
             super.connectionSuccess();
             return res;
         } catch (RemoteException e) {
@@ -82,10 +82,10 @@ public class RmiIndexerStub extends ARmiClientStub implements IRemoteIndexer {
         }
     }
 
-    public int index(String text) throws RpcException {
+    public IndexerReturnCode index(String text) throws RpcException {
         try {
             super.checkConnection();
-            int res = remoteIndexer.index(text);
+            IndexerReturnCode res = remoteIndexer.index(text);
             super.connectionSuccess();
             return res;
         } catch (RemoteException e) {
@@ -95,19 +95,6 @@ public class RmiIndexerStub extends ARmiClientStub implements IRemoteIndexer {
         }
     }
 
-
-
-    // TODO when indexer supports exceptions instead of error codes,
-    // IndexerException.toString() will be much nicer.
-    private static String errorCodeToString(int error) {
-        switch(error) {
-            case Indexer.SUCCESS:           return "SUCCESS";
-            case Indexer.PARSE_ERROR:       return "PARSE_ERROR";
-            case Indexer.RETRY_QUEUE_FULL:  return "RETRY_QUEUE_FULL";
-            case Indexer.FAILURE:           return "FAILURE";
-        }
-        return "UNKNOWN_ERROR";
-    }
 
 
     @SuppressWarnings("static-access")
@@ -174,9 +161,9 @@ public class RmiIndexerStub extends ARmiClientStub implements IRemoteIndexer {
     }
 
     private static void indexOrFail(RmiIndexerStub stub,Document dom, String error) throws Exception {
-        int ret = stub.index(dom);
-        if (ret != Indexer.SUCCESS) {
-            System.out.println(error + errorCodeToString(ret));
+        IndexerReturnCode ret = stub.index(dom);
+        if (ret != IndexerReturnCode.SUCCESS) {
+            System.out.println(error + ret);
             System.exit(1);
         }
     }

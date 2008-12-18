@@ -25,6 +25,7 @@ import java.util.Vector;
 import java.util.regex.Pattern;
 
 import com.flaptor.hounder.indexer.RmiIndexerStub;
+import com.flaptor.hounder.indexer.IndexerReturnCode;
 
 /**
  * @author Flaptor Development Team
@@ -83,8 +84,8 @@ public class HounderDocumentGenerator {
                 //String argstr[] = {"\'" + dg.getDocument() + "\'"};
                 //System.out.println(dg.getDocument() + "\n\n");
                 String doc = dg.getDocument();
-                int result = indexerStub.index(doc);
-                while (result == com.flaptor.hounder.indexer.Indexer.RETRY_QUEUE_FULL) {
+                IndexerReturnCode result = indexerStub.index(doc);
+                while (result == IndexerReturnCode.RETRY_QUEUE_FULL) {
                     System.out.println("queue full " + new Date());
                     try {
                         Thread.sleep(1000);

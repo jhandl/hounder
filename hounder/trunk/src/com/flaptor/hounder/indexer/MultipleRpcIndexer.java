@@ -22,15 +22,17 @@ import org.dom4j.Document;
 import com.flaptor.util.Config;
 import com.flaptor.util.Execute;
 import com.flaptor.util.FileUtil;
+import com.flaptor.util.Stoppable;
 import com.flaptor.util.MonitoringKillerThread;
 import com.flaptor.util.PortUtil;
 import com.flaptor.util.remote.RmiServer;
 import com.flaptor.util.remote.XmlrpcServer;
 
 /**
+ * Exports a base IIndexer instance via rmi and via xmlrpc.
  * @author Flaptor Development Team
  */
-public class MultipleRpcIndexer implements IIndexer {
+public class MultipleRpcIndexer implements IIndexer, Stoppable {
     private static final Logger logger = Logger.getLogger(Execute.whoAmI());
     private final IIndexer baseIndexer;
     RmiServer rmiServer = null;
@@ -49,21 +51,34 @@ public class MultipleRpcIndexer implements IIndexer {
         	int port = PortUtil.getPort("indexer.xml");
             logger.info("MultipleRpcIndexer constructor: starting xmlRpc indexer on port " + port);
             xmlrpcServer = new XmlrpcServer(port);
-            xmlrpcServer.addHandler(null, baseIndexer);
+            xmlrpcServer.addHandler(null, new XmlIndexerWrapper());
             xmlrpcServer.start();
         }
 
         new MonitoringKillerThread(indexer,this).start();
     }
-    
-    public int index(Document doc) {
+
+    @Override
+    public IndexerReturnCode index(Document doc) {
         return baseIndexer.index(doc);
     }
 
-    public int index(String text) {
+    @Override
+    public IndexerReturnCode index(String text) {
         return baseIndexer.index(text);
     }
 
+    private class XmlIndexerWrapper { 
+        public int index(Document doc) {
+            return baseIndexer.index(doc).getOldRetValue();
+        }
+
+        public int index(String text) {
+            return baseIndexer.index(text).getOldRetValue();
+        }
+    }
+
+    @Override
     public boolean isStopped() {
         return ( rmiStopped()
                 && xmlrpcStopped()
@@ -86,6 +101,7 @@ public class MultipleRpcIndexer implements IIndexer {
         }
     }
 
+    @Override
     public void requestStop() {
         new StopperThread().start();
     }
@@ -97,7 +113,7 @@ public class MultipleRpcIndexer implements IIndexer {
         } else {
             logger.warn("log4j.properties not found in classpath! Reload disabled.");
         }
-        
+
         Config conf = Config.getConfig("indexer.properties");
         IIndexer indexer = conf.getBoolean("isMultiIndexer") ? new MultiIndexer() : new Indexer();
         new MultipleRpcIndexer(indexer,conf.getBoolean("rmiInterface"), conf.getBoolean("xmlInterface"));
@@ -113,29 +129,29 @@ public class MultipleRpcIndexer implements IIndexer {
         }
 
         @Override
-        public void run() {
-            if (null != rmiServer) {
-                logger.debug("stopping rmi server...");
-                rmiServer.requestStop();
-                while (!rmiServer.isStopped()) {
+            public void run() {
+                if (null != rmiServer) {
+                    logger.debug("stopping rmi server...");
+                    rmiServer.requestStop();
+                    while (!rmiServer.isStopped()) {
+                        Execute.sleep(20);
+                    }
+                    logger.debug("rmi server stopped.");
+                }
+                if (null != xmlrpcServer) {
+                    logger.debug("stopping xmlrpc server...");
+                    xmlrpcServer.requestStop();
+                    while (! xmlrpcServer.isStopped()) {
+                        Execute.sleep(20);
+                    }
+                    logger.debug("xmlrpc server stopped.");
+                }
+                logger.debug("stopping indexer...");
+                baseIndexer.requestStop();
+                while (!baseIndexer.isStopped()) {
                     Execute.sleep(20);
                 }
-                logger.debug("rmi server stopped.");
+                logger.debug("indexer stopped. MultipleRpcIndexer stopped.");
             }
-            if (null != xmlrpcServer) {
-                logger.debug("stopping xmlrpc server...");
-                xmlrpcServer.requestStop();
-                while (! xmlrpcServer.isStopped()) {
-                    Execute.sleep(20);
-                }
-                logger.debug("xmlrpc server stopped.");
-            }
-            logger.debug("stopping indexer...");
-            baseIndexer.requestStop();
-            while (!baseIndexer.isStopped()) {
-                Execute.sleep(20);
-            }
-            logger.debug("indexer stopped. MultipleRpcIndexer stopped.");
-        }
     }
 }

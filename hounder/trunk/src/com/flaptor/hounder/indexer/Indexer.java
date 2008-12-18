@@ -156,7 +156,7 @@ public class Indexer implements IRmiIndexer, IIndexer, Stoppable {
      * @throws IllegalStateException if the state of the indexer is not running.
      * @see com.flaptor.util.remote.XmlrpcServer
      */
-    public int index(final Document doc) {
+    public IndexerReturnCode index(final Document doc) {
     // Changed from indexDom because there is no need to use the param type as part of the method name.
         logger.debug("indexDom: received data to index");
         if (state != RunningState.RUNNING) {
@@ -166,10 +166,10 @@ public class Indexer implements IRmiIndexer, IIndexer, Stoppable {
         }
         if (queue.enqueueNoBlock(doc)) {
             statistics.notifyEventValue(DOCUMENT_ENQUEUED,1f);
-            return SUCCESS;
+            return IndexerReturnCode.SUCCESS;
         } else {
             statistics.notifyEventError(DOCUMENT_ENQUEUED);
-            return RETRY_QUEUE_FULL;
+            return IndexerReturnCode.RETRY_QUEUE_FULL;
         }
     }
 
@@ -180,7 +180,7 @@ public class Indexer implements IRmiIndexer, IIndexer, Stoppable {
      * @throws IllegalStateException if the indexer is not in the "running" state.
      * @see com.flaptor.util.remote.XmlrpcServer
      */
-    public int index(final String text) {
+    public IndexerReturnCode index(final String text) {
         // this avoids parsing the document if the queue is already full
         // so it reduces the impact of a denial-of-service attack
         // (not necessarily malicious, it could be due to a bug in the
@@ -191,11 +191,11 @@ public class Indexer implements IRmiIndexer, IIndexer, Stoppable {
             throw new IllegalStateException(s);
         }
         if (queue.isFull()) {
-            return RETRY_QUEUE_FULL;
+            return IndexerReturnCode.RETRY_QUEUE_FULL;
         } else {
             Document doc = parser.genDocument(text);
             if (null == doc) {
-                return (PARSE_ERROR);
+                return IndexerReturnCode.PARSE_ERROR;
             } else {
                 return index(doc);
             }

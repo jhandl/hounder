@@ -35,6 +35,7 @@ import com.flaptor.hounder.crawler.APageMapper;
 import com.flaptor.hounder.crawler.UrlHashMapper;
 import com.flaptor.hounder.indexer.IRemoteIndexer;
 import com.flaptor.hounder.indexer.Indexer;
+import com.flaptor.hounder.indexer.IndexerReturnCode;
 import com.flaptor.hounder.indexer.MockIndexer;
 import com.flaptor.hounder.indexer.RmiIndexerStub;
 import com.flaptor.util.Config;
@@ -167,7 +168,7 @@ public class IndexerModule extends AProcessorModule {
         root.addElement("documentId").addText(getDocumentId(page));
         try {
         	int i = pageMapper.mapPage(page);
-            while (indexers[i].index(dom) == Indexer.RETRY_QUEUE_FULL) {
+            while (indexers[i].index(dom) == IndexerReturnCode.RETRY_QUEUE_FULL) {
                 try {
                     Thread.sleep(indexerBusyRetryTime*1000);
                 } catch (InterruptedException e) {
@@ -392,7 +393,7 @@ public class IndexerModule extends AProcessorModule {
         // Send the document to the indexer. If the queue is full, wait and retry.
         try {
         	int i = pageMapper.mapPage(page);
-            while (indexers[i].index(dom) == Indexer.RETRY_QUEUE_FULL) {
+            while (indexers[i].index(dom) == IndexerReturnCode.RETRY_QUEUE_FULL) {
                 try { 
                     Thread.sleep(indexerBusyRetryTime*1000); 
                 } catch (InterruptedException e) {

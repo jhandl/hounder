@@ -24,8 +24,8 @@ import com.flaptor.util.remote.RpcException;
  */
 public interface IRemoteIndexer {
     
-    public int index(final Document doc) throws RpcException;
+    public IndexerReturnCode index(final Document doc) throws RpcException;
     
-    public int index(final String text) throws RpcException;
+    public IndexerReturnCode index(final String text) throws RpcException;
     
 }

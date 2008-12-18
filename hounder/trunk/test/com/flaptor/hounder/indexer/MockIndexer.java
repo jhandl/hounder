@@ -24,12 +24,14 @@ import com.flaptor.util.remote.RpcException;
  */
 public class MockIndexer implements IRemoteIndexer {
 
-        public int index(final Document doc) throws RpcException {
-            return 0;
+        @Override
+        public IndexerReturnCode index(final Document doc) throws RpcException {
+            return IndexerReturnCode.SUCCESS;
         }
         
-        public int index(final String text) throws RpcException {
-            return 0;
+        @Override
+        public IndexerReturnCode index(final String text) throws RpcException {
+            return IndexerReturnCode.SUCCESS;
         }
         
 }  

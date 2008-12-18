@@ -62,26 +62,26 @@ public class MultiIndexerTest extends TestCase {
 
 
     public void setUpIndexer(int i){
-		String tmpDir = com.flaptor.util.FileUtil.createTempDir("junit", ".tmp").getAbsolutePath();
+        String tmpDir = com.flaptor.util.FileUtil.createTempDir("junit", ".tmp").getAbsolutePath();
         com.flaptor.util.FileUtil.deleteDir(tmpDir);
         tmpDirs.add(tmpDir);
         Config.getConfig("common.properties").set("baseDir", tmpDir);
         Config.getConfig("common.properties").set("port.base", String.valueOf(genPort(i)));
-        
+
         Config config = Config.getConfig("indexer.properties");
         //config.set("Indexer.modules", "");
         config.set("Writer.fields", "content");
         config.set("Indexer.maxQueueSize", "100");
-		config.set("docIdName", "docId");
+        config.set("docIdName", "docId");
         config.set("IndexManager.updateInterval", "2000");
         config.set("IndexLibrary.remoteIndexUpdaters","");
         config.set("IndexLibrary.rsyncAccessString","");
         config.set("IndexManager.indexDescriptor",i+"of"+numIndexers+"@defaultCluster");
         config.set("Indexer.modules","com.flaptor.hounder.indexer.CommandsModule,com.flaptor.hounder.indexer.LoggerModule,com.flaptor.hounder.indexer.Writer");
         config.set("clustering.enable","false");
-       
+
         IIndexer baseIndexer = new Indexer();
-        IIndexer indexer = new MultipleRpcIndexer(baseIndexer,true/*rmi*/,false/*xmlrpc*/);
+        MultipleRpcIndexer indexer = new MultipleRpcIndexer(baseIndexer,true/*rmi*/,false/*xmlrpc*/);
         rpcIndexers.add(indexer);
         baseIndexers.add(baseIndexer);
     }
@@ -176,9 +176,9 @@ public class MultiIndexerTest extends TestCase {
     public void testCommands() throws Exception {
         String command = "<command name='close'/>";
         MultiIndexer multiIndexer = new MultiIndexer();
-        int retValue = multiIndexer.index(command);
+        IndexerReturnCode retValue = multiIndexer.index(command);
 
-        assertEquals("Indexing command did not succeed.",Indexer.SUCCESS,retValue);
+        assertEquals("Indexing command did not succeed.",IndexerReturnCode.SUCCESS,retValue);
 
         Execute.sleep(5000);
 

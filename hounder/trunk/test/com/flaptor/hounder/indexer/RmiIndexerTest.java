@@ -55,7 +55,7 @@ public class RmiIndexerTest extends TestCase {
     public void testConnection() throws Exception {
         int port = PortUtil.getPort("indexer.rmi");
         IIndexer baseIndexer = new Indexer();
-        IIndexer indexer = new MultipleRpcIndexer(baseIndexer,true, false);
+        MultipleRpcIndexer indexer = new MultipleRpcIndexer(baseIndexer,true, false);
         try {
             LocateRegistry.getRegistry(port).lookup(RmiServer.DEFAULT_SERVICE_NAME);
         } catch (Exception e) {

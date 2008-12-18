@@ -65,26 +65,26 @@ public class RmiIndexerStubTest extends TestCase {
             requiresPort = {BASE_PORT + OFFSET_RMI})
     public void testIndexingFailOnUnparsable() {
         RmiIndexerStub indexerStub = new RmiIndexerStub(BASE_PORT, "localhost");
-        int retVal = -1;
+        IndexerReturnCode retVal = IndexerReturnCode.FAILURE;
         try {
             retVal = indexerStub.index("this text is not valid xml");
         } catch (Exception e) {
             fail("catched exception while indexing" + e);
         }
-        assertEquals(Indexer.PARSE_ERROR, retVal);
+        assertEquals(IndexerReturnCode.PARSE_ERROR, retVal);
     }
 
     @TestInfo(testType = TestInfo.TestType.INTEGRATION,
             requiresPort = {BASE_PORT + OFFSET_RMI})
     public void testIndexingSuccesOnAdd() {
         RmiIndexerStub indexerStub = new RmiIndexerStub(BASE_PORT, "localhost");
-        int retVal = -1;
+        IndexerReturnCode retVal = IndexerReturnCode.FAILURE;
         try {
             retVal = indexerStub.index("<documentAdd><documentId>1</documentId></documentAdd>");
         } catch (Exception e) {
             fail("catched exception while indexing" + e);
         }
-        assertEquals(Indexer.SUCCESS, retVal);
+        assertEquals(IndexerReturnCode.SUCCESS, retVal);
     }
 
 }
