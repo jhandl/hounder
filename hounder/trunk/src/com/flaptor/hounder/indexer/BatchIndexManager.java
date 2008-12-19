@@ -1,43 +1,32 @@
 /*
-Copyright 2008 Flaptor (flaptor.com) 
+Copyright 2008 Flaptor (flaptor.com)
 
-Licensed under the Apache License, Version 2.0 (the "License"); 
-you may not use this file except in compliance with the License. 
-You may obtain a copy of the License at 
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0 
+    http://www.apache.org/licenses/LICENSE-2.0
 
-Unless required by applicable law or agreed to in writing, software 
-distributed under the License is distributed on an "AS IS" BASIS, 
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
-See the License for the specific language governing permissions and 
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
 limitations under the License.
 */
 package com.flaptor.hounder.indexer;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Enumeration;
-import java.util.HashSet;
-import java.util.Hashtable;
-import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
-import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexWriter;
-import org.apache.lucene.index.Term;
-import org.apache.lucene.search.Hits;
-import org.apache.lucene.search.IndexSearcher;
-import org.apache.lucene.search.TermQuery;
 
 import com.flaptor.hounder.Index;
 import com.flaptor.hounder.IndexDescriptor;
-import com.flaptor.hounder.indexer.util.Hash;
-import com.flaptor.util.AStoppableThread;
 import com.flaptor.util.Config;
 import com.flaptor.util.Execute;
 import com.flaptor.util.RunningState;
@@ -47,38 +36,38 @@ public final class BatchIndexManager implements Stoppable {
 	private static final Logger logger = Logger.getLogger(Execute.whoAmI());
 
 
-    private Indexer indexer;
-    
+//    private Indexer indexer;
+
 	//Lucene related variables.
     private final Index index;
     private IndexWriter writer;
 	private String docIdName = null;
-	
-    private AtomicLong nextAddId;
+
+    private AtomicLong nextAddId= new AtomicLong();
 
 	//State related te the shutdown sequence.
 	private volatile RunningState state = RunningState.RUNNING;
 
 
 	/**
-	 * Default constructor. 
-     * Takes the required information from the configuration file. 
+	 * Default constructor.
+     * Takes the required information from the configuration file.
      *
-     * Configuration strings: 
-     *      docIdName: 
-     *          the string to use as identifier of the document id while 
-     *          storing it in the index. 
-	 * @throws IllegalArgumentException 
+     * Configuration strings:
+     *      docIdName:
+     *          the string to use as identifier of the document id while
+     *          storing it in the index.
+	 * @throws IllegalArgumentException
      *          when there are problems with the arguments taken from the
 	 * 		    configuration file.
-	 * @throws IllegalStateException 
+	 * @throws IllegalStateException
      *          when the filesystem is not ready to be set up (permissions,
 	 * 		    space?)
 	 */
 	public BatchIndexManager(IndexDescriptor indexDescriptor, File indexDirectory) {
-        index = Index.createIndex(indexDirectory); 
+        index = Index.createIndex(indexDirectory);
         index.setIndexDescriptor(indexDescriptor);
-        
+        writer= index.getWriter();
         Config config = Config.getConfig("indexer.properties");
 		docIdName = config.getString("docIdName");
 	}
@@ -86,7 +75,7 @@ public final class BatchIndexManager implements Stoppable {
 
 	/**
 	 * Checks that the runningState is RUNNING.
-	 * This is a simple helper method used to check that the running state 
+	 * This is a simple helper method used to check that the running state
      * is RUNNING.
 	 * if it's not, it throws an exception.
 	 * Using this method makes many methods much more readable.
@@ -113,7 +102,7 @@ public final class BatchIndexManager implements Stoppable {
 		}
 		Long addId = nextAddId.incrementAndGet();
         doc.add(new Field("AddId", addId.toString(), Field.Store.YES, Field.Index.UN_TOKENIZED));
-        if ( logger.isEnabledFor(Level.DEBUG)) { 
+        if ( logger.isEnabledFor(Level.DEBUG)) {
             logger.debug("Adding document with AddId=" + addId + " and docId=" + docId);
         }
         writer.addDocument(doc);
@@ -128,7 +117,7 @@ public final class BatchIndexManager implements Stoppable {
 
     @Override
 	public boolean isStopped() {
-		return state == RunningState.STOPPED;        
+		return state == RunningState.STOPPED;
 	}
 
 }

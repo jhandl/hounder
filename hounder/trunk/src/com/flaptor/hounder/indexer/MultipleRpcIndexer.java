@@ -1,16 +1,16 @@
 /*
-Copyright 2008 Flaptor (flaptor.com) 
+Copyright 2008 Flaptor (flaptor.com)
 
-Licensed under the Apache License, Version 2.0 (the "License"); 
-you may not use this file except in compliance with the License. 
-You may obtain a copy of the License at 
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0 
+    http://www.apache.org/licenses/LICENSE-2.0
 
-Unless required by applicable law or agreed to in writing, software 
-distributed under the License is distributed on an "AS IS" BASIS, 
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
-See the License for the specific language governing permissions and 
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
 limitations under the License.
 */
 package com.flaptor.hounder.indexer;
@@ -37,7 +37,7 @@ public class MultipleRpcIndexer implements IIndexer, Stoppable {
     private final IIndexer baseIndexer;
     RmiServer rmiServer = null;
     XmlrpcServer xmlrpcServer = null;
-    
+
     public MultipleRpcIndexer(IIndexer indexer, boolean rmi, boolean xmlrpc) {
         this.baseIndexer = indexer;
         if (rmi) {
@@ -68,13 +68,26 @@ public class MultipleRpcIndexer implements IIndexer, Stoppable {
         return baseIndexer.index(text);
     }
 
-    private class XmlIndexerWrapper { 
+    public class XmlIndexerWrapper {
         public int index(Document doc) {
-            return baseIndexer.index(doc).getOldRetValue();
+        	logger.debug("Asked to index doc: " + doc.asXML());
+        	int res= baseIndexer.index(doc).getOldRetValue();
+        	logger.debug("Returning " + res);
+            return res;
         }
 
         public int index(String text) {
-            return baseIndexer.index(text).getOldRetValue();
+        	try {
+        		logger.debug("Asked to index: " + text + " baseI=" + baseIndexer);
+        		IndexerReturnCode z = baseIndexer.index(text);
+        		logger.debug("retCod= " + z);
+        		int res = z.getOldRetValue();
+        		logger.debug("Returning " + res);
+        		return res;
+        	}catch (Exception e) {
+        		logger.warn(e,e);
+        		return IndexerReturnCode.FAILURE.getOldRetValue();
+			}
         }
     }
 
