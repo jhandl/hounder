@@ -67,7 +67,8 @@ public final class IndexManager implements IndexWriteProvider, Stoppable {
     private final Hash hashFunction;
 
     private Indexer indexer;
-    
+    private final boolean optimizeForBatch;
+
 	//Lucene related variables.
     private Index workIndex;
     private IndexWriter writer;
@@ -126,6 +127,11 @@ public final class IndexManager implements IndexWriteProvider, Stoppable {
         indexDescriptor = new IndexDescriptor(config.getString("IndexManager.indexDescriptor"));
         library = new IndexLibrary(indexer);
 
+        optimizeForBatch = config.getBoolean("optimizeForBatch");
+        if (optimizedForBatch) {
+            logger.warn("Constructor: the index manager is configured for batch indexing. Deletes will throw exceptions and"
+                + " adds will not be checked for duplicated documentIds. BE CAREFUL.");
+        }
 
 		setBaseDirectory();
 		setIndexDirectory();
@@ -314,7 +320,9 @@ public final class IndexManager implements IndexWriteProvider, Stoppable {
                 logger.debug("Adding document with AddId=" + addId + " and docId=" + docId);
             }
 			writer.addDocument(doc);
-			lastOperation.put(docId, addId);
+            if (! optimizedForBatch) {
+			    lastOperation.put(docId, addId);
+            }
 		} catch (IOException e) {
 			logger.error(e);
 		}
@@ -326,6 +334,9 @@ public final class IndexManager implements IndexWriteProvider, Stoppable {
 	 */
 	public synchronized void deleteDocument(final String id) {
 		checkRunningState();
+        if (optimizedForBatch) {
+            throw new UnsupportedOperationException("Cannot delete while batch indexing. Check your configuration.");
+        }
 		lastOperation.put(id, new Long(0));
 	}
 
@@ -445,7 +456,9 @@ public final class IndexManager implements IndexWriteProvider, Stoppable {
 	 */
 	public synchronized void makeDirectoryCheckpoint() {
 		closeWriter();
-		applyDeletes();
+        if (! optimizedForBatch) {
+		    applyDeletes();
+        }
 		if (optimizeScheduled) {
 			logger.info("Beginning index optimization..");
 			try {

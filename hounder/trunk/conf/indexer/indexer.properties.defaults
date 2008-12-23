@@ -10,6 +10,9 @@ IndexManager.indexDescriptor=0of1@defaultCluster
 
 docIdName=documentId
 
+#If the indexer is allowed to optimize for batch indexing, it will be somehow faster at that, but it won't allow deletes and won't check for dupplicates in the
+# documentId key. This option is generally used for first-time indexing, or complete reindexing when the content system/feeder combination can give enough warranties.
+optimizeForBatch=false
 
 #The size of the queues in-between modules. This parameter may be important when the multithreaded version of the ModulePipe is implemented.
 # Never make this value smaller than the maximum number of document any module returns, as it may cause deadlock. (In Hounder, no module return more than 1 document)
