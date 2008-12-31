@@ -57,7 +57,7 @@ public class FetchServer {
     private class ServerThread extends Thread {
         @Override
         public void run () {
-            setName("FetcherThread");
+            setName("FetchServerThread");
             FetchList fetchlist = null;
             FetchData fetchdata = null;
             boolean continueAfterException;

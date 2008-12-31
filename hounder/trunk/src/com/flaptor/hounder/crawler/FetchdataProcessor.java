@@ -34,6 +34,7 @@ import com.flaptor.hounder.crawler.pagedb.Page;
 import com.flaptor.hounder.crawler.pagedb.PageDB;
 import com.flaptor.util.Config;
 import com.flaptor.util.Execute;
+import java.util.Arrays;
 import java.util.concurrent.BlockingQueue;
 
 /**
@@ -51,7 +52,7 @@ public class FetchdataProcessor {
     private ExecutorService pool;
     private final int workerCount;
     private long discoveryPages;
-
+    
     /** 
      * Class initializer.
      */
@@ -66,6 +67,15 @@ public class FetchdataProcessor {
         workerCount = (int) Math.ceil(cpus * config.getFloat("workers.per.cpu"));
         logger.info("FetchDocument processor using " + workerCount + " workers on " + cpus + " cpus");
     }
+    
+    /**
+     * Free resources.
+     */
+    public void close() {
+        Execute.close(hotspots);
+    }
+
+
 
     private /*synchronized */ void newDiscoveryPage() {
         discoveryPages++;
@@ -155,8 +165,8 @@ public class FetchdataProcessor {
                 Link[] links = doc.getLinks();
                 String[] anchors = page.getAnchors();
                 boolean success = doc.success() 
-                        && (null != title && title.length() > 0) 
-                        && (   (null != text && text.length() > 0) 
+                        && (   (null != title && title.length() > 0) 
+                            || (null != text && text.length() > 0) 
                             || (null != anchors && anchors.length > 0)
                             || (null != links && links.length > 0)
                            );
@@ -203,6 +213,18 @@ public class FetchdataProcessor {
                     // send it to modules manager
                     modules.process(doc);
 
+                    // propagate the antiscore back to its parents
+                    float antiScore = page.getAntiScore();
+/*
+                    if ((antiScore > 0f) && recordParents) {
+                        for (String url : page.getParents()) {
+                            Page badParent = new Page(url, 1.0f);
+                            badParent.setAntiScore(antiScore);
+                            newPageDB.addPage(badParent);
+                        }
+                    }
+ */
+                    
                     if (null != links) {
                         // Now add the page's outlinks to the next pagedb, 
                         // so they can be fetched in the next cycle
@@ -226,6 +248,10 @@ public class FetchdataProcessor {
                                         }
                                         child.addAnchor(link.getAnchor()); // at this point it can only be one anchor
                                         child.setScore(PageRank.parentContribution(page.getScore(), links.length));
+                               
+                                        // propagate the antiscore to the children
+                                        child.setAntiScore(PageRank.parentContribution(antiScore, links.length));
+
                                         // unless the child is a hotspot, it is removed from the fetched page by 1 level
                                         child.setDistance(page.getDistance() + 1);
 

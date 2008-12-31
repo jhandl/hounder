@@ -22,6 +22,7 @@ import org.apache.log4j.Logger;
 import com.flaptor.hounder.crawler.pagedb.Page;
 import com.flaptor.hounder.crawler.pagedb.PageDB;
 import com.flaptor.util.Execute;
+import com.flaptor.util.FileUtil;
 import com.flaptor.util.remote.RmiServer;
 import com.flaptor.util.remote.RpcException;
 
@@ -79,7 +80,7 @@ public class PageCatcher implements IRemotePageCatcher {
     /**
      * Stop the catcher by unregistering it.
      */
-    public void stop () {
+    public synchronized void stop () {
         if (running) {
             this.server.requestStop();
             while (!this.server.isStopped()) {Execute.sleep(20);}
@@ -116,10 +117,7 @@ public class PageCatcher implements IRemotePageCatcher {
     }
 
     // start a new pagedb for storing catched pages.
-    private void newCatcher () {
-        // TODO: using WRITE without APPEND means that if the crawler is restarted, any catched pages will be lost;
-        //       but append doesn't work with adding the timestamp to the name. Yet if the name remains the same for 
-        //       append to work, we can't return the old catchdb and immediately open the new one...
+    private synchronized void newCatcher () {
         try {
             String dirname = catchDir + ".tmp";
             catchdb = new PageDB(dirname);
@@ -145,9 +143,15 @@ public class PageCatcher implements IRemotePageCatcher {
      * Return the pagedb with the catched pages and switch to a new one.
      * @return the pagedb with the catched pages.
      */
-    public synchronized PageDB getCatch () {
+    public synchronized PageDB getCatch () throws IOException {
         Execute.close(catchdb);
-        catchdb.rename(catchDir);
+        if (!catchdb.rename(catchDir)) {
+            logger.warn("Found a previous catchdb, will remove.");
+            FileUtil.deleteDir(catchDir);
+            if (!catchdb.rename(catchDir)) {
+                throw new IOException("Unable to rename the catchdb.tmp because I couldn't remove a previous catchdb");
+            }
+        }
         PageDB tmp = catchdb;
         newCatcher();
         return tmp;

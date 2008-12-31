@@ -42,6 +42,14 @@ public class WhiteListModule extends ATrueFalseModule {
         patterns = new UrlPatterns(getModuleConfig().getString("whitelist.file"));
     }
     
+    /**
+     * Free resources.
+     */
+    public void close() {
+        Execute.close(patterns);
+    }
+
+
     @Override
     public Boolean tfInternalProcess (FetchDocument doc) {
         Page page = doc.getPage();

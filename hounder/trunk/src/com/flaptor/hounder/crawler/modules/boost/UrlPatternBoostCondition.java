@@ -51,6 +51,13 @@ public class UrlPatternBoostCondition extends ABoostCondition {
             throw new RuntimeException(e);
         }
     }
+    
+    /**
+     * Free resources.
+     */
+    public void close() {
+        Execute.close(patterns);
+    }
 
     /**
      * If the document url matches any of the patterns, return true.

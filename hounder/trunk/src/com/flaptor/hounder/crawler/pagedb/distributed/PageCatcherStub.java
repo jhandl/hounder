@@ -55,9 +55,10 @@ public class PageCatcherStub extends ARmiClientStub implements IRemotePageCatche
                 long now = System.currentTimeMillis();
                 if (now-start > CONNECTION_TIMEOUT) {
                     logger.error("Failed to connect to remote PageCatcher at " + host + ":" + catcherPort);
+                    break;
                 }
-                try { Thread.sleep(1000); } catch (InterruptedException ex) { }
             }
+            try { Thread.sleep(1000); } catch (InterruptedException ex) { }
         }
     }
     

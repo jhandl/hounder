@@ -133,6 +133,7 @@ public class Crawler {
         if (null != pageCatcher) {
             pageCatcher.stop();
         }
+        modules.close();
 /* 
     Commented out because it causes the crawler to hang at the end, should investigate more.
     If this is not used, an external stop request may not work because the fetchserver would be waiting for a fetchlist.
@@ -177,7 +178,7 @@ public class Crawler {
 
         public FetchlistQueueMonitor (PageDB oldPageDB, PageDB tmpPageDB, long skip) {
             try {
-                factory = new FetchlistFactory(oldPageDB,tmpPageDB);
+                factory = new FetchlistFactory(oldPageDB,tmpPageDB,progress);
             } catch (IOException e) {
                 logger.error(e,e);
             }
@@ -200,11 +201,6 @@ public class Crawler {
                     break;
                 } 
                 // else
-                
-                progress.addSeen(fetchlist.getSize());
-                if (logger.isDebugEnabled()) {
-                    progress.report();
-                }
                 
                 if (skip > seen) {
                     fetchlist.remove();
@@ -251,7 +247,7 @@ public class Crawler {
                     try {
                         PageDB pageDB = new PageDB(injectedPagedbDir);
                         pageDB.open(PageDB.READ);
-                        factory = new FetchlistFactory(pageDB,tmpPageDB);
+                        factory = new FetchlistFactory(pageDB,tmpPageDB,progress);
 
                         FetchList fetchlist = factory.getNextFetchlist();
                         while (null != fetchlist && running() && !cycleFinished) {
@@ -298,7 +294,6 @@ public class Crawler {
 
         @Override
         public void run () {
-
             FetchData fetchdata = null;
             do {
                 boolean couldDequeue = false;
@@ -312,9 +307,7 @@ public class Crawler {
                     try {
                         discoveryPages += processor.processFetchdata(fetchdata, oldPageDB, tmpPageDB);
                         progress.addProcessed(fetchdata.getSize());
-                        if (logger.isEnabledFor(Level.ERROR)) {
-                            progress.report();
-                        }
+                        progress.report();
                     } catch (Exception e) {
                         logger.error(e,e);
                     } catch (Throwable e) {
@@ -355,14 +348,6 @@ public class Crawler {
             fetchlist = fetchlistQueue.dequeueBlock(100);
             couldDequeue = (null != fetchlist);
         }    
-
-        if (couldDequeue) {
-            if (fetchlistQueue.isClosed()) {
-                logger.debug("Dequeued the last fetchlist of this cycle.");
-            } else {
-                logger.debug("Dequeued normal fetchlist");
-            }
-        }
         return fetchlist;
     }
 
@@ -377,9 +362,7 @@ public class Crawler {
             return;
         }
         progress.addFetched(fetchdata.getSize());
-        if (logger.isInfoEnabled()) {
-            progress.report();
-        }
+        progress.report();
         // else, enqueue it
         boolean enqueued = false;
         while (!enqueued) {
@@ -542,8 +525,7 @@ public class Crawler {
                 // start queues
                 if (fetchlistQueue.isClosed()) fetchlistQueue.reset();
                 if (fetchdataQueue.isClosed()) fetchdataQueue.reset();
-
-                PageDB newPageDB = runSingleCrawlCicle(processor, createNewPageDB, skip);
+                PageDB newPageDB = runSingleCrawlCycle(processor, createNewPageDB, skip);
                 skip = 0;
 
                 logger.info("Finished crawl cycle");
@@ -588,7 +570,7 @@ public class Crawler {
      * @throws InterruptedException
      * @throws MalformedURLException
      */
-    private PageDB runSingleCrawlCicle(FetchdataProcessor processor, boolean createNewPageDB, long skip) throws Exception, IOException, InterruptedException, MalformedURLException {
+    private PageDB runSingleCrawlCycle(FetchdataProcessor processor, boolean createNewPageDB, long skip) throws Exception, IOException, InterruptedException, MalformedURLException {
         // start the fetch server
         FetchServer fetchserver = new FetchServer(fetcher, this);
         fetchserver.start();
@@ -622,7 +604,7 @@ public class Crawler {
         tmpPageDB.open(PageDB.WRITE);
         tmpPageDB.setNextCycleOf(oldPageDB);
 
-        progress = new CrawlerProgress(tmpPageDB.getCycles(), oldPageDB.getSize());
+        progress = new CrawlerProgress(tmpPageDB.getCycles(), oldPageDB.getSize(), oldPageDB.getFetchedSize());
         
         logger.info("Starting crawl cycle " + oldPageDB.getCycles());
         declareStartCycle(oldPageDB);

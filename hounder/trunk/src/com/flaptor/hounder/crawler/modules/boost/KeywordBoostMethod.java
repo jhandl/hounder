@@ -21,6 +21,7 @@ import java.util.Set;
 import com.flaptor.hounder.crawler.UrlPatterns;
 import com.flaptor.hounder.crawler.modules.FetchDocument;
 import com.flaptor.util.Config;
+import com.flaptor.util.Execute;
 import com.flaptor.util.FileUtil;
 
 /**
@@ -43,6 +44,12 @@ public class KeywordBoostMethod extends ABoostMethod{
         }
     }
 
+    /**
+     * Free resources.
+     */
+    public void close() {
+        Execute.close(patterns);
+    }
 
     public void applyBoost(FetchDocument doc, double value) {
 

@@ -61,9 +61,7 @@ public class CrawlerTest extends TestCase {
     boolean testingFailedFetcher = true;
     boolean testingPriorityCrawl = true;
     boolean testingPageRank = true;
-    boolean testingPageDBInjection = true;
-
-    int repetitions = 10;
+    boolean testingPageDBInjection = false;
 
     public void setUp() throws IOException {
         String log4jConfigPath = com.flaptor.util.FileUtil.getFilePathFromClasspath("log4j.properties");
@@ -227,6 +225,7 @@ public class CrawlerTest extends TestCase {
     }
 
 
+
     @TestInfo(testType = TestInfo.TestType.SYSTEM,
             requiresPort = {8087})
     public void testLinkFollowing () throws Exception {
@@ -279,7 +278,7 @@ public class CrawlerTest extends TestCase {
     public void testRandomWebs () throws Exception {
         if (!testingRandomWebs) return;
         System.out.println("...Testing random webs");
-        int tests = repetitions;
+        int tests = 10;
         for (int test=1; test<=tests; test++) {
             int size = 2+rnd.nextInt(15);
             config.set("discovery.front.size", String.valueOf(size));

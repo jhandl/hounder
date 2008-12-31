@@ -17,6 +17,7 @@ package com.flaptor.hounder.crawler.modules.boost;
 
 
 import com.flaptor.hounder.crawler.modules.FetchDocument;
+import com.flaptor.util.Execute;
 
 /**
  * @author Flaptor Development Team
@@ -54,4 +55,11 @@ public class Booster {
     public ABoostMethod getBoostMethod () {
         return method;
     }
+    
+    public void close() {
+        Execute.close(condition);
+        Execute.close(method);
+        Execute.close(value);
+    }
+    
 }

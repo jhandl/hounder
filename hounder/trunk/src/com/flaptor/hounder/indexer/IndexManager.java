@@ -528,14 +528,14 @@ public final class IndexManager implements IndexWriteProvider, Stoppable {
 	 * @todo review exception handling
 	 */
 	private class UpdaterThread extends AStoppableThread {
-		private final int updateInterval;
+		private final long updateInterval;
 
 		/**
 		 * Default constructor.
 		 */
 		public UpdaterThread() {
 			thrd.setName("IndexManager:UpdaterThread");
-			updateInterval = config.getInt("IndexManager.updateInterval");
+			updateInterval = config.getTimePeriod("IndexManager.updateInterval","ms");
 		}
 
 		/**

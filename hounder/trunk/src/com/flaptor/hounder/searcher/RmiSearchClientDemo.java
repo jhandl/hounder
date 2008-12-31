@@ -32,16 +32,18 @@ import com.flaptor.util.remote.RpcException;
 public class RmiSearchClientDemo {
 
     public static void main(String[] args) throws Exception {
-        String query = args[0];
-        String groupByField = args[1];
+        String host = args[0];
+        String query = args[1];
+        String groupByField = args[2];
 
-        int basePort = 10000;
-        String host = "192.168.0.10";
-
+        int basePort = 47000; // baseport of the search server. default value is 47000.
 
         IRemoteSearcher searcher = new RmiSearcherStub(basePort, host);
+
+
         //The simplest example.
-        System.out.println("Simple search successful.\n" + searcher.search(new LazyParsedQuery(query), 0, 10, new NoGroup(), 1, null, null).toString());
+        System.out.println("Simple search results:\n" + searcher.search(new LazyParsedQuery(query), 0, 10, new NoGroup(), 1, null, null).toString());
+
 
         //The same example, with some error management
         GroupedSearchResults gsr = null;

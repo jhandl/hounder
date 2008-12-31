@@ -17,6 +17,7 @@ package com.flaptor.hounder.crawler.modules.boost;
 
 import com.flaptor.hounder.crawler.modules.FetchDocument;
 import com.flaptor.util.Config;
+import com.flaptor.util.Execute;
 
 
 /**
@@ -54,5 +55,11 @@ public class CompositeBoostCondition extends ABoostCondition {
         return val;
     }
 
+
+    @Override
+    public void close() {
+        Execute.close(cond1);
+        Execute.close(cond2);
+    }
 }
 

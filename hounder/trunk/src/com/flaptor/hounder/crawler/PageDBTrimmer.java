@@ -246,7 +246,7 @@ public class PageDBTrimmer {
     public void trimPageDB (PageDB origPageDB, PageDB destPageDB, long availableDiscoveryPages) throws IOException, MalformedURLException {
         Page bestPage;
         bestPage = new Page("",0);
-        bestPage.setDistance(0);
+        bestPage.setDistance(Integer.MAX_VALUE);
         bestPage.setRetries(0);
         bestPage.setLastAttempt(0);
         bestPage.setLastSuccess(0);
@@ -267,6 +267,7 @@ public class PageDBTrimmer {
         logger.debug("  cycle="+origPageDB.getCycles()+" size="+dbSize);
 
         PageRank pageRank = new PageRank(dbSize);
+        PageRank badRank = new PageRank(dbSize);
         PageFilter pageFilter = new PageFilter(maxDistance, maxRetries, dbFetchedSize, discoveryFrontSize, availableDiscoveryPages);
 
         // This code produces one page for each block of same-url pages.
@@ -299,6 +300,7 @@ public class PageDBTrimmer {
                 if (lastSuccess == 0L) {
                     unfetched = true;
                     pageRank.addContribution(page.getScore());
+                    badRank.addContribution(page.getAntiScore());
                     inlinks++;
                 }
 
@@ -345,7 +347,10 @@ public class PageDBTrimmer {
                 if (bestPage.getUrl().length() > 0) { // if this is not the first page, write the best of the last similar pages
                     logger.debug("    new page, will write previous one: " + bestPage.getUrl());
                     bestPage.setNumInlinks(inlinks);
-                    if (unfetched) bestPage.setScore(pageRank.getPageScore());
+                    if (unfetched) {
+                        bestPage.setScore(pageRank.getPageScore());
+                        bestPage.setAntiScore(badRank.getPageScore());
+                    }
                     if (pageFilter.shouldWrite (destPageDB, bestPage)) {
                         updatePriority(bestPage);
                         destPageDB.addPage(bestPage);
@@ -367,8 +372,10 @@ public class PageDBTrimmer {
                 unfetched = (bestPage.getLastSuccess() == 0L);
                 inlinks = 0;
                 pageRank.reset();
+                badRank.reset();
                 if (unfetched) {
                     pageRank.addContribution(bestPage.getScore());
+                    badRank.addContribution(bestPage.getAntiScore());
                     inlinks++;
                 }
             }
@@ -386,7 +393,7 @@ public class PageDBTrimmer {
             origPageDB.close();
             destPageDB.close();
         }
-        hotspots.close();
+        Execute.close(hotspots);
     }
 
 

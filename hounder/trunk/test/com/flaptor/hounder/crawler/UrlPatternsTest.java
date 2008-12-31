@@ -82,6 +82,7 @@ public class UrlPatternsTest extends TestCase {
             for (String line : nomatch) {
                 assertFalse("Matched a line that should not match ("+line+")", hs.match(line));
             }
+            hs.close();
         } catch (IOException e) {
             assertTrue(e.toString(), false);
         }

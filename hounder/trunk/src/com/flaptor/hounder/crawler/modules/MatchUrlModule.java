@@ -44,6 +44,13 @@ public class MatchUrlModule extends ATrueFalseModule {
         patterns = new UrlPatterns(filepath); // TODO: hotspots should be singleton, otherwise we have two copies in ram.
     }
     
+    /**
+     * Free resources.
+     */
+    public void close() {
+        Execute.close(patterns);
+    }
+    
     @Override
     public Boolean tfInternalProcess (FetchDocument doc) {
         Page page = doc.getPage();

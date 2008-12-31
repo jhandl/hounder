@@ -31,8 +31,9 @@ import com.flaptor.util.Execute;
 public class StopMonitor {
 
     private static final Logger logger = Logger.getLogger(Execute.whoAmI());
-    private static boolean running = true;
+    private static volatile boolean running = true;
     private static File stopFile;
+    private static StopMonitorThread monitor;
 
     /**
      * Class initializer.
@@ -41,25 +42,32 @@ public class StopMonitor {
     public StopMonitor (String stopFileName) {
         stopFile = new File(stopFileName);
         reset();
-        StopMonitorThread mon = new StopMonitorThread();
-        mon.start();
+        monitor = new StopMonitorThread();
+        monitor.setDaemon(true);
+        monitor.start();
     }
 
     /**
      * Resets the stop signal.
      */
     public static void reset () {
-        if (stopFile.exists()) {
-            stopFile.delete();
+        synchronized (stopFile) {
+            if (stopFile.exists()) {
+                stopFile.delete();
+            }
+            running = true;
         }
-        running = true;
     }
 
     // This thread checks if the stop signal is present.
     private class StopMonitorThread extends Thread {
         public void run () {
             while (running) {
-                running = !stopFile.exists();
+                synchronized (stopFile) {
+                    if (running) {
+                        running = !stopFile.exists();
+                    }
+                }
                 try { sleep(10000); } catch (Exception e) { /*ignore*/ }
             }
             logger.info("STOP file detected");
@@ -78,7 +86,10 @@ public class StopMonitor {
      * Stops the system by internal request.
      */
     public static void stop () {
-        running = false;
+        synchronized (stopFile) {
+            running = false;
+        }
+        monitor.interrupt();
         logger.info("STOP requested internaly");
     }
 

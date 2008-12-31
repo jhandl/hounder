@@ -17,6 +17,7 @@ package com.flaptor.hounder.crawler.modules.boost;
 
 import com.flaptor.hounder.crawler.modules.FetchDocument;
 import com.flaptor.util.Config;
+import com.flaptor.util.Execute;
 
 /**
  * @author Flaptor Development Team
@@ -49,8 +50,10 @@ public abstract class ABoostCondition extends ABoostModule  {
 
         return cond;
     }
-
+    
     public abstract boolean eval (FetchDocument doc);
     public boolean hasValue(FetchDocument doc) {return false;}
     public double getValue (FetchDocument doc) {return 0;}
+    public abstract void close();
+
 } 

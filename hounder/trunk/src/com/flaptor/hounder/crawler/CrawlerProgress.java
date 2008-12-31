@@ -35,20 +35,23 @@ public class CrawlerProgress {
     private long cycle;
     private long max;
     private long seen;
+    private long tofetch;
     private long fetched;
     private long processed;
     private long startTime;
     private File reportFile;
     private File baseFile;
 
-    public CrawlerProgress(long cycle, long max) {
+    public CrawlerProgress(long cycle, long max, long known) {
         this.cycle = cycle;
         this.max = max;
         seen = 0;
         fetched = 0;
         processed = 0;
-        startTime = System.currentTimeMillis();
+        startTime = System.currentTimeMillis(); 
         Config config = Config.getConfig("crawler.properties");
+        int refetchPercent = config.getInt("priority.percentile.to.fetch");
+        tofetch = (max-known)+known*refetchPercent/100;
         String baseFileName = config.getString("progress.report.filename");
         baseFile = new File(baseFileName);
         reportFile = new File(baseFileName+"."+cycle);
@@ -90,29 +93,32 @@ public class CrawlerProgress {
     public void report() {
         long now = System.currentTimeMillis();
         long elapsed = now - startTime;
+        if (0 == elapsed) { elapsed = 1; }
         long remaining = -1;
         if (processed > 0) {
-            remaining = ((max / processed) - 1) * elapsed;
+            remaining = ((tofetch * elapsed) / processed) - elapsed;
         } else if (fetched > 0) {
-            remaining = ((max / fetched) - 1) * elapsed;
+            remaining = ((tofetch * elapsed) / fetched) - elapsed;
         }
-        float rate = Math.round(10000 * processed / elapsed) / 10;
+        float rate = ((10000L * processed) / elapsed) / 10.0f;
         BufferedWriter buf = null;
         try {
             buf = new BufferedWriter(new FileWriter(reportFile));
             buf.write("Cycle: " + cycle);
             buf.newLine();
-            buf.write("Pagedb size: " + max);
+            buf.write("Pagedb size: " + max + " (to fetch "+tofetch+")");
             buf.newLine();
             buf.write("Seen: " + seen + " (" + (100 * seen / max) + "%)");
             buf.newLine();
-            buf.write("Fetched: " + fetched + " (" + (100 * fetched / max) + "%)");
+            buf.write("Fetched: " + fetched + " (" + (100 * fetched / tofetch) + "%)");
             buf.newLine();
-            buf.write("Processed: " + processed + " (" + (100 * processed / max) + "%)");
+            buf.write("Processed: " + processed + " (" + (100 * processed / tofetch) + "%)");
             buf.newLine();
             buf.write("Rate: " + rate + " docs/s");
             buf.newLine();
             buf.write("Start: " + formatTime(startTime,true));
+            buf.newLine();
+            buf.write("Now: " + formatTime(now,true));
             buf.newLine();
             buf.write("Elapsed: " + formatTime(elapsed,false));
             buf.newLine();

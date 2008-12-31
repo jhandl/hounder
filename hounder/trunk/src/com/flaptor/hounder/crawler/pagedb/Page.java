@@ -37,11 +37,12 @@ import org.apache.log4j.Logger;
 public class Page implements Serializable {
     
     private static final Logger logger = Logger.getLogger(Execute.whoAmI());
-    private static final long serialVersionUID = 5L;
-    private static final int CURRENT_VERSION = 5;
+    private static final long serialVersionUID = 6L;
+    private static final int CURRENT_VERSION = 7;
 
     private String url;
     private float score;
+    private float antiScore;
     private float priority;
     private int distance;
     private int retries;
@@ -54,6 +55,7 @@ public class Page implements Serializable {
     private byte[] urlHash;
     private HashSet<String> anchors;
     private HashSet<String> parents;
+    private HashSet<String> tags;
     private TextSignature signature;
     private MessageDigest digester;
     private static boolean configured = false;
@@ -62,7 +64,7 @@ public class Page implements Serializable {
     /**
      * Read the configuration parameters.
      */
-    private synchronized void readConfig() {
+    private void readConfig() {
         if (!configured) {
             Config config = Config.getConfig("crawler.properties");
             similarityThreshold = config.getFloat("page.similarity.threshold");
@@ -77,6 +79,7 @@ public class Page implements Serializable {
     private void init() {
         url = "";
         score = 0f;
+        antiScore = 0f;
         priority = 0;
         distance = 0;
         retries = 0;
@@ -89,12 +92,14 @@ public class Page implements Serializable {
         urlHash = new byte[16];
         anchors = new HashSet<String>();
         parents = new HashSet<String>();
+        tags = new HashSet<String>();
         signature = new TextSignature("");
         try {
             digester = MessageDigest.getInstance("MD5");
         } catch (NoSuchAlgorithmException ex) {
             logger.error("Initializing message digester", ex);
         }
+        readConfig();
     }
 
 
@@ -144,6 +149,11 @@ public class Page implements Serializable {
      */
     public void setUrl (String url) throws MalformedURLException {
         this.url = url;
+        calculateUrlHash();
+    }
+
+
+    private void calculateUrlHash() {
         digester.reset();
         urlHash = digester.digest(url.getBytes());
     }
@@ -162,7 +172,7 @@ public class Page implements Serializable {
      * @return the anchors of the links pointing to this page.
      */
     public String[] getAnchors () {
-        return anchors.toArray(new String[0]);
+        return this.anchors.toArray(new String[0]);
     }
 
     /**
@@ -199,7 +209,7 @@ public class Page implements Serializable {
      * @return the urls of the pages linking to this page.
      */
     public String[] getParents () {
-        return parents.toArray(new String[0]);
+        return this.parents.toArray(new String[0]);
     }
 
     /**
@@ -207,7 +217,7 @@ public class Page implements Serializable {
      * @param urls set of parent urls.
      */
     public void setParents (String[] urls) {
-        parents.clear();
+        this.parents.clear();
         addParents(urls);
     }
 
@@ -217,7 +227,7 @@ public class Page implements Serializable {
      */
     public void addParent (String url) {
         if (null != url) {
-            parents.add(url);
+            this.parents.add(url);
         }
     }
 
@@ -227,7 +237,45 @@ public class Page implements Serializable {
      */
     public void addParents (String[] urls) {
         if (null != urls) {
-            parents.addAll(Arrays.asList(urls));
+            this.parents.addAll(Arrays.asList(urls));
+        }
+    }
+
+
+    /**
+     * Return the tags for this page.
+     * @return the tags for this page.
+     */
+    public String[] getTags () {
+        return this.tags.toArray(new String[0]);
+    }
+
+    /**
+     * Sets the tags for this page to the provided set.
+     * @param tags the set of tags.
+     */
+    public void setTags (String[] tags) {
+        this.tags.clear();
+        addTags(tags);
+    }
+
+    /**
+     * Adds a tag to the page.
+     * @param tag the tag to add.
+     */
+    public void addTag (String tag) {
+        if (null != tag) {
+            this.tags.add(tag);
+        }
+    }
+
+    /**
+     * Add an array of tags to the list of tags for this page.
+     * @param tags array of tags to add.
+     */
+    public void addTags (String[] tags) {
+        if (null != tags) {
+            this.tags.addAll(Arrays.asList(tags));
         }
     }
 
@@ -376,7 +424,23 @@ public class Page implements Serializable {
      * @return the score of the page.
      */
     public float getScore () {
-        return score;
+        return this.score;
+    }
+
+    /** 
+     * Setter for the antiScore metadata.
+     * @param score the antiScore of the page.
+     */
+    public void setAntiScore (float antiScore) {
+        this.antiScore = antiScore;
+    }
+
+    /** 
+     * Getter for the antiScore metadata.
+     * @return the antiScore of the page.
+     */
+    public float getAntiScore () {
+        return this.antiScore;
     }
 
     /** 
@@ -384,7 +448,7 @@ public class Page implements Serializable {
      * @param priority the priority of the page.
      */
     public void setPriority (float priority) {
-        this.priority = priority;;
+        this.priority = priority;
     }
 
     /** 
@@ -449,8 +513,8 @@ public class Page implements Serializable {
         synchronized(oos) {
             oos.writeByte(CURRENT_VERSION);
             oos.writeObject(url);
-            oos.writeObject(urlHash);
             oos.writeFloat(score);
+            oos.writeFloat(antiScore);
             oos.writeFloat(priority);
             oos.writeLong(lastAttempt);
             oos.writeLong(lastSuccess);
@@ -464,6 +528,10 @@ public class Page implements Serializable {
             oos.writeInt(anchors.size());
             for (String anchor:anchors) {
                 oos.writeObject(anchor);
+            }
+            oos.writeInt(tags.size());
+            for (String tag:tags) {
+                oos.writeObject(tag);
             }
             if (0L != lastSuccess) { 
                 oos.writeLong(lastChange);
@@ -484,8 +552,13 @@ public class Page implements Serializable {
                 throw new IOException("Incompatible Page version: v"+version+", expected v5 through v"+CURRENT_VERSION);
             }
             url = (String)ois.readObject();
-            urlHash = (byte[])ois.readObject();
+            if (version == 5) { // no longer used in versions > 5
+                urlHash = (byte[])ois.readObject();
+            }
             score = ois.readFloat();
+            if (version >= 7) { // only used from cersion 7 and up.
+                antiScore = ois.readFloat();
+            }
             priority = ois.readFloat();
             lastAttempt = ois.readLong();
             lastSuccess = ois.readLong();
@@ -504,14 +577,22 @@ public class Page implements Serializable {
                 String a = (String)ois.readObject();
                 anchors.add(a);
             }
+            if (version >= 7) { // only used from version 7 and up.
+                tags.clear();
+                int tagSize = ois.readInt();
+                for (int i = 0; i < tagSize; i++) {
+                    String a = (String)ois.readObject();
+                    tags.add(a);
+                }
+            }
             if (0L != lastSuccess) {
                 lastChange = ois.readLong();
                 isLocal = ois.readBoolean();
                 emitted = ois.readBoolean();
                 signature = (TextSignature)ois.readObject();
             }
+            calculateUrlHash();
         }
-        readConfig();
     }
 
     public void write(ObjectOutputStream oos) throws IOException {
@@ -528,6 +609,7 @@ public class Page implements Serializable {
         return page;
     }
 
+    @Override
     public String toString () {
         return "Page("
             +"url="+getUrl()
@@ -549,6 +631,7 @@ public class Page implements Serializable {
     }
 
 
+    @Override
     public boolean equals(Object obj) {
         if (!(obj instanceof Page)) return false;
         if (!getUrlHash().equals(((Page)obj).getUrlHash())) return false;

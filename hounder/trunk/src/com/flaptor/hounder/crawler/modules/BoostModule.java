@@ -33,43 +33,42 @@ public class BoostModule extends AProcessorModule {
     private static Logger logger = Logger.getLogger(Execute.whoAmI());
 
     private final Booster booster;
-    private final ABoostMethod method;
-    private final ABoostValue value;
-    private final ABoostCondition condition;
 
     public BoostModule (String moduleName, Config globalConfig) {
         super(moduleName, globalConfig);
-            ABoostCondition.Type conditionType = null ;
-            Config mdlConfig = getModuleConfig();
-            String conditionString = mdlConfig.getString("boost.condition");
-            if ("url".equals(conditionString)) conditionType = ABoostCondition.Type.UrlPattern;
-            if ("keyword".equals(conditionString)) conditionType = ABoostCondition.Type.Keyword;
-            if ("urlandkeyword".equals(conditionString)) conditionType = ABoostCondition.Type.UrlPatternAndKeyword;
-            condition = ABoostCondition.getBoostCondition(mdlConfig,conditionType);
+        ABoostCondition.Type conditionType = null ;
+        Config mdlConfig = getModuleConfig();
+        String conditionString = mdlConfig.getString("boost.condition");
+        if ("url".equals(conditionString)) conditionType = ABoostCondition.Type.UrlPattern;
+        if ("keyword".equals(conditionString)) conditionType = ABoostCondition.Type.Keyword;
+        if ("urlandkeyword".equals(conditionString)) conditionType = ABoostCondition.Type.UrlPatternAndKeyword;
+        ABoostCondition condition = ABoostCondition.getBoostCondition(mdlConfig,conditionType);
 
-            ABoostMethod.Type methodType = null;
-            String methodString = mdlConfig.getString("boost.method");
-            if ("doc".equals(methodString)) methodType = ABoostMethod.Type.Doc;
-            if ("field".equals(methodString)) methodType = ABoostMethod.Type.Field;
-            if ("keyword".equals(methodString)) methodType = ABoostMethod.Type.Keyword;
-            method = ABoostMethod.getBoostMethod(mdlConfig,methodType);
+        ABoostMethod.Type methodType = null;
+        String methodString = mdlConfig.getString("boost.method");
+        if ("doc".equals(methodString)) methodType = ABoostMethod.Type.Doc;
+        if ("field".equals(methodString)) methodType = ABoostMethod.Type.Field;
+        if ("keyword".equals(methodString)) methodType = ABoostMethod.Type.Keyword;
+        ABoostMethod method = ABoostMethod.getBoostMethod(mdlConfig,methodType);
 
-            ABoostValue.Type valueType = null;
-            valueType = ABoostValue.Type.None;
-            String valueString = mdlConfig.getString("boost.value");
-            if ("constant".equals(valueString)) valueType = ABoostValue.Type.Constant;
-            if ("attribute".equals(valueString)) valueType = ABoostValue.Type.Attribute;
-            value = ABoostValue.getBoostValue(mdlConfig,valueType);
+        ABoostValue.Type valueType = null;
+        valueType = ABoostValue.Type.None;
+        String valueString = mdlConfig.getString("boost.value");
+        if ("constant".equals(valueString)) valueType = ABoostValue.Type.Constant;
+        if ("attribute".equals(valueString)) valueType = ABoostValue.Type.Attribute;
+        ABoostValue value = ABoostValue.getBoostValue(mdlConfig,valueType);
 
-            booster = new Booster(condition,value,method);
+        booster = new Booster(condition,value,method);
+    }
+    
+    public void close() {
+        Execute.close(booster);
     }
     
     @Override
     @SuppressWarnings("unchecked")
     protected void internalProcess (FetchDocument doc) {    
-        
         booster.applyBoost(doc);
-
     }
 
 }

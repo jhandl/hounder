@@ -324,7 +324,8 @@ public class Nutch9Fetcher implements IFetcher {
                         if (readers[StatusData].next(key, value)) {
     //                        value.getFetchInterval();
                             currRec.status = value.getStatus();
-                            currRec.protocol_code = ((ProtocolStatus) value.getMetaData().get(Nutch.WRITABLE_PROTO_STATUS_KEY)).getCode();
+                            ProtocolStatus pstatus = (ProtocolStatus) value.getMetaData().get(Nutch.WRITABLE_PROTO_STATUS_KEY);
+                            currRec.protocol_code = (null == pstatus) ? 0 : pstatus.getCode();
                             logger.debug("       STATUS OF "+key.toString()+": "+currRec.status+" "+CrawlDatum.getStatusName(currRec.status)+" (code "+currRec.protocol_code+")");
                             break;
                         } else {

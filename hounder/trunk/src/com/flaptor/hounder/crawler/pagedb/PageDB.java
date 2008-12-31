@@ -668,7 +668,9 @@ public class PageDB implements IPageStore {
                     float score = page.getScore();
                     float priority = page.getPriority();
                     String[] anchors = page.getAnchors();
-                    System.out.println ("  Dist=" + distance + " Retr=" + retries + " LastAtt=" + lastAttempt + " LastSucc=" + lastSuccess + " Score=" + score + " Prior=" + priority + " URL=" + url + " Anchors(" + anchors.length + ")=" + java.util.Arrays.asList(anchors));
+                    String[] parents = page.getParents();
+                    String[] tags = page.getTags();
+                    System.out.println ("  Dist=" + distance + " Retr=" + retries + " LastAtt=" + lastAttempt + " LastSucc=" + lastSuccess + " Score=" + score + " Prior=" + priority + " URL=" + url + (anchors.length>0 ? " Anchors(" + anchors.length + ")=" + java.util.Arrays.asList(anchors) : "") + (parents.length>0 ? " Parents(" + parents.length + ")=" + java.util.Arrays.asList(parents) : "") + (tags.length>0 ? " Tags(" + tags.length + ")=" + java.util.Arrays.asList(tags) : ""));
                 }
                 System.err.println();
                 pagedb.close();

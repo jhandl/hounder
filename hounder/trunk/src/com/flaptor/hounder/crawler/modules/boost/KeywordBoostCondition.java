@@ -62,5 +62,8 @@ public class KeywordBoostCondition extends ABoostCondition {
         return false;
     }
 
+    @Override
+    public void close() {}
+
 }
 

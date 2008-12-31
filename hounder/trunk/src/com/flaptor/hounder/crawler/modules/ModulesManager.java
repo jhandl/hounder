@@ -164,5 +164,15 @@ public class ModulesManager implements IProcessorModule {
         }
     }
 
+    /**
+     * Free resources.
+     */
+    public void close() {
+        Iterator<IProcessorModule> it = modules.iterator();
+        while (it.hasNext()) {
+            Execute.close(it.next());
+        }
+    }
+    
 }
 

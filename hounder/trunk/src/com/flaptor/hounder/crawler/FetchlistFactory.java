@@ -41,13 +41,14 @@ public class FetchlistFactory {
     private PageDB pageSourceDB;
     private PageDB pageDestDB;
     private Iterator<Page> pages;
+    CrawlerProgress progress;
 
 
     /** 
      * Class initializer.
      * Prepares the fetchlist factory to work on a new set of pagedbs with a new threshold.
      */
-    public FetchlistFactory (PageDB pageSource, PageDB pageDest) throws IOException {
+    public FetchlistFactory (PageDB pageSource, PageDB pageDest, CrawlerProgress progress) throws IOException {
         Config config = Config.getConfig("crawler.properties");
         fetchlistSize = config.getInt("fetchlist.size");
         priorityPercentileToFetch = config.getInt("priority.percentile.to.fetch");
@@ -55,6 +56,7 @@ public class FetchlistFactory {
         pageDestDB = pageDest;
         priorityThreshold = pageSourceDB.getPriorityThreshold(100-priorityPercentileToFetch);
         pages = pageSourceDB.iterator();
+        this.progress = progress;
     }
 
     /**
@@ -115,6 +117,8 @@ public class FetchlistFactory {
                 }
             }
         }
+        progress.addSeen(pagesAdded);
+        progress.report();
     }
 
 }

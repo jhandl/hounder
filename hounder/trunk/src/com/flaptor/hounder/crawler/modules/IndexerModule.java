@@ -111,6 +111,8 @@ public class IndexerModule extends AProcessorModule {
         }        
     }
 
+    public void close() {}
+    
     // Return the configured page mapper.
     private APageMapper getPageMapper (Config config, int numberOfNodes) {
         String[] parts = config.getStringArray("indexer.node.mapper");

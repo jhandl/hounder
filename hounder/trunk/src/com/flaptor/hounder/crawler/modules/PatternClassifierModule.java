@@ -66,6 +66,14 @@ public class PatternClassifierModule extends ATrueFalseModule {
         }
     }
 
+    /**
+     * Free resources.
+     */
+    public void close() {
+        Execute.close(patterns);
+    }
+
+
     public Boolean tfInternalProcess(FetchDocument doc) {
         Page page = doc.getPage();
         if (null == page) {
