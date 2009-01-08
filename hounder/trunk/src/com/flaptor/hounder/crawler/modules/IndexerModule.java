@@ -61,6 +61,7 @@ public class IndexerModule extends AProcessorModule {
     private int indexerBusyRetryTime; // time in seconds between retries when the indexer is busy.
     private int categoryBoostDamp; // the amount of damping for the categoryBoost value in the boost formula.
     private int pagerankBoostDamp; // the amount of damping for the pagerankBoost value in the boost formula.
+    private int spamrankBoostDamp; // the amount of damping for the spamrankBoost value in the boost formula.
     private int logBoostDamp; // the amount of damping for the log value in the boost formula.
     private int freshnessBoostDamp; // the amount of damping for the freshnessBoost value in the boost formula.
     private QuadCurve freshnessCurve; // the curve that describes the amount of boost for any given freshness.
@@ -68,6 +69,7 @@ public class IndexerModule extends AProcessorModule {
     private APageMapper pageMapper; // a mapper to choose an indexer for a given page.
     private String crawlName; // the name of the crawl, added to the index so searches can be restricted to the results of this crawler.
     private float[] scoreThreshold; // the values for the (0 to 100 step 10) percentiles in the page score histogram.
+    private float[] antiScoreThreshold; // the values for the (0 to 100 step 10) percentiles in the page anti-score histogram.
     private HashSet hostStopWords; // the parts of web host names that are not interesting, like www.
     private boolean sendContent; // if true the page content will be sent to the indexer in a <body> tag.
     
@@ -82,6 +84,7 @@ public class IndexerModule extends AProcessorModule {
 
         categoryBoostDamp = weightToDamp(mdlConfig.getFloat("category.boost.weight"));
         pagerankBoostDamp = weightToDamp(mdlConfig.getFloat("pagerank.boost.weight"));
+        spamrankBoostDamp = weightToDamp(mdlConfig.getFloat("spamrank.boost.weight"));
         logBoostDamp = weightToDamp(mdlConfig.getFloat("log.boost.weight"));
         freshnessBoostDamp = weightToDamp(mdlConfig.getFloat("freshness.boost.weight"));
         prepareFreshnessBoost(mdlConfig.getString("freshness.times"));
@@ -111,7 +114,8 @@ public class IndexerModule extends AProcessorModule {
         }        
     }
 
-    public void close() {}
+    public void close() {
+    }
     
     // Return the configured page mapper.
     private APageMapper getPageMapper (Config config, int numberOfNodes) {
@@ -209,6 +213,23 @@ public class IndexerModule extends AProcessorModule {
             if (pagerankBoost < 0.1f) pagerankBoost = 0.1f;
         }
         return pagerankBoost;
+    }
+
+
+    // Calcuate the spamrank boost, range 0 - 1.
+    private float calculateSpamrankBoost (Page page) {
+        // page rank 
+        float score = page.getAntiScore();
+        int bucket = 0;
+        for (; bucket < antiScoreThreshold.length && antiScoreThreshold[bucket] <= score; bucket++);
+        float spamrank = bucket-1;
+        if (bucket < antiScoreThreshold.length) {
+            float bucketSpan = (antiScoreThreshold[bucket] - antiScoreThreshold[bucket-1]);
+            if (bucketSpan > 0) {
+                spamrank += (score - antiScoreThreshold[bucket-1]) / bucketSpan;
+            }
+        }
+        return (10f-spamrank)/10f;
     }
 
 
@@ -328,21 +349,23 @@ public class IndexerModule extends AProcessorModule {
 
         float categoryBoost = calculateCategoryBoost(attributes);
         float pagerankBoost = calculatePagerankBoost(page);
+        float spamrankBoost = calculateSpamrankBoost(page);
         float logBoost = calculateLogBoost(page);
         float freshnessBoost = calculateFreshnessBoost(page);
 
         // add overall score
         float f1 = factor("category",categoryBoost,categoryBoostDamp);
         float f2 = factor("pagerank",pagerankBoost,pagerankBoostDamp);
-        float f3 = factor("log",logBoost,logBoostDamp);
-        float f4 = factor("freshness",freshnessBoost,freshnessBoostDamp);
-        float f5 = ((Double)attributes.get("boost")).floatValue(); // as calculated by the boost module, or 1.0 if no boost module is defined.
-        float boost = f1 * f2 * f3 * f4 * f5;
+        float f3 = factor("spamrank",spamrankBoost,spamrankBoostDamp);
+        float f4 = factor("log",logBoost,logBoostDamp);
+        float f5 = factor("freshness",freshnessBoost,freshnessBoostDamp);
+        float f6 = ((Double)attributes.get("boost")).floatValue(); // as calculated by the boost module, or 1.0 if no boost module is defined.
+        float boost = f1 * f2 * f3 * f4 * f5 * f6;
 
         // System.out.println("BOOST url=["+url+"]  category="+f1+" ("+categoryBoost+":"+categoryBoostDamp+")  pagerank="+f2+" ("+pagerankBoost+":"+pagerankBoostDamp+")  log="+f3+" ("+logBoost+":"+logBoostDamp+")  freshness="+f4+" ("+freshnessBoost+":"+freshnessBoostDamp+") moduleBoost="+f5+"  Boost="+boost);
 
         if (boost < 1e-6) {
-            logger.warn("Boost too low! ("+boost+")  category="+f1+" ("+categoryBoost+":"+categoryBoostDamp+")  pagerank="+f2+" ("+pagerankBoost+":"+pagerankBoostDamp+")  log="+f3+" ("+logBoost+":"+logBoostDamp+")  freshness="+f4+" ("+freshnessBoost+":"+freshnessBoostDamp+") moduleBoost="+f5);
+            logger.warn("Boost too low! ("+boost+")  category="+f1+" ("+categoryBoost+":"+categoryBoostDamp+")  pagerank="+f2+" ("+pagerankBoost+":"+pagerankBoostDamp+")  spamrank="+f3+" ("+spamrankBoost+":"+spamrankBoostDamp+")  log="+f4+" ("+logBoost+":"+logBoostDamp+")  freshness="+f5+" ("+freshnessBoost+":"+freshnessBoostDamp+") moduleBoost="+f6);
         }
 
         root.addElement("boost").addText(String.valueOf(boost));
@@ -516,7 +539,9 @@ public class IndexerModule extends AProcessorModule {
             keep = Math.min(keep, hostParts.length);
             for (int i = hostParts.length-keep; i < hostParts.length; i++) {
                 buf.append(hostParts[i]);
-                buf.append(".");
+                if (i < hostParts.length-1) {
+                    buf.append(".");
+                }
             }
 
             tokenizedHost = buf.toString();
@@ -559,6 +584,10 @@ public class IndexerModule extends AProcessorModule {
             for (int i = 0; i < scoreThreshold.length; i++) {
                 scoreThreshold[i] = pagedb.getScoreThreshold(i*10);
             }
+            antiScoreThreshold = new float[11];
+            for (int i = 0; i < antiScoreThreshold.length; i++) {
+                antiScoreThreshold[i] = pagedb.getAntiScoreThreshold(i*10);
+            }            
         }
     }
 

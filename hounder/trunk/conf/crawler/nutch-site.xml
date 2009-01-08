@@ -34,6 +34,16 @@
 </property>
 
 <property>
+  <name>file.content.limit</name>
+  <value>65536</value>
+</property>
+
+<property>
+  <name>http.redirect.max</name>
+  <value>0</value>
+</property>
+
+<property>
   <name>plugin.includes</name>
   <value>protocol-http|scoring-opic</value>
 </property>

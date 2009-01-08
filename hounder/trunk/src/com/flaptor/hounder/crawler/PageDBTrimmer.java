@@ -254,6 +254,8 @@ public class PageDBTrimmer {
         bestPage.setPriority(-Float.MAX_VALUE);
         bestPage.setEmitted(false);
         bestPage.setSignature(new TextSignature(""));
+        bestPage.setAntiScore(0);
+        boolean hasAntiScore = false;
         boolean unfetched = false;
         int inlinks = 0;
 
@@ -290,73 +292,86 @@ public class PageDBTrimmer {
             if (url.equals(bestPage.getUrl())) { // both pages have the same url
                 logger.debug("    same page, will keep reading.");
 
-                // add the anchor to the list of anchors of this page
-                bestPage.addAnchors(page.getAnchors());
-                // add the urls of the pages linking to this one
-                bestPage.addParents(page.getParents());
-
-                // if this page has not been fetched, mark the block as unfetched, 
-                // add its score to the block score and count it as an incomming link
-                if (lastSuccess == 0L) {
-                    unfetched = true;
-                    pageRank.addContribution(page.getScore());
+                if (page.getScore() < 0) {
+                    // this is not a real link but a back-propagation vector for the anti-score
+                    hasAntiScore = true;
                     badRank.addContribution(page.getAntiScore());
-                    inlinks++;
-                }
+                    
+                } else {
 
-                // keep the shortest distance
-                int distance = page.getDistance();
-                if (distance < bestPage.getDistance()) { 
-                    bestPage.setDistance(distance);
-                }
+                    // add the anchor to the list of anchors of this block
+                    bestPage.addAnchors(page.getAnchors());
+                    // add the urls of the pages linking to this block
+                    bestPage.addParents(page.getParents());
 
-                // keep the latest fetch
-                if (lastAttempt > bestPage.getLastAttempt()) { 
-                    bestPage.setLastAttempt(lastAttempt);
-                }
-
-                // keep the latest success
-                if (lastSuccess > bestPage.getLastSuccess()) { 
-                    bestPage.setLastSuccess(lastSuccess);
-                }
-
-                // keep the latest change
-                if (lastChange > bestPage.getLastChange()) { 
-                    bestPage.setLastChange(lastChange);
-                }
-
-                // keep the least retries
-                int retries = page.getRetries();
-                if (lastSuccess < lastAttempt || lastSuccess == 0) { 
-                    // if this page has not been successfuly fetched keep the most retries 
-                    // (one will be for the actual attempt, the rest will be unattempted links)
-                    if (retries > bestPage.getRetries()) {
-                        bestPage.setRetries(retries);
+                    // if this page has not been fetched, mark the block as unfetched, 
+                    // add its score to the block score and count it as an incomming link
+                    if (lastSuccess == 0L) {
+                        unfetched = true;
+                        pageRank.addContribution(page.getScore());
+                        inlinks++;
                     }
-                }
 
-                // keep the old priority, hash and emitted
-                if (lastSuccess > 0) {
-                    bestPage.setSignature(page.getSignature());
-                    bestPage.setEmitted(page.isEmitted());
-                    bestPage.setPriority(page.getPriority());
-                }
+                    // keep the shortest distance
+                    int distance = page.getDistance();
+                    if (distance < bestPage.getDistance()) { 
+                        bestPage.setDistance(distance);
+                    }
 
+                    // keep the latest fetch
+                    if (lastAttempt > bestPage.getLastAttempt()) { 
+                        bestPage.setLastAttempt(lastAttempt);
+                    }
+
+                    // keep the latest success
+                    if (lastSuccess > bestPage.getLastSuccess()) { 
+                        bestPage.setLastSuccess(lastSuccess);
+                    }
+
+                    // keep the latest change
+                    if (lastChange > bestPage.getLastChange()) { 
+                        bestPage.setLastChange(lastChange);
+                    }
+
+                    // keep the least retries
+                    int retries = page.getRetries();
+                    if (lastSuccess < lastAttempt || lastSuccess == 0) { 
+                        // if this page has not been successfuly fetched keep the most retries 
+                        // (one will be for the actual attempt, the rest will be unattempted links)
+                        if (retries > bestPage.getRetries()) {
+                            bestPage.setRetries(retries);
+                        }
+                    }
+                    // keep the old priority, antiscore, hash and emitted
+                    if (lastSuccess > 0) {
+                        bestPage.setSignature(page.getSignature());
+                        bestPage.setEmitted(page.isEmitted());
+                        bestPage.setPriority(page.getPriority());
+                        bestPage.setAntiScore(page.getAntiScore());
+                    }
+
+                }
+                
             } else { // The page is not a duplicate
 
-                if (bestPage.getUrl().length() > 0) { // if this is not the first page, write the best of the last similar pages
+                if (bestPage.getUrl().length() > 0) { 
+                    // if this is not the first page, write the best of the last block of similar pages
                     logger.debug("    new page, will write previous one: " + bestPage.getUrl());
                     bestPage.setNumInlinks(inlinks);
                     if (unfetched) {
                         bestPage.setScore(pageRank.getPageScore());
-                        bestPage.setAntiScore(badRank.getPageScore());
+                    }
+                    if (hasAntiScore) {
+                        // new antiscore is the average between the original value and the children contributions
+                        float antiScore = (badRank.getPageScore() + bestPage.getAntiScore()) / 2f;
+                        bestPage.setAntiScore(antiScore);
                     }
                     if (pageFilter.shouldWrite (destPageDB, bestPage)) {
                         updatePriority(bestPage);
                         destPageDB.addPage(bestPage);
                     }
                 } 
-                // this is a new page, record its properties
+                // this page starts a new block of similar pages, record its properties
                 bestPage.setUrl(page.getUrl());
                 bestPage.setDistance(page.getDistance());
                 bestPage.setLastAttempt(page.getLastAttempt());
@@ -366,24 +381,35 @@ public class PageDBTrimmer {
                 bestPage.setAnchors(page.getAnchors());
                 bestPage.setParents(page.getParents());
                 bestPage.setScore(page.getScore());
+                bestPage.setAntiScore(page.getAntiScore());
                 bestPage.setPriority(page.getPriority());
                 bestPage.setSignature(page.getSignature());
                 bestPage.setEmitted(page.isEmitted());
-                unfetched = (bestPage.getLastSuccess() == 0L);
+                unfetched = (page.getLastSuccess() == 0L);
+                hasAntiScore = (page.getScore() < 0);
                 inlinks = 0;
                 pageRank.reset();
                 badRank.reset();
-                if (unfetched) {
-                    pageRank.addContribution(bestPage.getScore());
-                    badRank.addContribution(bestPage.getAntiScore());
+                if (hasAntiScore) {
+                    badRank.addContribution(page.getAntiScore());
+                } else if (unfetched) {
+                    pageRank.addContribution(page.getScore());
                     inlinks++;
                 }
             }
         }
-        if (bestPage.getUrl().length() > 0) { // if the orig pagedb is not empty, write the best of the last similar pages
+        if (bestPage.getUrl().length() > 0) { 
+            // if the orig pagedb is not empty, write the best of the last similar block of pages
             logger.debug("    pagedb is over, will write last one: " + bestPage.getUrl());
             bestPage.setNumInlinks(inlinks);
-            if (unfetched) bestPage.setScore(pageRank.getPageScore());
+            if (unfetched) {
+                bestPage.setScore(pageRank.getPageScore());
+            }
+            if (hasAntiScore) {
+                // new antiscore is the average between the original value and the children contributions
+                float antiScore = (badRank.getPageScore() + bestPage.getAntiScore()) / 2f;
+                bestPage.setAntiScore(antiScore);
+            }
             if (pageFilter.shouldWrite (destPageDB, bestPage)) {
                 updatePriority(bestPage);
                 destPageDB.addPage(bestPage);

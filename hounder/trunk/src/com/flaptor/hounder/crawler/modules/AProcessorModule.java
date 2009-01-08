@@ -21,6 +21,7 @@ import org.apache.log4j.Logger;
 
 import com.flaptor.util.Config;
 import com.flaptor.util.Execute;
+import java.util.Arrays;
 
 
 /**
@@ -127,7 +128,7 @@ public abstract class AProcessorModule implements IProcessorModule {
         HashSet<String> set= new HashSet<String>();
         String[] tags;
         tags= moduleConfig.getStringArray(strTag);
-        logger.debug(strTag + ": " + tags);        
+        logger.debug(strTag + ": " + Arrays.toString(tags));        
         for (String tag: tags) {
             tag = tag.trim();
             if (tag.length() > 0) {

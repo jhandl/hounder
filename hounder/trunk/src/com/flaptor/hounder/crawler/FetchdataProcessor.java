@@ -215,15 +215,14 @@ public class FetchdataProcessor {
 
                     // propagate the antiscore back to its parents
                     float antiScore = page.getAntiScore();
-/*
                     if ((antiScore > 0f) && recordParents) {
-                        for (String url : page.getParents()) {
-                            Page badParent = new Page(url, 1.0f);
-                            badParent.setAntiScore(antiScore);
+                        int numParents = page.getParents().length;
+                        for (String parentUrl : page.getParents()) {
+                            Page badParent = new Page(parentUrl, -1.0f);
+                            badParent.setAntiScore(PageRank.parentContribution(antiScore, numParents));
                             newPageDB.addPage(badParent);
                         }
                     }
- */
                     
                     if (null != links) {
                         // Now add the page's outlinks to the next pagedb, 
@@ -249,9 +248,6 @@ public class FetchdataProcessor {
                                         child.addAnchor(link.getAnchor()); // at this point it can only be one anchor
                                         child.setScore(PageRank.parentContribution(page.getScore(), links.length));
                                
-                                        // propagate the antiscore to the children
-                                        child.setAntiScore(PageRank.parentContribution(antiScore, links.length));
-
                                         // unless the child is a hotspot, it is removed from the fetched page by 1 level
                                         child.setDistance(page.getDistance() + 1);
 

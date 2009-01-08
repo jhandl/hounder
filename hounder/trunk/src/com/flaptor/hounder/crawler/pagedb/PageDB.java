@@ -196,6 +196,7 @@ public class PageDB implements IPageStore {
             stats.priorityHistogram.addValue(page.getPriority());
         }
         stats.scoreHistogram.addValue(page.getScore());
+        stats.antiScoreHistogram.addValue(page.getAntiScore());
     }
 
 
@@ -567,6 +568,16 @@ public class PageDB implements IPageStore {
     public float getScoreThreshold (int percentile) {
         // logger.debug("PAGEDB getScoreThreshold "+dirname+" ("+new Throwable().getStackTrace()[1].getClassName()+")");
         return stats.getScoreThreshold(percentile);
+    }
+
+
+    /**
+     * Returns the value for the given percentile in the anti-score histogram.
+     * @return the anti-score threshold for the given percentile.
+     */
+    public float getAntiScoreThreshold (int percentile) {
+        // logger.debug("PAGEDB getAntiScoreThreshold "+dirname+" ("+new Throwable().getStackTrace()[1].getClassName()+")");
+        return stats.getAntiScoreThreshold(percentile);
     }
 
 

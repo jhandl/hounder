@@ -39,7 +39,7 @@ import com.flaptor.util.Execute;
  */
 public class PageDBStats {
 
-    private static final int VERSION = 4;
+    private static final int VERSION = 5;
     private String dir = null;
     public boolean initialized = false;
     public long pageCount = -1;
@@ -49,9 +49,11 @@ public class PageDBStats {
     public float fetchedScore = -1;
     public AdaptiveHistogram priorityHistogram = null;
     public AdaptiveHistogram scoreHistogram = null;
+    public AdaptiveHistogram antiScoreHistogram = null;
     private int sampleSize = 20;
     private float[] prioritySamples = null;
     private float[] scoreSamples = null;
+    private float[] antiScoreSamples = null;
     private static String statsFileName = "stats";
     private static String sizeFileName = "size";
     private static String cyclesFileName = "cycles";
@@ -78,6 +80,7 @@ public class PageDBStats {
         initialized = true;
         priorityHistogram = new AdaptiveHistogram();
         scoreHistogram = new AdaptiveHistogram();
+        antiScoreHistogram = new AdaptiveHistogram();
     }
 
     /**
@@ -102,6 +105,7 @@ public class PageDBStats {
             buf.newLine();
             writeSamples(buf, priorityHistogram, prioritySamples, "priority");
             writeSamples(buf, scoreHistogram, scoreSamples, "score");
+            writeSamples(buf, antiScoreHistogram, antiScoreSamples, "antiscore");
         } catch (Exception e) {
             logger.error("Writing data file " + file + ": " + e, e);
         } finally {
@@ -144,6 +148,9 @@ public class PageDBStats {
                     prioritySamples = readSamples(buf);
                     if (version >= 2) {
                         scoreSamples = readSamples(buf);
+                    }
+                    if (version >= 5) {
+                        antiScoreSamples = readSamples(buf);
                     }
                 }
             } catch (Exception e) {
@@ -215,6 +222,7 @@ public class PageDBStats {
             fetchedScore = 0;
             priorityHistogram = new AdaptiveHistogram();
             scoreHistogram = new AdaptiveHistogram();
+            antiScoreHistogram = new AdaptiveHistogram();
         }
         pageSource.open();
         while (true) {
@@ -231,6 +239,7 @@ public class PageDBStats {
                 }
                 priorityHistogram.addValue(page.getPriority());
                 scoreHistogram.addValue(page.getScore());
+                antiScoreHistogram.addValue(page.getAntiScore());
             } catch (Exception e) {
                 break;
             }
@@ -272,6 +281,15 @@ public class PageDBStats {
      */
     public float getScoreThreshold (int percentile) {
         return getHistogramThreshold (percentile, scoreHistogram, scoreSamples);
+    }
+
+    /**
+     * Gets the priority threshold for a given percentile.
+     * @param percentile the percent of values that should fall below the requested value.
+     * @return the value for which the given percent of values fall below.
+     */
+    public float getAntiScoreThreshold (int percentile) {
+        return getHistogramThreshold (percentile, antiScoreHistogram, antiScoreSamples);
     }
 
     /**

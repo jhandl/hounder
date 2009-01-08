@@ -15,6 +15,7 @@ limitations under the License.
 */
 package com.flaptor.hounder.crawler.modules;
 
+import com.flaptor.hounder.crawler.UrlPatterns;
 import java.io.IOException;
 
 import org.apache.log4j.Logger;
@@ -27,32 +28,39 @@ import com.flaptor.util.Execute;
  * Tries to detect spam
  * @author Flaptor Development Team
  */
-public class SpamDetectorModule extends ATrueFalseModule {
+public class SpamDetectorModule extends AProcessorModule {
 
     private static final Logger logger = Logger.getLogger(Execute.whoAmI());
     private int maxTitleLength = 0;
-    
+    private UrlPatterns patterns; // list of grep patterns a url must match to become a hotspot.
+
 	/**
      * Get the module configuration.
 	 */
     public SpamDetectorModule (String name, Config globalConfig) throws IOException {
         super(name, globalConfig);
         maxTitleLength = getModuleConfig().getInt("max.title.length");
+        patterns = new UrlPatterns(getModuleConfig().getString("url.pattern.file"));
     }
     
     //    @Override
-    public Boolean tfInternalProcess (FetchDocument doc) {
-        boolean spam = false;
+    public void internalProcess (FetchDocument doc) {
         try {
             Page page = doc.getPage();
             String title = doc.getTitle();
             if (title.length() > maxTitleLength) {
-                spam = true;
+                page.setAntiScore(0.3f);
+            }
+            if (patterns.match(page.getUrl())) {
+                page.setAntiScore(1f);
             }
         } catch (NullPointerException e) {
             logger.error(e,e);
         }
-        return spam;
     }
 
+    public void close() {
+        patterns.close();
+    }
+    
 }

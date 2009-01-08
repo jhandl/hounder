@@ -87,10 +87,11 @@ public class FetchlistFactory {
     // Split the page enumeration in two groups: one to fetch, one to pass
     private void selectPagesToFetch (IPageStore toFetch, IPageStore toPass) {
         logger.debug("Selecting pages for the fetchlist");
+        int pagesSeen = 0;
         int pagesAdded = 0;
         while (pagesAdded < fetchlistSize && pages.hasNext()) {
             Page page = pages.next(); 
-
+            pagesSeen++;
             // if it is a valid web page (not an image, etc), it is considered, otherwise it is discarded
             if (null == Crawler.urlFilter(page.getUrl())) {
                 logger.debug("  discarding page " + page.getUrl() + ", url filters consider it not interesting");
@@ -117,7 +118,7 @@ public class FetchlistFactory {
                 }
             }
         }
-        progress.addSeen(pagesAdded);
+        progress.addSeen(pagesSeen);
         progress.report();
     }
 

@@ -78,7 +78,7 @@ public class SimWeb {
         count = 0;
         for (int child=0; child<size; child++) {
             if (link[parent][child] != 0) {
-                children[count++] = child;;
+                children[count++] = child;
             }
         }
         return children;

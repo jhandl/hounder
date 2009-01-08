@@ -29,6 +29,7 @@ import com.flaptor.util.Execute;
 public class ModulesManager implements IProcessorModule {
 
     private static final Logger logger = Logger.getLogger(Execute.whoAmI());
+    private static Object synch = new Object();
     private static ModulesManager instance = null;
     private ArrayList<IProcessorModule> modules;
 
@@ -37,8 +38,10 @@ public class ModulesManager implements IProcessorModule {
      * Return an instance of this singleton class.
      */
     public static ModulesManager getInstance () {
-        if (null == instance) {
-            instance = new ModulesManager();
+        synchronized(synch) {
+            if (null == instance) {
+                instance = new ModulesManager();
+            }
         }
         return instance;
     }
@@ -49,7 +52,6 @@ public class ModulesManager implements IProcessorModule {
 	 * @todo review the way exceptions are handled.
 	 */
     private ModulesManager() {
-
         modules = new ArrayList<IProcessorModule>();
 
         Config config = Config.getConfig("crawler.properties");
@@ -171,6 +173,9 @@ public class ModulesManager implements IProcessorModule {
         Iterator<IProcessorModule> it = modules.iterator();
         while (it.hasNext()) {
             Execute.close(it.next());
+        }
+        synchronized (synch) {
+            instance = null;
         }
     }
     

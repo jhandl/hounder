@@ -67,7 +67,6 @@ public class Crawler {
     private boolean cycleFinished; // if true, the cycle has finished.
     private Object cycleFinishedMonitor; // used for waking up the crawler when the cycle finished.
     private static StopMonitor stopMonitor; // the monitor for the stop file.
-    private ModulesManager modules; // this holds the modules that will process the crawled pages.
     private boolean distributed; // if true, the underlying pagedb will be distributed.
     private boolean starting; // if true, this is the first cycle since the crawler started.
     private long pagedbSize; // the size of the current pagedb.
@@ -104,7 +103,6 @@ public class Crawler {
         fetchdataQueue = new CloseableQueue<FetchData>(1); //TODO: analyze if the fetchdata should be written to disk.
         cycleFinishedMonitor = new Object();
         stopMonitor = new StopMonitor("stop");
-        modules = ModulesManager.getInstance();
         urlFilter = new UrlFilter();
 
     	if (config.getBoolean("clustering.enable")) {
@@ -133,7 +131,7 @@ public class Crawler {
         if (null != pageCatcher) {
             pageCatcher.stop();
         }
-        modules.close();
+        ModulesManager.getInstance().close();
 /* 
     Commented out because it causes the crawler to hang at the end, should investigate more.
     If this is not used, an external stop request may not work because the fetchserver would be waiting for a fetchlist.
@@ -402,7 +400,7 @@ public class Crawler {
      */
     public void declareStartCycle (PageDB oldPageDB) {
         CommandWithPageDB cmd = new CommandWithPageDB("startCycle",oldPageDB);
-        modules.applyCommand(cmd);
+        ModulesManager.getInstance().applyCommand(cmd);
     }
 
     /**
@@ -411,7 +409,7 @@ public class Crawler {
      */
     public void declareEndCycle (PageDB newPageDB) {
         CommandWithPageDB cmd = new CommandWithPageDB("endCycle",newPageDB);
-        modules.applyCommand(cmd);
+        ModulesManager.getInstance().applyCommand(cmd);
     }
 
 
@@ -422,7 +420,7 @@ public class Crawler {
      */
     public void refresh (long skip) {
         boolean hasCache = false;
-        IProcessorModule[] caches = modules.getModuleInstances("com.flaptor.hounder.crawler.modules.CacheModule");
+        IProcessorModule[] caches = ModulesManager.getInstance().getModuleInstances("com.flaptor.hounder.crawler.modules.CacheModule");
         if (caches.length > 0) {
             CacheModule cacheModule = null;
             FileCache<DocumentCacheItem> fileCache = null;
@@ -432,7 +430,7 @@ public class Crawler {
             }
             if (null != fileCache) {
                 try {
-                    modules.unloadModule(cacheModule);
+                    ModulesManager.getInstance().unloadModule(cacheModule);
                     hasCache = true;
                     long seen = 0;
                     PageDB pagedb = new PageDB(pagedbDir);
@@ -443,7 +441,7 @@ public class Crawler {
                     processor.processFetchdata(pageCache, pagedb, new NoPageDB());
                     pagedb.close();
                     declareEndCycle(pagedb); // Note: normally this would be the newPageDB, but in a refresh there is no such thing.
-                    modules.applyCommand("optimize");
+                    ModulesManager.getInstance().applyCommand("optimize");
                 } catch (IOException e) {
                     logger.error(e,e);
                 }
