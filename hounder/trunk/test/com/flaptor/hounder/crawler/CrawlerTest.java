@@ -53,16 +53,16 @@ public class CrawlerTest extends TestCase {
     Config config;
     String tmpDir;
 
-    boolean testingPageRetention = false;
-    boolean testingLinkFollowing = false;
-    boolean testingRandomWebs = false;
-    boolean testingVerticalCrawl = false;
-    boolean testingRandomCrawl = false;
-    boolean testingFailedFetcher = false;
-    boolean testingPriorityCrawl = false;
+    boolean testingPageRetention = true;
+    boolean testingLinkFollowing = true;
+    boolean testingRandomWebs = true;
+    boolean testingVerticalCrawl = true;
+    boolean testingRandomCrawl = true;
+    boolean testingFailedFetcher = true;
+    boolean testingPriorityCrawl = true;
     boolean testingPageRank = true;
     boolean testingSpamRank = true;
-    boolean testingPageDBInjection = false;
+    boolean testingPageDBInjection = true;
 
     public void setUp() throws IOException {
         String log4jConfigPath = com.flaptor.util.FileUtil.getFilePathFromClasspath("log4j.properties");

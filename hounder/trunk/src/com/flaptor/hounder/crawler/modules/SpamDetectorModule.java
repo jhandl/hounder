@@ -33,6 +33,8 @@ public class SpamDetectorModule extends AProcessorModule {
     private static final Logger logger = Logger.getLogger(Execute.whoAmI());
     private int maxTitleLength = 0;
     private UrlPatterns patterns; // list of grep patterns a url must match to become a hotspot.
+    private boolean titleSpamActive;
+    private boolean urlMatchSpamActive;
 
 	/**
      * Get the module configuration.
@@ -40,27 +42,58 @@ public class SpamDetectorModule extends AProcessorModule {
     public SpamDetectorModule (String name, Config globalConfig) throws IOException {
         super(name, globalConfig);
         maxTitleLength = getModuleConfig().getInt("max.title.length");
-        patterns = new UrlPatterns(getModuleConfig().getString("url.pattern.file"));
+        titleSpamActive = (maxTitleLength > 0);
+        String urlPatternFile = getModuleConfig().getString("url.pattern.file");
+        urlMatchSpamActive = !("".equals(urlPatternFile));
+        patterns = new UrlPatterns(urlPatternFile);
     }
-    
+
     //    @Override
     public void internalProcess (FetchDocument doc) {
         try {
             Page page = doc.getPage();
-            String title = doc.getTitle();
-            if (title.length() > maxTitleLength) {
-                page.setAntiScore(0.3f);
-            }
-            if (patterns.match(page.getUrl())) {
-                page.setAntiScore(1f);
-            }
+            float spamValue = 0;
+            
+            if (titleSpamActive) spamValue += titleSpamValue(doc.getTitle());
+            if (urlMatchSpamActive) spamValue += urlMatchSpamValue(page);
+
+            page.setAntiScore(spamValue);
         } catch (NullPointerException e) {
             logger.error(e,e);
         }
     }
 
+    /**
+     * Long titles are indicative of spam.
+     * @param title
+     * @return
+     */
+    private float titleSpamValue(String title) {
+        if (title.length() > maxTitleLength) {
+            return 0.3f;
+        } else {
+            return 0;
+        }
+    }
+    
+    /**
+     * If the page url matches the provided spam url patterns, it is spam.
+     * @param page
+     * @return
+     */
+    private float urlMatchSpamValue(Page page) {
+        if (patterns.match(page.getUrl())) {
+            return 1f;
+        } else {
+            return 0;
+        }
+    }
+
+    
     public void close() {
         patterns.close();
     }
+
+    
     
 }
