@@ -216,7 +216,7 @@ public class BayesCalculator {
         File beforeSort= new File(CAT_TOK_FILE_UNSORTED);
         File afterSort= new File(CAT_TOK_FILE_SORTED);
         TokenCounterPersistence tcp= new TokenCounterPersistence();
-        MergeSort.sort(beforeSort, afterSort, tcp);
+        MergeSort.sort(beforeSort, afterSort, tcp, null);
         logger.info("Sorting categoryTokenCount.... done");
 
         logger.info("Folding categoryTokenCount.... ");

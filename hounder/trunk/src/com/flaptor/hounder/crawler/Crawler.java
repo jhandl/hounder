@@ -98,7 +98,7 @@ public class Crawler {
         injectedPagedbDir = config.getString("injected.pagedb.dir");
         distributed = config.getBoolean("pagedb.is.distributed");
         starting = true;
-        fetchlistQueue = new CloseableQueue<FetchList>(1); // max three fetchlists in the queue
+        fetchlistQueue = new CloseableQueue<FetchList>(1); // max one fetchlists in the queue
         injectedFetchlistQueue = new CloseableQueue<FetchList>(); //TODO: put a limit, a large injectdb causes an OutOfMemoryError.
         fetchdataQueue = new CloseableQueue<FetchData>(1); //TODO: analyze if the fetchdata should be written to disk.
         cycleFinishedMonitor = new Object();
@@ -512,11 +512,7 @@ public class Crawler {
                 pageCatcher = new PageCatcher("catch");
             }
             int cyclesCounter = 0;
-            final boolean createNewPageDB;
-            if (cycles == 0 )
-                createNewPageDB = false;
-            else
-                createNewPageDB = true;
+            boolean createNewPageDB = (cycles != 0);
 
             while (running()) {
 
@@ -602,7 +598,9 @@ public class Crawler {
         tmpPageDB.open(PageDB.WRITE);
         tmpPageDB.setNextCycleOf(oldPageDB);
 
-        progress = new CrawlerProgress(tmpPageDB.getCycles(), oldPageDB.getSize(), oldPageDB.getFetchedSize());
+        progress = new CrawlerProgress(tmpPageDB.getCycles());
+        progress.startFetch(oldPageDB.getSize(), oldPageDB.getFetchedSize());
+        tmpPageDB.setProgressHandler(progress);
         
         logger.info("Starting crawl cycle " + oldPageDB.getCycles());
         declareStartCycle(oldPageDB);
@@ -625,7 +623,6 @@ public class Crawler {
         logger.debug("Waiting no more: running="+running()+" cycleFinished="+cycleFinished+" fetchList="+fetchlistQueue.size()+" injectedFetchList="+injectedFetchlistQueue.size()+" fetchData="+fetchdataQueue.size());
 
         if (running()) {
-
             logger.debug("Closing old and temporary pagedbs");
             oldPageDB.close();
             tmpPageDB.close(); 
@@ -633,7 +630,7 @@ public class Crawler {
 
             if (createNewPageDB) {
                 // dedup & trim
-                new PageDBTrimmer().trimPageDB (tmpPageDB, newPageDB, discoveryPages);
+                new PageDBTrimmer().trimPageDB (tmpPageDB, newPageDB, discoveryPages, progress);
 
                 if (running()) {
                     // TODO overwrite old with new

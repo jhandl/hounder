@@ -58,6 +58,11 @@ public class CacheModule extends AProcessorModule {
         	logger.warn("Starting cache server", e);
         }
     }
+    
+    // Release resources.
+    public void close() {
+        cacheRmiServer.requestStop();
+    }
 
     public FileCache<String> getTextCache () {
         return textCache;

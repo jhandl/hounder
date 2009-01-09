@@ -84,6 +84,11 @@ public abstract class AProcessorModule implements IProcessorModule {
         passThroughOnMissingTags = loadTags("pass.through.on.missing.tags");
     }
 
+    /** 
+     * Release resources.
+     */
+    public void close() {}
+    
 
     private final boolean ignoreDocument (final FetchDocument doc){
         for (String tag : passThroughOnTags){

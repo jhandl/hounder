@@ -28,5 +28,8 @@ public interface IProcessorModule {
     // For now the parameter is an Object.
     // Someday we will change it for a newly created a ICommand. 
     public void applyCommand(Object command);
+    
+    // Release resources.
+    public void close();
 
 }

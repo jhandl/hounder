@@ -34,6 +34,8 @@ public class DummyModule extends AProcessorModule {
         super(name, globalConfig);
         echoMessage = getModuleConfig().getString("echo.message");
     }
+
+    public void close() {}
     
     public void internalProcess (FetchDocument doc) {
         logger.debug(moduleName +" " + echoMessage);

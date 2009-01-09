@@ -15,6 +15,7 @@ limitations under the License.
 */
 package com.flaptor.hounder.crawler.pagedb;
 
+import com.flaptor.hounder.crawler.CrawlerProgress;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
@@ -37,6 +38,7 @@ import com.flaptor.hounder.crawler.PageRank;
 import com.flaptor.util.Execute;
 import com.flaptor.util.FileUtil;
 import com.flaptor.util.sort.MergeSort;
+import com.flaptor.util.sort.SortProgressReporting;
 
 
 /**
@@ -84,6 +86,7 @@ public class PageDB implements IPageStore {
     private long pagesRead = 0;
     private PageDBStats stats = null;
     private int priorityScope = FETCHED_PAGES;
+    private CrawlerProgress progress = null;
 
 
     /**
@@ -274,7 +277,24 @@ public class PageDB implements IPageStore {
         }
     }
 
-
+    
+    public void setProgressHandler(CrawlerProgress progress) {
+        this.progress = progress;
+    }
+    
+    private class ProgressReportAdapter implements SortProgressReporting {
+        private CrawlerProgress progress;
+        private long size;
+        public ProgressReportAdapter(CrawlerProgress progress, long size) { 
+            this.progress = progress;
+            this.size = size;
+        }
+        public void startSort() { progress.startSort(size); }
+        public void startMerge() { progress.startMerge(size); }
+        public void reportSorted(long recs) { progress.addSorted(recs); progress.report(); }
+        public void reportMerged(long recs) { progress.addMerged(recs); progress.report(); }
+    }
+    
     // Transform the input file into two sorted files, one by url, the other one by md5.
     private void sortPages () throws IOException {
         File unsortedFile = new File (dirname, unsortedFileName);
@@ -282,13 +302,19 @@ public class PageDB implements IPageStore {
         sortPages (unsortedFile, md5File);
         unsortedFile.delete();
     }
+    
+    
 
     // If the source file is already sorted, copy it; otherwise sort it.
     private void sortPages (File from, File to) throws IOException {
         if (sorted || sortDisabled) {
             from.renameTo(to);
         } else {
-            MergeSort.sort (from, to, new PageInformation());
+            ProgressReportAdapter progressAdapter = null;
+            if (null != progress) {
+                progressAdapter = new ProgressReportAdapter(progress,stats.pageCount);
+            }
+            MergeSort.sort (from, to, new PageInformation(), progressAdapter);
         }
     }
 
@@ -817,7 +843,7 @@ public class PageDB implements IPageStore {
                 PageDB dest = new PageDB(args[2]);
                 long unfetched = orig.getSize() - orig.getFetchedSize();
                 PageDBTrimmer trimmer = new PageDBTrimmer();
-                trimmer.trimPageDB(orig, dest, unfetched);
+                trimmer.trimPageDB(orig, dest, unfetched, new CrawlerProgress(0));
 
             } else if ("reset".equals(cmd)) {
 

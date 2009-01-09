@@ -101,7 +101,7 @@ public class WhoHasBean extends TrainingBean{
         File beforeSort= new File(WHO_HAS_FILE_UNSORTED);
         File afterSort= new File(WHO_HAS_FILE_SORTED);
         WhoHasPersistence whp= new WhoHasPersistence();
-        MergeSort.sort(beforeSort, afterSort, whp);
+        MergeSort.sort(beforeSort, afterSort, whp, null);
         logger.info("Sorting WhoHasPersistence... done");
 
         logger.info("Writing WhoHas Total to ... " + WHO_HAS_FILE_DONE);

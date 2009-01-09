@@ -243,7 +243,7 @@ public class PageDBTrimmer {
      * @param destPageDB the output pagedb that will hold the trimmed result.
      * @param availableDiscoveryPages the number of discovery pages present in the input pagedb.
      */ 
-    public void trimPageDB (PageDB origPageDB, PageDB destPageDB, long availableDiscoveryPages) throws IOException, MalformedURLException {
+    public void trimPageDB (PageDB origPageDB, PageDB destPageDB, long availableDiscoveryPages, CrawlerProgress progress) throws IOException, MalformedURLException {
         Page bestPage;
         bestPage = new Page("",0);
         bestPage.setDistance(Integer.MAX_VALUE);
@@ -266,7 +266,11 @@ public class PageDBTrimmer {
         destPageDB.setSameCycleAs(origPageDB);
         long dbSize = origPageDB.getSize();
         long dbFetchedSize = origPageDB.getFetchedSize();
-        logger.debug("  cycle="+origPageDB.getCycles()+" size="+dbSize);
+        if (null != progress) {
+            progress.startTrim(dbSize);
+            origPageDB.setProgressHandler(progress);
+        }
+        int counter = 0;
 
         PageRank pageRank = new PageRank(dbSize);
         PageRank badRank = new PageRank(dbSize);
@@ -281,6 +285,16 @@ public class PageDBTrimmer {
         for (Page page : origPageDB) {
 
             if (!Crawler.running()) break;
+            
+            if (null != progress) {
+                counter++;
+                if (counter >= 10) {
+                    progress.addTrimmed(counter);
+                    progress.report();
+                    counter = 0;
+                }
+            }
+
 
             // get data for this page
             String url = page.getUrl();
@@ -397,6 +411,10 @@ public class PageDBTrimmer {
                     inlinks++;
                 }
             }
+        }
+        if (null != progress) {
+            progress.addTrimmed(counter);
+            progress.report();
         }
         if (bestPage.getUrl().length() > 0) { 
             // if the orig pagedb is not empty, write the best of the last similar block of pages
