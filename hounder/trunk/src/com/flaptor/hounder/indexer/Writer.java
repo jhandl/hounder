@@ -84,7 +84,12 @@ public class Writer extends AInternalModule {
     protected Document[] internalProcess(final Document doc) {
         Element root = doc.getRootElement();
         if (root.getName().equals("documentAdd")) {
-			iwp.addDocument(DocumentConverter.getInstance().convert(doc));
+            try {
+                iwp.addDocument(DocumentConverter.getInstance().convert(doc));
+            } catch (DocumentConverter.IllegalDocumentException e) {
+                logger.error("Exception while converting this document to lucene. Check the document format. This document "
+                    + "won't be added to the index.", e);
+            }
         } else if (root.getName().equals("documentDelete")) {
             processDelete(root);
         } else {

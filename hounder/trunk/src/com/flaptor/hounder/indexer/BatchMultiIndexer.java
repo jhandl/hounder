@@ -87,7 +87,7 @@ public class BatchMultiIndexer implements IRmiIndexer, IIndexer, Stoppable {
         org.apache.lucene.document.Document ldoc;
         try {
             ldoc = DocumentConverter.getInstance().convert(doc);
-        } catch (IllegalArgumentException e) {
+        } catch (DocumentConverter.IllegalDocumentException e) {
             return IndexerReturnCode.PARSE_ERROR;
         }
         String docId = ldoc.get(docIdName);

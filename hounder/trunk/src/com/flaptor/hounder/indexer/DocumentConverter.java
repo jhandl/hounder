@@ -96,19 +96,19 @@ public class DocumentConverter {
      *@throws IllegalArgumentException if the document is malformed, if it's not an add
      *if it does not contain the required fields, etc.
     */
-    public org.apache.lucene.document.Document convert(final Document doc) {
+    public org.apache.lucene.document.Document convert(final Document doc) throws IllegalDocumentException {
         Element root = doc.getRootElement();
         if (root.getName().equals("documentAdd")) {
             return processAdd(root);
         } else {
-            throw new IllegalArgumentException();
+            throw new IllegalDocumentException("This is not an add document.");
         }
     }
 
 	/**
 	 * @todo refactor this method, is too long
 	 */
-    private org.apache.lucene.document.Document processAdd(final Element e) {
+    private org.apache.lucene.document.Document processAdd(final Element e) throws IllegalDocumentException {
         // TODO: This method is too long, refactor.
         logger.debug("Processing Add");
 
@@ -123,7 +123,7 @@ public class DocumentConverter {
             }
 		}
         if (Float.isNaN(documentBoost) || Float.isInfinite(documentBoost) || documentBoost <= 0) {
-            throw new IllegalArgumentException("Document with invalid boost received. Ignoring addition.");
+            throw new IllegalDocumentException("Document with invalid boost (" + documentBoost + ") received.");
         }
 
         org.apache.lucene.document.Document ldoc = new org.apache.lucene.document.Document();
@@ -136,7 +136,7 @@ public class DocumentConverter {
 		//First, we add the documentId as a field under the name provided in the configuration (docIdName)
         node = e.selectSingleNode("documentId");
 		if (null == node) {
-			throw new IllegalArgumentException("Document missing documentId. Cannot index it.");
+			throw new IllegalDocumentException("Add document missing documentId.");
 		}
 		String docIdText = node.getText();
 		//now we add the documentId as another field, using the name provided in the configuration (docIdName)
@@ -156,37 +156,37 @@ public class DocumentConverter {
 
 			fieldName = field.valueOf("@name");
 			if (fieldName.equals("")) {
-				throw new IllegalArgumentException("Field without name. Ignoring add.");
+				throw new IllegalDocumentException("Field without name.");
 			}
 
 			//There cannot be a field with the name used to store the documentId (docIdName)
 			//as it would collide with the documentId per se when saved to the lucene index.
 			fieldText = field.getText();
 			if (fieldName.equals(docIdName)) {
-				throw new IllegalArgumentException("This document contains a field with the same name as the configured name to save the documentId( "
-						+ docIdName + "). Cannot index this document.");
+				throw new IllegalDocumentException("This document contains a field with the same name as the configured name "
+                        + "to save the documentId( " + docIdName + ").");
 			}
 
 			storedS = field.valueOf("@stored");
 			if (storedS.equals("")) {
-				throw new IllegalArgumentException("Field without stored attribute. Ignoring add");
+				throw new IllegalDocumentException("Field without stored attribute.");
 			}
 			stored = Boolean.valueOf(storedS);
 
 			indexedS = field.valueOf("@indexed");
 			if (indexedS.equals("")) {
-				throw new IllegalArgumentException("Field without indexed attribute. Ignoring add.");
+				throw new IllegalDocumentException("Field without indexed attribute.");
 			}
 			indexed = Boolean.valueOf(indexedS);
 			//Lucene complains of an unindexed unstored field with a runtime exception
 			//and it makes no sense anyway
 			if (!(indexed || stored)) {
-				throw new IllegalArgumentException("processAdd: unindexed unstored field \"" + fieldName + "\". Ignoring add.");
+				throw new IllegalDocumentException("processAdd: unindexed unstored field \"" + fieldName + "\".");
 			}
 
 			tokenizedS = field.valueOf("@tokenized");
 			if (tokenizedS.equals("")) {
-				throw new IllegalArgumentException("Field without tokenized attribute. Ignoring add.");
+				throw new IllegalDocumentException("Field without tokenized attribute.");
 			}
 			tokenized = Boolean.valueOf(tokenizedS);
 
@@ -195,7 +195,7 @@ public class DocumentConverter {
 				try {
 					boost = new Float(boostS).floatValue();
 				} catch (NumberFormatException exception) {
-					throw new IllegalArgumentException("Error in input format while adding document.", exception);
+					throw new IllegalDocumentException("Unparsable boost value (" + boostS + ") for field  \"" + fieldName + "\".");
 				}
 			}
 
@@ -234,7 +234,7 @@ public class DocumentConverter {
 			
             String payloadName = payload.valueOf("@name");
 			if (payloadName.equals("")) {
-				throw new IllegalArgumentException("Payload without name. Ignoring add.");
+				throw new IllegalDocumentException("Payload without name.");
 			}
             providedPayloads.add(payloadName);
             try { 
@@ -242,7 +242,7 @@ public class DocumentConverter {
                 ldoc.add(new Field(payloadName,new FixedValueTokenStream(payloadName,payloadValue)));
                 logger.debug("Adding payload \""+payloadName+"\" to document \"" + docIdText + "\" with value " + payloadValue);
             } catch (NumberFormatException nfe) {
-                throw new IllegalArgumentException("Writer - while parsing Long payload: " + nfe.getMessage() + " ignoring add." ,nfe);
+                throw new IllegalDocumentException("Writer - while parsing Long payload: " + nfe.getMessage());
             }
         }
 
@@ -268,9 +268,14 @@ public class DocumentConverter {
             for (String payload: requiredPayloads) {
 				sb.append(payload + "\n");
             }
-            throw new IllegalArgumentException(sb.toString());
+            throw new IllegalDocumentException(sb.toString());
 		}
         return ldoc;
 	}
 
+    public static class IllegalDocumentException extends Exception {
+        public IllegalDocumentException(String message) {
+            super(message);
+        }
+    }
 }
