@@ -216,20 +216,25 @@ public class IndexerModule extends AProcessorModule {
     }
 
 
-    // Calcuate the spamrank boost, range 0 - 1.
+    // Calcuate the spamrank boost, range 0.01 - 1.
     private float calculateSpamrankBoost (Page page) {
-        // page rank 
-        float score = page.getAntiScore();
-        int bucket = 0;
-        for (; bucket < antiScoreThreshold.length && antiScoreThreshold[bucket] <= score; bucket++);
-        float spamrank = bucket-1;
-        if (bucket < antiScoreThreshold.length) {
-            float bucketSpan = (antiScoreThreshold[bucket] - antiScoreThreshold[bucket-1]);
-            if (bucketSpan > 0) {
-                spamrank += (score - antiScoreThreshold[bucket-1]) / bucketSpan;
+        // spam rank 
+        float spamrank = 1f;
+        if (antiScoreThreshold[0] < antiScoreThreshold[antiScoreThreshold.length-1]) {
+            float score = page.getAntiScore();
+            int bucket = 0;
+            for (; bucket < antiScoreThreshold.length && antiScoreThreshold[bucket] <= score; bucket++);
+            spamrank = bucket-1;
+            if (bucket < antiScoreThreshold.length) {
+                float bucketSpan = (antiScoreThreshold[bucket] - antiScoreThreshold[bucket-1]);
+                if (bucketSpan > 0) {
+                    spamrank += (score - antiScoreThreshold[bucket-1]) / bucketSpan;
+                }
             }
+            spamrank = (10f-spamrank)/10f;
+            if (spamrank < 0.01f) spamrank = 0.01f;
         }
-        return (10f-spamrank)/10f;
+        return spamrank;
     }
 
 
@@ -297,10 +302,9 @@ public class IndexerModule extends AProcessorModule {
     // If damp == 10, the value is disregarded and 1.0 is returned, so the value has no influence at all.
     // If damp is in the [1,9] range, the damp-power-of-two root of the value is returned, which gets closer to 1.0 as damp increases.
     private float factor (String name, float value, int damp) {
-        if (value < 0.1f || value > 15f) {
+        if (value < 0.01f || value > 15f) {
             logger.warn(name+" boost value out of range! ("+value+")");
-            value = (value < 0.1f) ? 0.1f : 15f;
-
+            value = (value < 0.01f) ? 0.01f : 15f;
         }
         if (damp >= 10) return 1.0f;
         for (int i = 0; i < damp; i++) {
@@ -581,11 +585,11 @@ public class IndexerModule extends AProcessorModule {
         } else if ("startCycle".equals(command.toString())) {
             PageDB pagedb = ((CommandWithPageDB)command).getPageDB();
             scoreThreshold = new float[11];
-            for (int i = 0; i < scoreThreshold.length; i++) {
+            for (int i = 0; i < 11; i++) {
                 scoreThreshold[i] = pagedb.getScoreThreshold(i*10);
             }
             antiScoreThreshold = new float[11];
-            for (int i = 0; i < antiScoreThreshold.length; i++) {
+            for (int i = 0; i < 11; i++) {
                 antiScoreThreshold[i] = pagedb.getAntiScoreThreshold(i*10);
             }            
         }

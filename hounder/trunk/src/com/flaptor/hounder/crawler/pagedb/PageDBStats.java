@@ -252,6 +252,8 @@ public class PageDBStats {
         float threshold = 0;
         if (null != samples) {
             float i = (float)(percentile * sampleSize) / 100f;
+            if (i < 0) i = 0;
+            if (i >= sampleSize) i = sampleSize-1;
             int i1 = (int)Math.floor(i);
             if (i == i1) {
                 threshold = samples[i1];

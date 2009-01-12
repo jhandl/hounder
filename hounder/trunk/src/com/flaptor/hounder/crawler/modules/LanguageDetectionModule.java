@@ -20,6 +20,8 @@ import org.apache.nutch.analysis.lang.LanguageIdentifier;
 
 import com.flaptor.util.Config;
 import com.flaptor.util.Execute;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.nutch.util.NutchConfiguration;
 
 /**
  * Process a document checking it's language. Adds a TAG_LANGUAGE_lang tag
@@ -30,12 +32,15 @@ import com.flaptor.util.Execute;
 public class LanguageDetectionModule extends AProcessorModule {
     @SuppressWarnings("unused")
     private static final Logger logger = Logger.getLogger(Execute.whoAmI());
-    private static LanguageIdentifier langIdentif= LanguageIdentifier.getInstance();
+    private static LanguageIdentifier langIdentif = null;
+
 
     public static final String LANGUAGE_TAG="TAG_LANGUAGE_";
 
     public LanguageDetectionModule(String name, Config globalConfig) {
         super(name, globalConfig);
+        Configuration conf = NutchConfiguration.create();
+        langIdentif = new LanguageIdentifier(conf);
     }
 
 

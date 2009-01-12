@@ -181,6 +181,7 @@ public class CrawlerProgress {
             showSort(buf);
             showMerge(buf);
             showTrim(buf);
+            buf.write("                                            ");
             buf.newLine();
         } catch (Exception ex) {
             logger.error("While writing to the crawler progress report file:", ex);
@@ -190,63 +191,55 @@ public class CrawlerProgress {
     }
 
     private void showFetch(BufferedWriter buf) throws IOException {
-        buf.write("Fetch: ");
         if (stage == FETCH) {
+            buf.write("Fetch: ");
             buf.write("seen " + seen + " (" + (100 * seen / tosee) + "%) - ");
             buf.write("fetched " + fetched + " (" + (100 * fetched / tofetch) + "%) - ");
             buf.write("processed " + processed + " (" + (100 * processed / tofetch) + "%)");
             buf.write("                                            ");
             buf.newLine();
             showProgress(buf,processed,tofetch);
-        } else if (stage < FETCH) {
-            buf.write("---                                         ");
-            buf.newLine();
-        } else {
+        } else if (stage > FETCH) {
+            buf.write("Fetch: ");
             showFinished(buf, processed, FETCH);
         }
     }
 
     private void showSort(BufferedWriter buf) throws IOException {
-        buf.write("Sort:  ");
         if (stage == SORT) {
+            buf.write("Sort:  ");
             buf.write(sorted + " (" + (100 * sorted / tosort) + "%)");
             buf.write("                                            ");
             buf.newLine();
             showProgress(buf,sorted,tosort);
-        } else if (stage < SORT) {
-            buf.write("---                                         ");
-            buf.newLine();
-        } else {
+        } else if (stage > SORT) {
+            buf.write("Sort:  ");
             showFinished(buf, sorted, SORT);
         }
     }
 
     private void showMerge(BufferedWriter buf) throws IOException {
-        buf.write("Merge: ");
         if (stage == MERGE) {
+            buf.write("Merge: ");
             buf.write(merged + " (" + (100 * merged / tomerge) + "%)");
             buf.write("                                            ");
             buf.newLine();
             showProgress(buf,merged,tomerge);
-        } else if (stage < MERGE) {
-            buf.write("---                                         ");
-            buf.newLine();
-        } else {
+        } else if (stage > MERGE) {
+            buf.write("Merge: ");
             showFinished(buf, merged, MERGE);
         }
     }
     
     private void showTrim(BufferedWriter buf) throws IOException {
-        buf.write("Trim:  ");
         if (stage == TRIM) {
+            buf.write("Trim:  ");
             buf.write(trimmed + " (" + (100 * trimmed / totrim) + "%)");
             buf.write("                                            ");
             buf.newLine();
             showProgress(buf,trimmed,totrim);
-        } else if (stage < TRIM) {
-            buf.write("---                                         ");
-            buf.newLine();
-        } else {
+        } else if (stage > TRIM) {
+            buf.write("Trim:  ");
             showFinished(buf, trimmed, TRIM);
         }
     }
