@@ -114,7 +114,7 @@ public class HtmlParser extends AModule {
                 processTag(doc, tag.first(), tag.last());
             }
         } catch (Exception e) {
-            logger.error("internalProcess: while running processTag:" + e.getMessage(),e);
+            logger.warn("internalProcess: while running processTag:" + e.getMessage(),e);
             return null;
         }
         return docs;
