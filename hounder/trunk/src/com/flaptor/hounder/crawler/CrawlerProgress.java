@@ -78,28 +78,28 @@ public class CrawlerProgress {
     public void startFetch(long max, long known) {
         Config config = Config.getConfig("crawler.properties");
         int refetchPercent = config.getInt("priority.percentile.to.fetch");
-        tosee = max;
+        tosee = max > 0 ? max : 1;
         tofetch = (max-known)+known*refetchPercent/100;
         stage = FETCH;
         startTime[stage] = System.currentTimeMillis(); 
     }
 
     public void startSort(long max) {
-        tosort = max;
+        tosort = max > 0 ? max : 1;
         stage = SORT;
         startTime[stage] = System.currentTimeMillis(); 
         endTime[stage-1] = startTime[stage];
     }
 
     public void startMerge(long max) {
-        tomerge = max;
+        tomerge = max > 0 ? max : 1;
         stage = MERGE;
         startTime[stage] = System.currentTimeMillis(); 
         endTime[stage-1] = startTime[stage];
     }
 
     public void startTrim(long max) {
-        totrim = max;
+        totrim = max > 0 ? max : 1;
         stage = TRIM;
         startTime[stage] = System.currentTimeMillis(); 
         endTime[stage-1] = startTime[stage];
