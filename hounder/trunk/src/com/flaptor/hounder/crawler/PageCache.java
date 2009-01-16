@@ -38,18 +38,10 @@ public class PageCache implements Iterable<FetchDocument>{
     private static final Logger logger = Logger.getLogger(Execute.whoAmI());
     private PageDB pagedb;
     private FileCache<DocumentCacheItem> cache;
-    private long skip;
-    private long seen;
 
     public PageCache (PageDB pagedb, FileCache<DocumentCacheItem> cache) {
-        this(pagedb, cache, 0);
-    }
-
-    public PageCache (PageDB pagedb, FileCache<DocumentCacheItem> cache, long skip) {
         this.pagedb = pagedb;
         this.cache = cache;
-        this.skip = skip;
-        seen = 0;
     }
 
     public Iterator<FetchDocument> iterator () {
@@ -76,18 +68,13 @@ public class PageCache implements Iterable<FetchDocument>{
                 Page page = pages.next();
                 String url = page.getUrl();
                 if (cache.hasItem(url)) {
-                    seen++;
-                    if (seen > skip) {
-                        byte[] content = cache.getItem(url).getContent();
-                        Map<String,String> header = new HashMap<String,String>(); // this info is lost, it should be stored in the cache along with the page contents.
-                        boolean success = true;
-                        boolean recoverable = true;
-                        boolean internalError = false;
-                        boolean changed = false;
-                        doc = new FetchDocument(page, url, content, header, success, recoverable, internalError, changed);
-                    } else if (seen % 10000 == 0) {
-                        logger.info("Skipped "+seen+" pages...");
-                    }
+                    byte[] content = cache.getItem(url).getContent();
+                    Map<String,String> header = new HashMap<String,String>(); // this info is lost, it should be stored in the cache along with the page contents.
+                    boolean success = true;
+                    boolean recoverable = true;
+                    boolean internalError = false;
+                    boolean changed = false;
+                    doc = new FetchDocument(page, url, content, header, success, recoverable, internalError, changed);
                 }
             }
         }

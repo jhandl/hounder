@@ -63,7 +63,6 @@ public class Crawler {
     private CloseableQueue<FetchList> fetchlistQueue; // this queue holds fetch lists ready to be fetched.
     private CloseableQueue<FetchList> injectedFetchlistQueue; // this queue holds fetch lists ready to be fetched, that come from temporary page dbs.
     private CloseableQueue<FetchData> fetchdataQueue; // this queue holds fetched data ready to be processed.
-    private long discoveryPages; // the number of pages in the discovery front after one cycle. TODO: should be in pagedb.
     private boolean cycleFinished; // if true, the cycle has finished.
     private Object cycleFinishedMonitor; // used for waking up the crawler when the cycle finished.
     private static StopMonitor stopMonitor; // the monitor for the stop file.
@@ -130,6 +129,12 @@ public class Crawler {
         StopMonitor.stop();
         if (null != pageCatcher) {
             pageCatcher.stop();
+        }
+        if (null != nodeListener) {
+            nodeListener.requestStop();
+            while (!nodeListener.isStopped()) {
+                Execute.sleep(100);
+            }
         }
         ModulesManager.getInstance().close();
 /* 
@@ -199,8 +204,8 @@ public class Crawler {
                     break;
                 } 
                 // else
-                
-                if (skip > seen) {
+                seen += fetchlist.getSize();
+                if (skip >= seen) {
                     fetchlist.remove();
                 } else {
                     couldEnqueue = false;
@@ -279,14 +284,11 @@ public class Crawler {
         private PageDB tmpPageDB;
         private PageDB oldPageDB;
         private FetchdataProcessor processor;
-        private long processed;
         
         public FetchdataQueueMonitor (PageDB oldPageDB, PageDB tmpPageDB, FetchdataProcessor processor) {
             this.tmpPageDB = tmpPageDB;
             this.oldPageDB = oldPageDB;
             this.processor = processor;
-            discoveryPages = 0;
-            processed = 0;
             this.setName("FetchdataQueueMonitor");
         }
 
@@ -303,8 +305,9 @@ public class Crawler {
 
                 if (couldDequeue) {
                     try {
-                        discoveryPages += processor.processFetchdata(fetchdata, oldPageDB, tmpPageDB);
+                        long discoveredPages = processor.processFetchdata(fetchdata, oldPageDB, tmpPageDB);
                         progress.addProcessed(fetchdata.getSize());
+                        progress.addDiscovered(discoveredPages);
                         progress.report();
                     } catch (Exception e) {
                         logger.error(e,e);
@@ -418,7 +421,7 @@ public class Crawler {
      * It needs to have the cache configured in the modules list.
      * If there is no cache, it falls back to the refetch method.
      */
-    public void refresh (long skip) {
+    public void refresh () {
         boolean hasCache = false;
         IProcessorModule[] caches = ModulesManager.getInstance().getModuleInstances("com.flaptor.hounder.crawler.modules.CacheModule");
         if (caches.length > 0) {
@@ -436,7 +439,7 @@ public class Crawler {
                     PageDB pagedb = new PageDB(pagedbDir);
                     long total = pagedb.getSize();
                     declareStartCycle(pagedb);
-                    PageCache pageCache = new PageCache(pagedb, fileCache, skip);
+                    PageCache pageCache = new PageCache(pagedb, fileCache);
                     FetchdataProcessor processor = new FetchdataProcessor();
                     processor.processFetchdata(pageCache, pagedb, new NoPageDB());
                     pagedb.close();
@@ -448,7 +451,7 @@ public class Crawler {
             }
         }
         if (!hasCache) {
-            crawl(0,skip);
+            crawl(0);
         }
         stopCrawler();
     }
@@ -492,19 +495,10 @@ public class Crawler {
 
 
     /** 
-     * Does the actual crawl.
+     * Runs the crawl cycles.
      * @param cycles -1 if the crawler should cycle repeatedly, N if it should cycle N times, 0 if it should only refresh without completing a cycle.
      */
     public void crawl (final int cycles) {
-        crawl(cycles, 0);
-    }
-
-    /** 
-     * Does the actual crawl.
-     * @param cycles -1 if the crawler should cycle repeatedly, N if it should cycle N times, 0 if it should only refresh without completing a cycle.
-     * @param skip the number of pages to skip from the pagedb in the first cycle. This is for resuming interrupted crawls.
-     */
-    public void crawl (final int cycles, long skip) {
         try {
             StopMonitor.reset();
             FetchdataProcessor processor = new FetchdataProcessor();
@@ -519,8 +513,9 @@ public class Crawler {
                 // start queues
                 if (fetchlistQueue.isClosed()) fetchlistQueue.reset();
                 if (fetchdataQueue.isClosed()) fetchdataQueue.reset();
-                PageDB newPageDB = runSingleCrawlCycle(processor, createNewPageDB, skip);
-                skip = 0;
+                
+                // run crawl cycle
+                PageDB newPageDB = runSingleCrawlCycle(processor, createNewPageDB);
 
                 logger.info("Finished crawl cycle");
 
@@ -540,9 +535,7 @@ public class Crawler {
         } catch (Exception e) {
             logger.error("ABORTING CRAWLER: " + e, e);
         }
-        if (running()) {
-            stopCrawler();
-        }
+        stopCrawler();
         logger.info("Stopped.");
     }
 
@@ -564,7 +557,8 @@ public class Crawler {
      * @throws InterruptedException
      * @throws MalformedURLException
      */
-    private PageDB runSingleCrawlCycle(FetchdataProcessor processor, boolean createNewPageDB, long skip) throws Exception, IOException, InterruptedException, MalformedURLException {
+    @SuppressWarnings("fallthrough")
+    private PageDB runSingleCrawlCycle(FetchdataProcessor processor, boolean createNewPageDB) throws Exception, IOException, InterruptedException, MalformedURLException {
         // start the fetch server
         FetchServer fetchserver = new FetchServer(fetcher, this);
         fetchserver.start();
@@ -590,38 +584,87 @@ public class Crawler {
             tmpPageDB = new NoPageDB();
             newPageDB = new NoPageDB();
         }
-        // delete any leftover dirs
+        // delete leftover new pagedb
         newPageDB.deleteDir();
-        tmpPageDB.deleteDir();
         // prepare the new pagedb
         oldPageDB.open(PageDB.READ);
-        tmpPageDB.open(PageDB.WRITE);
-        tmpPageDB.setNextCycleOf(oldPageDB);
 
-        progress = new CrawlerProgress(tmpPageDB.getCycles());
-        progress.startFetch(oldPageDB.getSize(), oldPageDB.getFetchedSize());
-        tmpPageDB.setProgressHandler(progress);
-        
-        logger.info("Starting crawl cycle " + oldPageDB.getCycles());
-        declareStartCycle(oldPageDB);
-
-        FetchlistQueueMonitor fetchlistFeeder = new FetchlistQueueMonitor(oldPageDB, tmpPageDB, skip);
-        InjectedFetchlistQueueMonitor injectedFetchlistFeeder = new InjectedFetchlistQueueMonitor(tmpPageDB);
-        FetchdataQueueMonitor fetchdataConsumer = new FetchdataQueueMonitor(oldPageDB, tmpPageDB, processor);
-        cycleFinished = false;
-        fetchlistFeeder.start();
-        injectedFetchlistFeeder.start();
-        fetchdataConsumer.start();
-
-        // Wait until the fetchlist and fetchdata threads are done
-        synchronized(cycleFinishedMonitor) {
-            while (running() && !cycleFinished) {
-                logger.debug("Waiting: running="+running()+" cycleFinished="+cycleFinished+" fetchList="+fetchlistQueue.size()+" injectedFetchList="+injectedFetchlistQueue.size()+" fetchData="+fetchdataQueue.size());
-                cycleFinishedMonitor.wait(60000); // wake up every minute or when the cycle finishes
+        // Crawl recovery attempt
+        boolean skipFetch = false;
+        long skip = 0;
+        progress = CrawlerProgress.restartCrawlerProgress();
+        if (null != progress) { 
+            // the previous cycle was interrupted
+            switch (progress.stage()) {
+                case CrawlerProgress.START:
+                case CrawlerProgress.STOP:
+                    logger.info("Last crawler state is either before starting or after finishing, will start next cycle.");
+                    progress = null;
+                    break;
+                case CrawlerProgress.FETCH:
+                    if ((progress.cycle() == oldPageDB.getCycles() + 1)) {
+                        skip = progress.processed();
+                        logger.info("Crawler was interrupted while fetching at cycle "+progress.cycle()+", will continue current cycle skipping "+skip+" docs.");
+                        tmpPageDB.open(PageDB.WRITE + PageDB.APPEND);
+                    } else {
+                        logger.info("Last crawler report inconsistent with pagedb state, will restart.");
+                        progress = null;
+                    }
+                    break;
+                case CrawlerProgress.SORT:
+                    // fall through
+                case CrawlerProgress.MERGE:
+                    logger.info("Crawler was interrupted while sorting at cycle "+progress.cycle()+", will continue current cycle.");
+                    tmpPageDB.open(PageDB.WRITE + PageDB.APPEND); // this will force a sort upon closing
+                    // fall through
+                case CrawlerProgress.TRIM:
+                    if (progress.stage() == CrawlerProgress.TRIM) {
+                        logger.info("Crawler was interrupted while trimming at cycle "+progress.cycle()+", will continue current cycle.");
+                    }
+                    skipFetch = true;
+                    break;
+                default:
+                    logger.error("Unknown crawler state report, will restart.");
+                    progress = null;
+                    break;
             }
         }
-        logger.debug("Waiting no more: running="+running()+" cycleFinished="+cycleFinished+" fetchList="+fetchlistQueue.size()+" injectedFetchList="+injectedFetchlistQueue.size()+" fetchData="+fetchdataQueue.size());
+        if (null == progress) { 
+            // there was no interrupted previous cycle or it was inconsistent
+            tmpPageDB.deleteDir();
+            tmpPageDB.open(PageDB.WRITE);
+            tmpPageDB.setNextCycleOf(oldPageDB);
+            progress = new CrawlerProgress(tmpPageDB.getCycles());
+        }
+        
+        tmpPageDB.setProgressHandler(progress);
+        if (!skipFetch) {
+            if (0 == skip) {
+                progress.startFetch(oldPageDB.getSize(), oldPageDB.getFetchedSize());
+                logger.info("Starting crawl cycle " + (oldPageDB.getCycles()+1));
+            } else {
+                logger.info("Continuing crawl cycle " + (oldPageDB.getCycles()+1));
+            }
+            declareStartCycle(oldPageDB);
 
+            FetchlistQueueMonitor fetchlistFeeder = new FetchlistQueueMonitor(oldPageDB, tmpPageDB, skip);
+            InjectedFetchlistQueueMonitor injectedFetchlistFeeder = new InjectedFetchlistQueueMonitor(tmpPageDB);
+            FetchdataQueueMonitor fetchdataConsumer = new FetchdataQueueMonitor(oldPageDB, tmpPageDB, processor);
+            cycleFinished = false;
+            fetchlistFeeder.start();
+            injectedFetchlistFeeder.start();
+            fetchdataConsumer.start();
+
+            // Wait until the fetchlist and fetchdata threads are done
+            synchronized(cycleFinishedMonitor) {
+                while (running() && !cycleFinished) {
+                    logger.debug("Waiting: running="+running()+" cycleFinished="+cycleFinished+" fetchList="+fetchlistQueue.size()+" injectedFetchList="+injectedFetchlistQueue.size()+" fetchData="+fetchdataQueue.size());
+                    cycleFinishedMonitor.wait(60000); // wake up every minute or when the cycle finishes
+                }
+            }
+            logger.debug("Waiting no more: running="+running()+" cycleFinished="+cycleFinished+" fetchList="+fetchlistQueue.size()+" injectedFetchList="+injectedFetchlistQueue.size()+" fetchData="+fetchdataQueue.size());
+        }
+        
         if (running()) {
             logger.debug("Closing old and temporary pagedbs");
             oldPageDB.close();
@@ -630,7 +673,7 @@ public class Crawler {
 
             if (createNewPageDB) {
                 // dedup & trim
-                new PageDBTrimmer().trimPageDB (tmpPageDB, newPageDB, discoveryPages, progress);
+                new PageDBTrimmer().trimPageDB(tmpPageDB, newPageDB, progress);
 
                 if (running()) {
                     // TODO overwrite old with new
@@ -652,10 +695,10 @@ public class Crawler {
                     }
                 }
             }
+            progress.close();
         } else {
             logger.info("Stopping, not closing or trimming the temporary pagedb");
         }
-        progress.close();
         return newPageDB;
     }
 
@@ -684,15 +727,14 @@ public class Crawler {
 
         Crawler crawler = new Crawler();
         
-        int skip = config.getInt("crawler.mode.skip"); 
         int cycles = config.getInt("crawler.mode.cycles");
         
         if (mode.equals("runforever")) {
-        	crawler.crawl(-1, skip);
+        	crawler.crawl(-1);
         } else if (mode.equals("cycles")) {
-            crawler.crawl(config.getInt("crawler.mode.cycles"), skip);
+            crawler.crawl(config.getInt("crawler.mode.cycles"));
         } else if (mode.equals("refresh")) {
-            crawler.refresh(skip);
+            crawler.refresh();
         } else if (mode.equals("redistribute")) {
             crawler.redistribute();
         }

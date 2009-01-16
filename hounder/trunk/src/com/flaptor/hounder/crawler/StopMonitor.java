@@ -68,7 +68,7 @@ public class StopMonitor {
                         running = !stopFile.exists();
                     }
                 }
-                try { sleep(10000); } catch (Exception e) { /*ignore*/ }
+                try { sleep(1000); } catch (Exception e) { /*ignore*/ }
             }
             logger.info("STOP file detected");
         }

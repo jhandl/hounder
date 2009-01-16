@@ -243,7 +243,7 @@ public class PageDBTrimmer {
      * @param destPageDB the output pagedb that will hold the trimmed result.
      * @param availableDiscoveryPages the number of discovery pages present in the input pagedb.
      */ 
-    public void trimPageDB (PageDB origPageDB, PageDB destPageDB, long availableDiscoveryPages, CrawlerProgress progress) throws IOException, MalformedURLException {
+    public void trimPageDB (PageDB origPageDB, PageDB destPageDB, CrawlerProgress progress) throws IOException, MalformedURLException {
         Page bestPage;
         bestPage = new Page("",0);
         bestPage.setDistance(Integer.MAX_VALUE);
@@ -274,7 +274,7 @@ public class PageDBTrimmer {
 
         PageRank pageRank = new PageRank(dbSize);
         PageRank badRank = new PageRank(dbSize);
-        PageFilter pageFilter = new PageFilter(maxDistance, maxRetries, dbFetchedSize, discoveryFrontSize, availableDiscoveryPages);
+        PageFilter pageFilter = new PageFilter(maxDistance, maxRetries, dbFetchedSize, discoveryFrontSize, progress.discovered());
 
         // This code produces one page for each block of same-url pages.
         // The produced page has the best properties of the block,

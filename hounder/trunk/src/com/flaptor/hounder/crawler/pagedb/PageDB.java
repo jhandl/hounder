@@ -843,7 +843,9 @@ public class PageDB implements IPageStore {
                 PageDB dest = new PageDB(args[2]);
                 long unfetched = orig.getSize() - orig.getFetchedSize();
                 PageDBTrimmer trimmer = new PageDBTrimmer();
-                trimmer.trimPageDB(orig, dest, unfetched, new CrawlerProgress(0));
+                CrawlerProgress cp = new CrawlerProgress(0);
+                cp.addDiscovered(unfetched);
+                trimmer.trimPageDB(orig, dest, cp);
 
             } else if ("reset".equals(cmd)) {
 

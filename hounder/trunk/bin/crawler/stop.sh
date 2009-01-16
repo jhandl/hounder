@@ -1,18 +1,15 @@
 #!/bin/bash
 
-
-pid=`cat pid`
-if [ -z "$pid" ]; then
-  echo The crawler is not running.
-else
-  kill $pid
-  echo The crawler has stopped.
-  rm pid
-fi
-
-exit
-########### IGNORE CODE BELOW
-### THE CRAWLER DOESNT STOP. It needs to be killed
+# pid=`cat pid`
+# if [ -z "$pid" ]; then
+#   echo The crawler is not running.
+# else
+#   kill $pid
+#   echo The crawler has stopped.
+#   rm pid
+# fi
+# 
+# exit
 
 MULTICRAWLER="no"
 
