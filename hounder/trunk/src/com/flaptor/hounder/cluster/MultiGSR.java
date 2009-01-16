@@ -21,8 +21,9 @@ public class MultiGSR implements Serializable{
 	public MultiGSR(GroupedSearchResults gsr, int numSearchers) {
 		this.gsr= gsr;
 		responsesData= new ArrayList<ResponseData>(numSearchers);
+        ResponseData timeout = new ResponseData(-1, -1);
 		for (int i=0; i< numSearchers; i++){
-			responsesData.add(null);
+			responsesData.add(timeout);
 		}
 	}
 
@@ -63,8 +64,8 @@ public class MultiGSR implements Serializable{
 	}
 
 	public class ResponseData{
-		public long responseTime;
-		public int responseResults;
+		private long responseTime;
+		private int responseResults;
 
 		public ResponseData(long responseTime, int responseResults) {
 			this.responseTime = responseTime;

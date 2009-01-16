@@ -114,8 +114,8 @@ public class MultiSearcher implements ISearcher {
         try {
             execution.waitFor(timeout);
         } catch (InterruptedException e) {
-            logger.warn("timeout of some searchers");
             execution.forget();
+            logger.warn("timeout of some searchers");
         }
 
         //a treeMap for sorting values according to the searcher number
@@ -136,12 +136,12 @@ public class MultiSearcher implements ISearcher {
                 	goodResultsMap.put(numSearcher, gsr);
                     totalDocuments += gsr.totalGroupsEstimation();
                     // gather stats from the uni-searchers
-                	Statistics.getStatistics().notifyEventValue("averageTimes_"+searcherIPs.get(numSearcher), gsr.getResponseTime());
+                	Statistics.getStatistics().notifyEventValue("averageTimes_" + searchers.get(numSearcher).getTextualIdentifier(), gsr.getResponseTime());
                 } else {
                     badResults++;
                     logger.warn("Exception from remote searcher " +  numSearcher, result.getException());
                     //gather stats of searcher failures
-                    Statistics.getStatistics().notifyEventError("averageTimes_"+searcherIPs.get(numSearcher));
+                    Statistics.getStatistics().notifyEventError("averageTimes_" + searchers.get(numSearcher).getTextualIdentifier());
                     badResultsMap.put(numSearcher, result.getException().getMessage());
                 }
             }
@@ -177,6 +177,19 @@ public class MultiSearcher implements ISearcher {
         	int searcherNum= entry.getKey();
         	result.setData(searcherNum, -1L, -1);
         	logger.warn("Searcher " + entry.getKey() + " failed with " + entry.getValue());
+        }
+
+        //The searchers that timed out were not marked al failures before. We'll do it here.
+        for (int i = 0; i < result.getNumOfSerachers(); i ++) {
+            if (-1 == result.getResponseResults(i)) {
+                Statistics.getStatistics().notifyEventError("averageTimes_" + searchers.get(i).getTextualIdentifier());
+            }
+        }
+
+        if (logger.isDebugEnabled()) {
+            for (int i = 0; i < result.getNumOfSerachers(); i ++) {
+                logger.debug("Searcher " + i + "(" + searchers.get(i).getTextualIdentifier() + "): result " + result.getResponseResults(i) + ", time " + result.getResponseTime(i));
+            }
         }
         return result;
     }

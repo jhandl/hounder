@@ -29,5 +29,8 @@ import com.flaptor.util.remote.RpcException;
 public interface IRemoteSearcher {
     /*@fixme writeme*/
 	public GroupedSearchResults search(AQuery query, int firstResult, int count,  AGroup group, int groupSize, AFilter filter, ASort sort) throws RpcException;
+    
+    // This method should return a String that identifies the remote searcher univocally, for example "host:port"
+    public String getTextualIdentifier();
 }
 

@@ -41,6 +41,9 @@ public class RmiSearcherStub extends ARmiClientStub implements IRemoteSearcher {
     private static Logger logger = Logger.getLogger(com.flaptor.util.Execute.whoAmI());
     private IRmiSearcher remoteSearcher = null;
 
+    private final String host;
+    private final int port;
+
     /**
      * Ctor with ExponentialFallbackPolicy
      * @param basePort
@@ -52,7 +55,13 @@ public class RmiSearcherStub extends ARmiClientStub implements IRemoteSearcher {
 
    	public RmiSearcherStub(final int basePort, final String host, IRetryPolicy policy) {
         super(PortUtil.getPort(basePort,"searcher.rmi"), host, policy);
+        this.port = basePort;
+        this.host = host;
         logger.info("Creating RmiSearcherStub for Searcher located at " + host + ":" + PortUtil.getPort(basePort,"searcher.rmi"));
+    }
+
+    public String getTextualIdentifier() {
+        return (host + ':' + port);
     }
 
 	public GroupedSearchResults search(AQuery query, int firstResult, int count,  AGroup groupBy, int groupSize, AFilter filter, ASort sort) throws RpcException {
