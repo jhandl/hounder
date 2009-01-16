@@ -166,7 +166,7 @@ public class MultiSearcher implements ISearcher {
         	gsr = grouper.group(count,groupSize,firstResult);
         }
 
-        MultiGSR result = new MultiGSR(gsr,goodResultsMap.size() + badResultsMap.size());
+        MultiGSR result = new MultiGSR(gsr,searchers.size());
 
         for (Entry<Integer, GroupedSearchResults> entry: goodResultsMap.entrySet()){
         	int searcherNum= entry.getKey();
