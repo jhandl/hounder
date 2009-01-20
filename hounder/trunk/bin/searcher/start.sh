@@ -67,7 +67,7 @@ HOST=`/sbin/ifconfig |grep eth0 -A 1 |grep inet | cut -d ":" -f 2 |cut -d " " -f
 echo Starting the searcher...
 
 ARGUS="-server \
-        -Xms3500m \
+        -Xms300m \
         -Xmx3500m \
         -XX:+UseConcMarkSweepGC \
         -XX:+CMSIncrementalMode \
