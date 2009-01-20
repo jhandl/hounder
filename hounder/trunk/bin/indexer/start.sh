@@ -1,6 +1,6 @@
 #!/bin/bash
 
-if ./status.sh | grep -q "is running"
+if ./status.sh
 then
     echo The indexer is already running
     exit 1
@@ -38,7 +38,7 @@ nohup  ${CMND} > ${LOUT} 2> ${LERR} &
 
 echo $! >pid
 
-if ./status.sh | grep -q "is running"
+if ./status.sh
 then
 	RMI=`${GET_PORT} getPort indexer.rmi`
 	XMLRPC=`${GET_PORT} getPort indexer.xml`
