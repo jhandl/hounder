@@ -51,5 +51,6 @@ public abstract class ABoostMethod extends ABoostModule {
     }
 
     public abstract void applyBoost (FetchDocument doc, double value);
+    
 }
 

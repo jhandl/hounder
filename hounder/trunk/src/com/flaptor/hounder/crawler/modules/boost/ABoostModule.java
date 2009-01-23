@@ -26,4 +26,11 @@ public abstract class ABoostModule {
     public ABoostModule (Config config) {
         this.config = config;
     }
+    
+    /** 
+     * Release resources.
+     */
+    public abstract void close();
+    
+
 }

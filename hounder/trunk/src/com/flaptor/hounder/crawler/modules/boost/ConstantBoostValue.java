@@ -40,4 +40,9 @@ public class ConstantBoostValue extends ABoostValue {
         return boostValue;
     }
 
+    /** 
+     * Release resources.
+     */
+    public void close() {}
+    
 }

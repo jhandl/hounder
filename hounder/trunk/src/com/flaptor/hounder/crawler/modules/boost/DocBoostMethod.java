@@ -29,6 +29,12 @@ public class DocBoostMethod extends ABoostMethod {
         super(config);
     } 
 
+    /** 
+     * Release resources.
+     */
+    public void close() {}
+    
+    
     // Gets the actual boost of the document, and multiplies
     // value times
     public void applyBoost(FetchDocument doc,double value) {

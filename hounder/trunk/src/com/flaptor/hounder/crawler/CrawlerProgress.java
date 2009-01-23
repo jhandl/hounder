@@ -496,11 +496,8 @@ public class CrawlerProgress implements Serializable {
         CrawlerProgress cp = readCrawlerProgress();
         if (null != cp) {
             long delta = System.currentTimeMillis() - cp.now;
-System.out.println("Dead time: "+cp.formatTime(delta, false));
             cp.deadTime[cp.stage] += delta;
             cp.totalDeadTime += delta;
-System.out.println("Dead time at stage ["+cp.stage+"]: "+cp.formatTime(cp.deadTime[cp.stage], false));
-System.out.println("Total dead time: "+cp.formatTime(cp.totalDeadTime, false));
             if (cp.stage == FETCH) { cp.seen = 0; }
         }
         return cp;

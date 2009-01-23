@@ -666,6 +666,7 @@ public class Crawler {
         }
         
         if (running()) {
+            progress.report();
             logger.debug("Closing old and temporary pagedbs");
             oldPageDB.close();
             tmpPageDB.close(); 
@@ -697,6 +698,8 @@ public class Crawler {
             }
             progress.close();
         } else {
+            oldPageDB.abort();
+            tmpPageDB.abort();
             logger.info("Stopping, not closing or trimming the temporary pagedb");
         }
         return newPageDB;

@@ -368,8 +368,13 @@ public class IndexerModule extends AProcessorModule {
 
         // System.out.println("BOOST url=["+url+"]  category="+f1+" ("+categoryBoost+":"+categoryBoostDamp+")  pagerank="+f2+" ("+pagerankBoost+":"+pagerankBoostDamp+")  log="+f3+" ("+logBoost+":"+logBoostDamp+")  freshness="+f4+" ("+freshnessBoost+":"+freshnessBoostDamp+") moduleBoost="+f5+"  Boost="+boost);
 
-        if (boost < 1e-6) {
+        if (boost < 1e-6f) {
             logger.warn("Boost too low! ("+boost+")  category="+f1+" ("+categoryBoost+":"+categoryBoostDamp+")  pagerank="+f2+" ("+pagerankBoost+":"+pagerankBoostDamp+")  spamrank="+f3+" ("+spamrankBoost+":"+spamrankBoostDamp+")  log="+f4+" ("+logBoost+":"+logBoostDamp+")  freshness="+f5+" ("+freshnessBoost+":"+freshnessBoostDamp+") moduleBoost="+f6);
+            boost = 1e-6f;
+        }
+        
+        if (null == title || "".equals(title)) {
+            title = "Untitled";
         }
 
         root.addElement("boost").addText(String.valueOf(boost));

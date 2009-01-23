@@ -56,6 +56,13 @@ public class AttributeBoostValue extends ABoostValue {
         // default
         return false;
     }
+    
+    /** 
+     * Release resources.
+     */
+    public void close() {}
+    
+
 
 }
 

@@ -224,27 +224,27 @@ public class PageDBStats {
             scoreHistogram = new AdaptiveHistogram();
             antiScoreHistogram = new AdaptiveHistogram();
         }
-        pageSource.open();
-        while (true) {
-            try {
-                Page page = pageSource.nextPage();
-                pageCount++;
-                if (page.getLastAttempt() > 0) {
-                    if (page.getLastSuccess() > 0) {
-                        fetchedPages++;
-                        fetchedScore += page.getScore();
-                    } else {
-                        failedPages++;
+        try {
+            pageSource.open();
+            while (true) {
+                    Page page = pageSource.nextPage();
+                    pageCount++;
+                    if (page.getLastAttempt() > 0) {
+                        if (page.getLastSuccess() > 0) {
+                            fetchedPages++;
+                            fetchedScore += page.getScore();
+                        } else {
+                            failedPages++;
+                        }
                     }
-                }
-                priorityHistogram.addValue(page.getPriority());
-                scoreHistogram.addValue(page.getScore());
-                antiScoreHistogram.addValue(page.getAntiScore());
-            } catch (Exception e) {
-                break;
+                    priorityHistogram.addValue(page.getPriority());
+                    scoreHistogram.addValue(page.getScore());
+                    antiScoreHistogram.addValue(page.getAntiScore());
             }
+        } catch (IOException e) {
+        } finally {
+            pageSource.close();
         }
-        pageSource.close();
     }
 
     // Gets the histogram threshold for a given percentile.

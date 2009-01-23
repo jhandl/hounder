@@ -37,5 +37,10 @@ public class NoBoostValue extends ABoostValue {
         return false;
     }
 
+    /** 
+     * Release resources.
+     */
+    public void close() {}
+    
 }
 

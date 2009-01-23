@@ -8,8 +8,6 @@
 #export JAVA_HOME=some custom path
 export PATH=${JAVA_HOME}/bin:$PATH
 
-
-
 #Java version checks
 if [ "$JAVA_HOME" == "" ]
 then
@@ -46,10 +44,9 @@ LOUT=${LOG_DIR}/searcher.out
 
 CONF=./conf
 LIBS=../lib
-WINK=$LIBS/wink.jar
-CP=${CONF}:.:${WINK}
+CP=${CONF}:.
 GET_PORT="java -cp ${CP} com.flaptor.util.PortUtil"
-MAIN=com.wink.searcher.MultipleRpcSearcher
+MAIN=com.flaptor.hounder.searcher.MultipleRpcSearcher
 
 if [ "$CLEAN" == "true" ]
 then
@@ -66,7 +63,7 @@ HOST=`/sbin/ifconfig |grep eth0 -A 1 |grep inet | cut -d ":" -f 2 |cut -d " " -f
 
 echo Starting the searcher...
 
-ARGUS="-server \
+ARGS="-server \
         -Xms300m \
         -Xmx3500m \
         -XX:+UseConcMarkSweepGC \
@@ -86,25 +83,24 @@ GC_DEBUG_OPTIONS="-verbose:gc \
 if [ "$GC_DEBUGGING" == "true" ]
 then
     echo "Starting the jvm with gc debugging options enabled. Check ${LOUT}"
-    ARGUS="$ARGUS $GC_DEBUG_OPTIONS"
+    ARGS="$ARGS $GC_DEBUG_OPTIONS"
 else
     echo "Starting the jvm with gc debugging options disabled."
 fi
 
 
-CMND="java ${ARGUS} -cp ${CP} -Djava.rmi.server.hostname=${HOST} ${MAIN}"
-nohup  ${CMND} > ${LOUT} 2> ${LERR} &
+CMD="java ${ARGS} -cp ${CP} -Djava.rmi.server.hostname=${HOST} ${MAIN}"
+nohup  ${CMD} > ${LOUT} 2> ${LERR} &
 echo $! >pid
 
 
 sleep 10s
 if ./status.sh
 then
-        RMI=`${GET_PORT} getPort searcher.rmi`
-        XMLRPC=`${GET_PORT} getPort searcher.xml`
-        WEB=`${GET_PORT} getPort searcher.webOpenSearch`
-        ONC=`${GET_PORT} getPort searcher.onc`
-
+    RMI=`${GET_PORT} getPort searcher.rmi`
+    XMLRPC=`${GET_PORT} getPort searcher.xml`
+    WEB=`${GET_PORT} getPort searcher.webOpenSearch`
+    ONC=`${GET_PORT} getPort searcher.onc`
 
     echo
     echo    Searcher started, listening:
@@ -115,6 +111,6 @@ then
     echo        onc rpc      ${ONC}
     echo
 else
-    echo Searcher did not start correctly, check the logs
+    echo Searcher did not start correctly, please check the logs.
 fi
 

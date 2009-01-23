@@ -51,4 +51,5 @@ public abstract class ABoostValue extends ABoostModule{
     }
     public abstract double getValue (FetchDocument doc);
     public abstract boolean hasValue (FetchDocument doc);
+    public abstract void close();
 }

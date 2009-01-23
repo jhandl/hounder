@@ -130,17 +130,33 @@ public class PageDB implements IPageStore {
                     dir.mkdirs();
                 }
                 File md5File = new File(dir, md5FileName);
-                boolean oldDB = false;
+                File unsortedFile = new File(dir, unsortedFileName);
                 if (md5File.exists()) {
-                    md5File.renameTo(new File(dir, unsortedFileName));
-                    oldDB = true;
+                    md5File.renameTo(unsortedFile);
                 }
-                outputStream = new ObjectOutputStream(new BufferedOutputStream(new FileOutputStream(new File(dir, unsortedFileName), append), BUFFERSIZE));
-                if (append && oldDB) {
-                    stats.read();  // this is needed for the stats that can't be gathered from the files alone, like the cycle number
-                    stats.gatherStatsFromPageDBFile(new PageSource(new File(dirname, unsortedFileName)));  // gather the rest of the data, including histogram
+                boolean notNewDB = unsortedFile.exists();
+                if (append && notNewDB) {
+                    // Rename the old unsorted output file to a temp file.
+                    File orig = new File(dir, unsortedFileName);
+                    File temp = new File(dir, unsortedFileName+"_tmp");
+                    orig.renameTo(temp);
+                    orig = new File(dir, unsortedFileName); // reopen with the original name
+                    outputStream = new ObjectOutputStream(new BufferedOutputStream(new FileOutputStream(orig), BUFFERSIZE));
+                    inputStream = new ObjectInputStream(new BufferedInputStream(new FileInputStream(temp), BUFFERSIZE));
+                    stats.read();
+                    // Gather the rest of the data, including histogram
+                    // and copy the file so we can continue writing to the new copy.
+                    // This is needed to simulate an append to an ObjectOutputStream, which
+                    // cant be appended in the usual way because the old file has an EOF 
+                    // marker put there by the close operation, that can't be read past.
+                    // We do both operations in one horrible hack so we don't have to read
+                    // the whole pagedb twice (once for stats gathering, once for appending).
+                    stats.gatherStatsFromPageDBFile(new PageDBCopier(inputStream, outputStream));  
+                    Execute.close(inputStream);
+                    temp.delete();
                     sorted = false;
                 } else {
+                    outputStream = new ObjectOutputStream(new BufferedOutputStream(new FileOutputStream(new File(dir, unsortedFileName)), BUFFERSIZE));
                     stats.init();
                     maxHash = "00000000000000000000000000000000";
                     sorted = true;
@@ -263,7 +279,7 @@ public class PageDB implements IPageStore {
      * Close the pagedb. 
      * It should be called both after reading and after writing a poagedb.
      */
-    public void close () throws IOException {
+    public void close() throws IOException {
         // logger.debug("PAGEDB close "+dirname+" ("+new Throwable().getStackTrace()[1].getClassName()+")");
         if (null != inputStream) {
             Execute.close(inputStream);
@@ -277,6 +293,19 @@ public class PageDB implements IPageStore {
         }
     }
 
+    /**
+     * Close the pagedb as fast as possible, leaving it as it is.
+     * This is needed when interrupting the crawler, as the pagedb will 
+     * not be formally closed but must be left in a consistent and
+     * recoverable state.
+     */
+    public void abort() throws IOException {
+        if (null != outputStream) {
+            outputStream.flush();
+            Execute.close(outputStream);
+            stats.write();
+        }
+    }
     
     public void setProgressHandler(CrawlerProgress progress) {
         this.progress = progress;
@@ -419,17 +448,23 @@ public class PageDB implements IPageStore {
         out = new File (dest.getDir(), md5FileName);
         mergeSortedFiles (in1, in2, out, new PageDataGetter() { public Comparable getData(Page p) {return p.getUrlHash();} });
 
-        stats.gatherStatsFromPageDBFile(new PageSource(out));
+        stats.gatherStatsFromPageDBFile(new PageDBReader(out));
         stats.write();
     }
 
 
     // Auxiliary class used to give the PageDBStats a means to access the pages in a PageDB file 
     // while keeping the PageDB file format knowledge within the PageDB class.
-    protected static class PageSource {
+    protected interface PageSource {
+        public void open() throws FileNotFoundException, IOException;
+        public Page nextPage() throws IOException;
+        public void close();
+    }
+    
+    private static class PageDBReader implements PageSource {
         ObjectInputStream in;
         private File file;
-        public PageSource (File file) {
+        public PageDBReader (File file) {
             this.file = file;
         }
         // FIXME throws Exception
@@ -445,12 +480,39 @@ public class PageDB implements IPageStore {
         }
     }
 
+
+    // Auxiliary class used to give the PageDBStats a means to access the pages in a PageDB file 
+    // while keeping the PageDB file format knowledge within the PageDB class.
+    // Also has the side effect of copying while reading. This is needed to simulate an 
+    // append of an ObjectOutputStream (that can't append by itself).
+    protected static class PageDBCopier implements PageSource {
+        ObjectInputStream in;
+        ObjectOutputStream out;
+        public PageDBCopier (ObjectInputStream in, ObjectOutputStream out) {
+            this.in = in;
+            this.out = out;
+        }
+        // FIXME throws Exception
+        public void open () throws FileNotFoundException, IOException { }
+        public Page nextPage () throws IOException {
+            Page p = Page.read(in);
+            p.write(out);
+            return p;
+        }
+        public void close () {
+            Execute.close(in);
+            // Cant't close the output stream as it is needed  
+            // to continue writing, thus simulating an append.
+            // Horrible hack, I know!
+        }
+    }
+
     // Reads pages from a file and counts them.
     private long countPages (File file) {
         long count = 0;
         try {
             PageDBStats lstats = new PageDBStats(null);
-            lstats.gatherStatsFromPageDBFile(new PageSource(file));
+            lstats.gatherStatsFromPageDBFile(new PageDBReader(file));
             count = lstats.pageCount;
         } catch (FileNotFoundException e) {
             logger.error(e, e);
@@ -484,7 +546,7 @@ public class PageDB implements IPageStore {
                 stats.cycleCount = 0;
             }
             // compute the fetch stats
-            stats.gatherStatsFromPageDBFile(new PageSource(new File (dir, md5FileName)));
+            stats.gatherStatsFromPageDBFile(new PageDBReader(new File (dir, md5FileName)));
             // write the stats file
             stats.write();
 
@@ -511,7 +573,7 @@ public class PageDB implements IPageStore {
                     logger.info("Cycle count data lost, will restart at 0.");
                 }
                 // compute the fetch stats
-                stats.gatherStatsFromPageDBFile(new PageSource(md5File));
+                stats.gatherStatsFromPageDBFile(new PageDBReader(md5File));
                 // write the stats file
                 stats.write();
             }

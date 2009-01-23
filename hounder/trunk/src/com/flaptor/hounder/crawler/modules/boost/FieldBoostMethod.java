@@ -55,5 +55,10 @@ public class FieldBoostMethod extends ABoostMethod {
         doc.setAttribute("field_boost",boostMap);
     }
 
+    /** 
+     * Release resources.
+     */
+    public void close() {}
+
 }
 

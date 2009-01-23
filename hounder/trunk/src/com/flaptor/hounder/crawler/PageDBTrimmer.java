@@ -288,7 +288,7 @@ public class PageDBTrimmer {
             
             if (null != progress) {
                 counter++;
-                if (counter >= 10) {
+                if (counter >= 1000) {
                     progress.addTrimmed(counter);
                     progress.report();
                     counter = 0;
@@ -436,6 +436,9 @@ public class PageDBTrimmer {
         if (Crawler.running()) { // don't waste time closing temporary pagedbs if the system is being stopped
             origPageDB.close();
             destPageDB.close();
+        } else {
+            origPageDB.abort();
+            destPageDB.abort();
         }
         Execute.close(hotspots);
     }
