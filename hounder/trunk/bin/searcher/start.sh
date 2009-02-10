@@ -44,7 +44,7 @@ LOUT=${LOG_DIR}/searcher.out
 
 CONF=./conf
 LIBS=../lib
-CP=${CONF}:.
+CP=${CONF}:.:${LIBS}/hounder-trunk.jar:${LIBS}/hounder-trunk-deps.jar
 GET_PORT="java -cp ${CP} com.flaptor.util.PortUtil"
 MAIN=com.flaptor.hounder.searcher.MultipleRpcSearcher
 
