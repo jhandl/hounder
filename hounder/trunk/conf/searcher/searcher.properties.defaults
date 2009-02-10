@@ -42,7 +42,7 @@ Sort.cacheSize=20
 Searcher.snippetOfFields=text,title
 Searcher.snippetLength=180,75
 Searcher.snippetFragmentSeparator=...
-Searcher.emptySnippetsAllowed=true
+Searcher.emptySnippetsAllowed=false
 # This is a regular expression that matches the fragment (phrases) separation.
 # It is used in:  String regex= "^.*(" + fragmentBoundary+ ")+" + "$";
 # to know if a token is the last token of a phrase.
