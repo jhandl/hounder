@@ -307,16 +307,18 @@ final class ReloadableIndexHandler implements Stoppable {
      *             the new one. Should never happen if used properly.
      */
     public void setNewIndex(final Index newIndex) throws SearcherException {
-    	//first, I want to serilize (just in case) all calls to this method. For that I'll use
+    	//first, I want to serialize (just in case) all calls to this method. For that I'll use
     	//currentIndexRepository as a semaphore. Note that the advantage of AtomicReference is not
     	//lost since currentIndexRepository users (search and getNumDocs) don't sync against it.
     	synchronized (currentIndexRepository) {
 	    	IndexRepository newRepository = new IndexRepository(newIndex);
+            IndexRepository oldIndexRepository = currentIndexRepository.get();
 	    	currentIndexRepository.set(newRepository);
 	        //invalidate the cache, if any
 	        clearCaches();
 	        //extensive index warming, if enabled.
 	 		executeSavedQueries();
+            oldIndexRepository.close();
     	}
     }
 
@@ -404,11 +406,13 @@ final class ReloadableIndexHandler implements Stoppable {
     }
 
     private class IndexRepository {
-    	private static final int POOL_SIZE = 4;
+    	private static final int POOL_SIZE = 6;
+        private final Index index;
     	BlockingQueue<IndexSearcher> searcherPool;
         private final long timeout;
 
     	public IndexRepository(final Index index) throws SearcherException {
+            this.index = index;
     	    Config conf = Config.getConfig("searcher.properties");
     	    if (conf.getBoolean("compositeSearcher.useTrafficLimiting")) {
     		    timeout = conf.getInt("searcher.trafficLimiting.maxTimeInQueue");
@@ -492,6 +496,7 @@ final class ReloadableIndexHandler implements Stoppable {
     		        }
     		    }
     		}
+            library.discardIndex(index);
     	}
     }
 
