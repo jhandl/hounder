@@ -318,7 +318,9 @@ final class ReloadableIndexHandler implements Stoppable {
 	        clearCaches();
 	        //extensive index warming, if enabled.
 	 		executeSavedQueries();
-            oldIndexRepository.close();
+            if (null != oldIndexRepository) {
+                oldIndexRepository.close();
+            }
     	}
     }
 
