@@ -33,6 +33,7 @@ public class FetchServer {
     private Thread serverThread;
     private IFetcher fetcher;
     private Crawler crawler;
+    private boolean retryOnDisconnect;
 
 
     /** 
@@ -41,11 +42,12 @@ public class FetchServer {
      * @param crawler the crawler that will provide fetchlists and consume fetchdata.
      */
     public FetchServer (IFetcher fetcher, Crawler crawler) throws Exception {
+        Config config = Config.getConfig("crawler.properties");
         if (null == fetcher) {
-            Config config = Config.getConfig("crawler.properties");
             String className = config.getString("fetcher.plugin");
             fetcher = (IFetcher)Class.forName(className).getConstructor(new Class[]{}).newInstance(new Object[]{});
         }
+        retryOnDisconnect = config.getBoolean("retry.fetch.on.disconnect");
         this.fetcher = fetcher;
         this.crawler = crawler;
         serverThread = new ServerThread();
@@ -67,7 +69,11 @@ public class FetchServer {
                     fetchlist = crawler.getFetchlist();
                     fetchdata = null;
                     if (null != fetchlist) {
-                        fetchdata = fetcher.fetch(fetchlist);
+                        boolean retry = false;
+                        do {
+                            fetchdata = fetcher.fetch(fetchlist);
+                            retry = (retryOnDisconnect && 0 == fetchdata.getSuccesses());
+                        } while (retry);
                         fetchlist.remove();
                     } else {
                         logger.debug("Got null fetchlist, indicating end of cycle.");

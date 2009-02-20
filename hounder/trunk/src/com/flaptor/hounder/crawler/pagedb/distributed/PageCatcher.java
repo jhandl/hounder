@@ -84,8 +84,6 @@ public class PageCatcher implements IRemotePageCatcher {
         if (running) {
             this.server.requestStop();
             while (!this.server.isStopped()) {Execute.sleep(20);}
-        } else {
-            throw new IllegalStateException("Tried to stop a catcher that has not been started");
         }
     }
 

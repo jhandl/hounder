@@ -227,19 +227,19 @@ public class PageDBStats {
         try {
             pageSource.open();
             while (true) {
-                    Page page = pageSource.nextPage();
-                    pageCount++;
-                    if (page.getLastAttempt() > 0) {
-                        if (page.getLastSuccess() > 0) {
-                            fetchedPages++;
-                            fetchedScore += page.getScore();
-                        } else {
-                            failedPages++;
-                        }
+                Page page = pageSource.nextPage();
+                pageCount++;
+                if (page.getLastAttempt() > 0) {
+                    if (page.getLastSuccess() > 0) {
+                        fetchedPages++;
+                        fetchedScore += page.getScore();
+                    } else {
+                        failedPages++;
                     }
-                    priorityHistogram.addValue(page.getPriority());
-                    scoreHistogram.addValue(page.getScore());
-                    antiScoreHistogram.addValue(page.getAntiScore());
+                }
+                priorityHistogram.addValue(page.getPriority());
+                scoreHistogram.addValue(page.getScore());
+                antiScoreHistogram.addValue(page.getAntiScore());
             }
         } catch (IOException e) {
         } finally {

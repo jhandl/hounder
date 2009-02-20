@@ -139,7 +139,11 @@ public class PageDB implements IPageStore {
                     // Rename the old unsorted output file to a temp file.
                     File orig = new File(dir, unsortedFileName);
                     File temp = new File(dir, unsortedFileName+"_tmp");
-                    orig.renameTo(temp);
+                    if (temp.exists()) { // meaning we were killed while doing the trick below
+                        orig.delete(); // delete partially copied file
+                    } else {
+                        orig.renameTo(temp);
+                    }
                     orig = new File(dir, unsortedFileName); // reopen with the original name
                     outputStream = new ObjectOutputStream(new BufferedOutputStream(new FileOutputStream(orig), BUFFERSIZE));
                     inputStream = new ObjectInputStream(new BufferedInputStream(new FileInputStream(temp), BUFFERSIZE));
@@ -151,7 +155,9 @@ public class PageDB implements IPageStore {
                     // marker put there by the close operation, that can't be read past.
                     // We do both operations in one horrible hack so we don't have to read
                     // the whole pagedb twice (once for stats gathering, once for appending).
+                    logger.debug("Start copying pagedb to append...");
                     stats.gatherStatsFromPageDBFile(new PageDBCopier(inputStream, outputStream));  
+                    logger.debug("Finished copying pagedb to append...");
                     Execute.close(inputStream);
                     temp.delete();
                     sorted = false;
@@ -486,17 +492,23 @@ public class PageDB implements IPageStore {
     // Also has the side effect of copying while reading. This is needed to simulate an 
     // append of an ObjectOutputStream (that can't append by itself).
     protected static class PageDBCopier implements PageSource {
-        ObjectInputStream in;
-        ObjectOutputStream out;
+        private ObjectInputStream in;
+        private ObjectOutputStream out;
+        private int count;
         public PageDBCopier (ObjectInputStream in, ObjectOutputStream out) {
             this.in = in;
             this.out = out;
+            this.count = 0;
         }
         // FIXME throws Exception
         public void open () throws FileNotFoundException, IOException { }
         public Page nextPage () throws IOException {
             Page p = Page.read(in);
             p.write(out);
+            if (count++>1000) {
+                out.reset();
+                count = 0;
+            }
             return p;
         }
         public void close () {

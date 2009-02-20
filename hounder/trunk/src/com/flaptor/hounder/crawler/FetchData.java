@@ -34,6 +34,7 @@ public class FetchData implements Iterable<FetchDocument> {
 
     private static final Logger logger = Logger.getLogger(Execute.whoAmI());
     private ArrayList<FetchDocument> list;
+    private int successes;
     
 
     /** 
@@ -41,6 +42,7 @@ public class FetchData implements Iterable<FetchDocument> {
      */
     public FetchData () {
         list = new ArrayList<FetchDocument>();
+        successes = 0;
     }
 
 
@@ -50,6 +52,9 @@ public class FetchData implements Iterable<FetchDocument> {
      */
     public void addDoc(FetchDocument doc) {
         list.add(doc);
+        if (doc.success()) {
+            successes++;
+        }
     }
 
 
@@ -69,6 +74,14 @@ public class FetchData implements Iterable<FetchDocument> {
     }
 
 
+    /**
+     * Get the number of successful fetches
+     */
+    public int getSuccesses() {
+        return successes;
+    }
+    
+    
     /**
      * Iterates the fetchdata.
      */

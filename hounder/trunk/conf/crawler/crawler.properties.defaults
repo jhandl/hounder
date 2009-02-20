@@ -11,6 +11,9 @@ workers.per.cpu = 0.8
 # The fetcher plugin. By default it is the Nutch Fetcher, but any fetcher that implements the IFetcher interface will work.
 fetcher.plugin = com.flaptor.hounder.crawler.Nutch9Fetcher
 
+# When an entire fetchlist fails we assume it is due to a disconection from the web. In that case, we can ignore or retry.
+retry.fetch.on.disconnect = false
+
 # The directory of the pagedb.
 pagedb.dir = pagedb
 

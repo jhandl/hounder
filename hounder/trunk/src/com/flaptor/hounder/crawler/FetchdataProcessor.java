@@ -51,7 +51,7 @@ public class FetchdataProcessor {
     private final String IS_HOTSPOT; // the tag used to mark a doc as a hotspot.
     private ExecutorService pool;
     private final int workerCount;
-    private long discoveryPages;
+    private volatile long discoveryPages;
     
     /** 
      * Class initializer.
@@ -77,7 +77,7 @@ public class FetchdataProcessor {
 
 
 
-    private /*synchronized */ void newDiscoveryPage() {
+    private void newDiscoveryPage() {
         discoveryPages++;
     }
 
@@ -99,29 +99,26 @@ public class FetchdataProcessor {
      * hotspots earlier in the cycle will be dumped without sending a delete command to the document pipe.
      */
     public synchronized long processFetchdata(Iterable<FetchDocument> fetchdata, PageDB oldPageDB, PageDB newPageDB) throws IOException {
+        discoveryPages = 0; // set discoveryPages to 0, as there is a new "batch"
+        logger.debug("Processing the fetched data");
+
         // Create new pool to process.
         int queueLen = workerCount; // * 10; // TODO: explain why *10.
         BlockingQueue<Runnable> queue = new ArrayBlockingQueue<Runnable>(queueLen);
         RejectedExecutionHandler handler = new ThreadPoolExecutor.CallerRunsPolicy();
         pool = new ThreadPoolExecutor(queueLen, queueLen, 0, TimeUnit.SECONDS, queue, handler);
-        // set discoveryPages to 0, as there is a new "batch"
-        discoveryPages = 0;
-        logger.debug("Processing the fetched data");
+
 
         Iterator<FetchDocument> iter = fetchdata.iterator();
-        int submitted = 0;
-
 
         // Feed the thread pool queue.
         while (iter.hasNext() && Crawler.running()) {
             FetchDocument doc = iter.next();
             Runnable processorJob = new ProcessorJob(doc, oldPageDB, newPageDB);
             pool.execute(processorJob);
-            submitted++;
         }
 
-        // So the fetchdata ended, or the crawler is no longer
-        // running.
+        // So the fetchdata ended, or the crawler is no longer running.
         if (Crawler.running()) {
             pool.shutdown();
             while (!pool.isTerminated()) {
@@ -132,7 +129,7 @@ public class FetchdataProcessor {
             pool.shutdownNow();
             logger.debug("Ending process because crawler is no longer running.");
         }
-
+            
         return discoveryPages;
     }
 

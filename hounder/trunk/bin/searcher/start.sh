@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #Parameters taken as environment variables:
 #    GC_DEBUGGING: set to "true" to enable jvm's gc printing to std out.
 #    CLEAN: set to "true" to erase all logfiles before starting the searcher
@@ -9,7 +9,7 @@
 export PATH=${JAVA_HOME}/bin:$PATH
 
 #Java version checks
-if [ "$JAVA_HOME" == "" ]
+if [ "$JAVA_HOME" = "" ]
 then
     echo "JAVA_HOME not set."
     exit -1
@@ -24,7 +24,7 @@ then
 fi
 echo "Using javaVM ${JAVA_VERSION}"
 
-if [ "$RESTART" == "true" ]
+if [ "$RESTART" = "true" ]
 then
     ./stop.sh
 fi
@@ -48,7 +48,7 @@ CP=${CONF}:.:${LIBS}/hounder-trunk.jar:${LIBS}/hounder-trunk-deps.jar
 GET_PORT="java -cp ${CP} com.flaptor.util.PortUtil"
 MAIN=com.flaptor.hounder.searcher.MultipleRpcSearcher
 
-if [ "$CLEAN" == "true" ]
+if [ "$CLEAN" = "true" ]
 then
     echo "Removing old logfiles."
     rm -f logs/*
@@ -80,7 +80,7 @@ GC_DEBUG_OPTIONS="-verbose:gc \
         -XX:+PrintGCTimeStamps \
         -XX:-TraceClassUnloading"
 
-if [ "$GC_DEBUGGING" == "true" ]
+if [ "$GC_DEBUGGING" = "true" ]
 then
     echo "Starting the jvm with gc debugging options enabled. Check ${LOUT}"
     ARGS="$ARGS $GC_DEBUG_OPTIONS"
