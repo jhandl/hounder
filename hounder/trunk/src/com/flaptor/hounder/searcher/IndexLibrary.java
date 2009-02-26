@@ -123,8 +123,8 @@ public class IndexLibrary implements LocalIndexUpdater, Stoppable {
 
     public boolean addIndex(Index index) {
         try {
-            rih.setNewIndex(index);
             currentIndex = index;
+            rih.setNewIndex(index);
             return true;
         } catch (SearcherException e) {
             logger.error(e,e);
@@ -137,7 +137,8 @@ public class IndexLibrary implements LocalIndexUpdater, Stoppable {
         if (index.equals(currentIndex)) {
             // trying to discard the current index.
             // that is not the nicest thing, as the rih won't have an index
-            logger.error("Trying to discard current index. Ignoring index discard");
+            logger.error("Trying to discard current index (" 
+                    + currentIndex.getIndexDescriptor().getRsyncAccessString()    +") . Ignoring index discard");
             return;
         }
         if (index.exists()) {
