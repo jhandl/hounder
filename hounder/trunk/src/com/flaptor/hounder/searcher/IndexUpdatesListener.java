@@ -125,7 +125,7 @@ public class IndexUpdatesListener implements IRemoteIndexUpdater, Stoppable {
             if ( 0 != exitValue) {
                 // already logged in Execute
                 // TODO check what we want to do .. disk is probably full ..
-                throw new RuntimeException("Could not make rsync");
+                throw new RuntimeException("Could not make rsync " + System.getenv());
             }
 
             // now, verify that the index did not shrink more than 10%
