@@ -281,6 +281,12 @@ public class OpenSearchHandler extends AbstractHandler {
         	}
         }
         
+        boolean useXslt = false;
+        String useXsltStr = getParameter(params, "useXslt");
+        if (null != useXsltStr && useXsltStr.equalsIgnoreCase("yes")) {
+            useXslt = true;
+        }
+
         String requestUrl = request.getRequestURL().toString();
         String baseUrl = requestUrl.substring(0,requestUrl.lastIndexOf('/'));
         StringBuffer extraParams = new StringBuffer();
@@ -328,7 +334,8 @@ public class OpenSearchHandler extends AbstractHandler {
             sr = new GroupedSearchResults();
         }
 
-        Document dom = OpenSearch.buildDom_1_0(baseUrl, "search.jsp", "opensearch.jsp", extraParams.toString(), queryString, start, hitsPerPage, sr, status, statusMessage);
+        Document dom = OpenSearch.buildDom_1_0(baseUrl, "search.jsp", "opensearch.jsp", extraParams.toString(), queryString,
+            start, hitsPerPage, sr, status, statusMessage, useXslt);
         return dom;
     }
     

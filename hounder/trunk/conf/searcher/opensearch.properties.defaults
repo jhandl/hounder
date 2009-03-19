@@ -18,3 +18,4 @@ opensearch.description.from.index.field= snippet_text
 opensearch.title.prefix = Hounder:
 opensearch.link.prefix = 
 opensearch.description.prefix = Hounder search results for:
+opensearch.xsltPath= ./transformation.xsl

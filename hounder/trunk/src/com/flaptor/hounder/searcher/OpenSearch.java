@@ -22,6 +22,8 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.Vector;
+import java.util.Map;
+import java.util.HashMap;
 
 import org.apache.lucene.document.Field;
 import org.dom4j.Document;
@@ -57,6 +59,7 @@ public class OpenSearch {
     private static final String linkPrefix;
     private static final String titleField;
     private static final String titlePrefix;
+    private static final String xsltPath;
 
     static {
         Config config = Config.getConfig("opensearch.properties");
@@ -68,6 +71,7 @@ public class OpenSearch {
         descField = config.getString("opensearch.description.from.index.field");    	
         descPrefix = config.getString("opensearch.description.prefix");    	
         fieldsToShow.addAll(Arrays.asList(fieldList));
+        xsltPath = config.getString("opensearch.xsltPath");
     }
 
     /**
@@ -90,7 +94,7 @@ public class OpenSearch {
      * @return a DOM document
      * <br>An empty sr argument means that no results were found.
      */
-    public static final Document buildDom_1_0(String baseUrl, String htmlSearcher, String opensearchSearcher, String extraParams, String queryString, int start, int count, GroupedSearchResults sr, int status, String statusMessage) {
+    public static final Document buildDom_1_0(String baseUrl, String htmlSearcher, String opensearchSearcher, String extraParams, String queryString, int start, int count, GroupedSearchResults sr, int status, String statusMessage, boolean useXslt) {
 
         String encodedQuery = null;
         try {
@@ -100,6 +104,13 @@ public class OpenSearch {
             encodedQuery = "";
         }
         Document dom = DocumentHelper.createDocument();
+        if (useXslt) {
+            Map<String,String> map = new HashMap<String,String>();
+            map.put("type", "text/xsl");
+            map.put("href", xsltPath);
+            dom.addProcessingInstruction("xml-stylesheet", map);
+        }
+
         Namespace opensearchNs = DocumentHelper.createNamespace("opensearch", XMLNS_A9_OPENSEARCH_1_0);
         Namespace hounderNs = DocumentHelper.createNamespace("hounder", XMLNS_HOUNDER_OPENSEARCH_1_0);
         Element root = dom.addElement("rss").
