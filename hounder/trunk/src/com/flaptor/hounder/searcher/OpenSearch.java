@@ -113,11 +113,19 @@ public class OpenSearch {
 
         Namespace opensearchNs = DocumentHelper.createNamespace("opensearch", XMLNS_A9_OPENSEARCH_1_0);
         Namespace hounderNs = DocumentHelper.createNamespace("hounder", XMLNS_HOUNDER_OPENSEARCH_1_0);
-        Element root = dom.addElement("rss").
-        addAttribute("version", "2.0");
+        Element root;
+        Element channel;
+        if (!useXslt) {
+            root = dom.addElement("rss").
+            addAttribute("version", "2.0");
+            channel = root.addElement("channel");
+        } else {
+            channel = dom.addElement("searchResults");
+            root = channel;
+        } 
         root.add(opensearchNs);
         root.add(hounderNs);
-        Element channel = root.addElement("channel");
+
         channel.addElement("title").addText(titlePrefix+" "+DomUtil.filterXml(queryString));
         channel.addElement("link").addText(baseUrl + "/" + htmlSearcher +
                 "?query=" +encodedQuery + "&start=" + start + extraParams);

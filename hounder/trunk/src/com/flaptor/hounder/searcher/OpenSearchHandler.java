@@ -357,6 +357,7 @@ public class OpenSearchHandler extends AbstractHandler {
     public void handle(String target, HttpServletRequest request, HttpServletResponse response, int dispatch) throws IOException, ServletException {
         Document dom = doQuery(request, searcher);
         String openSearchResults = DomUtil.domToString(dom);
+        //response.setContentType("text/xml");
         response.setContentType("text/xml");
 //        response.setContentLength(openSearchResults.getBytes().length); <-- failed and was replaced in version 2721
 //        response.setContentLength(openSearchResults.length()); <-- failed and was commented out in version 4408
