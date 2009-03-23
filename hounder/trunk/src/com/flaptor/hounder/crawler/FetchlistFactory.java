@@ -58,6 +58,23 @@ public class FetchlistFactory {
         pages = pageSourceDB.iterator();
         this.progress = progress;
     }
+    
+    public void skip (long toSkip) {
+        logger.info("Skipping "+toSkip+" pages...");
+        long seen = 0;
+        long partial = 0;
+        while (seen < toSkip && pages.hasNext()) {
+            pages.next(); 
+            seen++;
+            if (partial++ % 10000 == 0) {
+                progress.addSeen(partial);
+                progress.report();
+                partial = 0;
+            }
+        }
+        progress.addSeen(partial);
+        progress.report();
+    }
 
     /**
      * Returns a new fetchlist.

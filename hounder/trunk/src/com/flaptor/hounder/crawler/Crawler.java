@@ -176,8 +176,6 @@ public class Crawler {
     private class FetchlistQueueMonitor extends Thread {
 
         private FetchlistFactory factory = null;
-        private long skip;
-        private long seen;
 
         public FetchlistQueueMonitor (PageDB oldPageDB, PageDB tmpPageDB, long skip) {
             try {
@@ -186,8 +184,7 @@ public class Crawler {
                 logger.error(e,e);
             }
             this.setName("FetchlistQueueMonitor");
-            this.skip = skip;
-            seen = 0;
+            factory.skip(skip);
         }
 
 
@@ -204,14 +201,9 @@ public class Crawler {
                     break;
                 } 
                 // else
-                seen += fetchlist.getSize();
-                if (skip >= seen) {
-                    fetchlist.remove();
-                } else {
-                    couldEnqueue = false;
-                    while (running() && !couldEnqueue && !fetchlistQueue.isClosed()) {
-                        couldEnqueue = fetchlistQueue.enqueueBlock(fetchlist,100);
-                    }
+                couldEnqueue = false;
+                while (running() && !couldEnqueue && !fetchlistQueue.isClosed()) {
+                    couldEnqueue = fetchlistQueue.enqueueBlock(fetchlist,100);
                 }
             } while (running() /* && !fetchlist.isClosed()*/);
 

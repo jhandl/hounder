@@ -49,7 +49,7 @@ public class CommandsModule extends AInternalModule {
 	 */
 	public Document[] internalProcess(final Document doc) {
 		Element root = doc.getRootElement();
-		if (root.getName().equals("command")) {
+		if (null != root && root.getName().equals("command")) {
 			String name = root.attributeValue("name");
 			if (null == name) {
 				logger.error("Invalid command: no name set. Ignoring it.");

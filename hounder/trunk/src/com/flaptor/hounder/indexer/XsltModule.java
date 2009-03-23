@@ -52,10 +52,18 @@ public class XsltModule extends AModule {
     private final Transformer transformer;
     
     public XsltModule() {
-        Config conf = Config.getConfig("indexer.properties");
-        String xsltFileName = conf.getString("XsltModule.file");
+        this(Config.getConfig("indexer.properties"));
+    }
+
+    public XsltModule(Config config) {
+        String xsltFileName = config.getString("XsltModule.file");
         try {
-            transformer = TransformerFactory.newInstance().newTransformer(new StreamSource(xsltFileName));
+            System.setProperty("javax.xml.transform.TransformerFactory", "net.sf.saxon.TransformerFactoryImpl");
+            TransformerFactory tFactory = TransformerFactory.newInstance();
+//          tFactory.setAttribute("generate-translet", true);
+//          tFactory.setAttribute("auto-translet", true);   
+//          tFactory.setAttribute("destination-directory", "translets");
+            transformer = tFactory.newTransformer(new StreamSource(xsltFileName));
         } catch (TransformerConfigurationException e) {
             logger.error("constructor: error creating the transformer.");
             throw new IllegalStateException(e);

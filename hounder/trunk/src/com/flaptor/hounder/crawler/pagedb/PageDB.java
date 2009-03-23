@@ -155,9 +155,9 @@ public class PageDB implements IPageStore {
                     // marker put there by the close operation, that can't be read past.
                     // We do both operations in one horrible hack so we don't have to read
                     // the whole pagedb twice (once for stats gathering, once for appending).
-                    logger.debug("Start copying pagedb to append...");
+                    logger.info("Opening pagedb to append...");
                     stats.gatherStatsFromPageDBFile(new PageDBCopier(inputStream, outputStream));  
-                    logger.debug("Finished copying pagedb to append...");
+                    logger.debug("Finished copying pagedb to append.");
                     Execute.close(inputStream);
                     temp.delete();
                     sorted = false;
@@ -739,9 +739,12 @@ public class PageDB implements IPageStore {
         System.out.println(msg);
         System.out.println();
         System.out.println("Usage:");
+        System.out.println("  PageDB stats <dir>                               (shows the pagedb stats)");
         System.out.println("  PageDB list <dir>                                (lists all pages)");
-        System.out.println("  PageDB create <dir> <url-file>                   (creates a new pagedb)"); 
-        System.out.println("  PageDB append <dir> <url-file>                   (appends to an existing pagedb)"); 
+        System.out.println("  PageDB new <dir>                                 (creates a new pagedb)"); 
+        System.out.println("  PageDB create <dir> <url-file>                   (creates a new pagedb with urls)"); 
+        System.out.println("  PageDB append <dir> <url-file>                   (appends urls to an existing pagedb)"); 
+        System.out.println("  PageDB copy <dir-orig> <dir-dest>                (copies a pagedb"); 
         System.out.println("  PageDB merge <dir-orig1> <dir-orig2> <dir-dest>  (merges two pagedbs, eliminating duplicates)"); 
         System.out.println("  PageDB repair <dir>                              (closes a pagedb that has not been properly closed)");
         System.out.println("  PageDB trim <dir-orig> <dir-dest>                (trims the pagedb according to crawler config)"); 

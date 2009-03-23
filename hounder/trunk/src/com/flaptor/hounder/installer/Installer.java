@@ -123,7 +123,6 @@ public class Installer {
 		//    /tmp/tempdir/localhost/hounder
 		//    /tmp/tempdir/otherhost/hounder
 		File tempDestDir = FileUtil.createTempDir("hounder-installation", "");
-		
 
         hosts = new HashSet<String>(); //localhost, otherhost, etc 
         hostDirs = new HashMap<String, File>(); //localhost -> tmpdir/localhost, otherhost -> tmpdir/localhost, etc

@@ -49,6 +49,7 @@ public class PageDBTrimmer {
     private static int[] maxRetries; // number of times a page will be allowed to fail before dropping it.
     private long pagedbSizeLimit; // number of pages that the pagedb cannot exceed.
     static { init(true); }
+long count0=0, count1=0, count2=0;
 
     /** 
      * Class initializer.
@@ -162,6 +163,7 @@ public class PageDBTrimmer {
             discoveryPagesWritten = 0;
             unfetchedPagesWritten = 0;
             rnd = new java.util.Random(System.currentTimeMillis());
+count0=0; count1=0; count2=0;
         }
 
         // Determine if a page if ok to write.
@@ -170,7 +172,7 @@ public class PageDBTrimmer {
             String motive = null; // this will hold an explanation if the page is rejected, for debugging
             String url = page.getUrl();
             long lastSuccess = page.getLastSuccess();
-
+count0++;
             if (lastSuccess > 0 || pagedbSizeLimit == 0 || dbFetchedSize + unfetchedPagesWritten <= pagedbSizeLimit) { 
                 // the number of pages written is within the imposed limit
 
@@ -195,6 +197,7 @@ public class PageDBTrimmer {
                         if (distance > 0 || hotspots.match(url)) { // if the page was a hotspot, it still is (needed for trimmer.main)
                             if (Crawler.urlFilter(url) != null) { // matches url regex filter file
                                 okToWrite = true;
+count1++;
                             } else motive = "discarded by url regex file";
                         } else motive = "no longer a hotspot";
                     } else motive = "too many retries "+retries+">"+maxRetries[distance]+" and no inlinks";
@@ -210,6 +213,7 @@ public class PageDBTrimmer {
                                             if (Crawler.urlFilter(url) != null) { // matches url regex filter file
                                                 okToWrite = true;
                                                 discoveryPagesWritten++;
+count2++;
                                             } else motive = "discarded by url regex file";
                                         } else motive = "discovery page wasn't lucky enough to make it to the front";
                                     } else motive = "too many discovery pages written "+discoveryPagesWritten+">"+discoveryFrontSize;
@@ -297,13 +301,13 @@ public class PageDBTrimmer {
 
 
             // get data for this page
-            String url = page.getUrl();
+            String url = page.getUrl().toLowerCase();
             logger.debug("  reading page " + url);
             long lastAttempt = page.getLastAttempt();
             long lastSuccess = page.getLastSuccess();
             long lastChange = page.getLastChange();
 
-            if (url.equals(bestPage.getUrl())) { // both pages have the same url
+            if (url.equals(bestPage.getUrl().toLowerCase())) { // both pages have the same url
                 logger.debug("    same page, will keep reading.");
 
                 if (page.getScore() < 0) {
@@ -443,6 +447,30 @@ public class PageDBTrimmer {
         Execute.close(hotspots);
     }
 
+    public void test(String name) throws IOException {
+        Config config = Config.getConfig("crawler.properties");
+        UrlPatterns hotspots = new UrlPatterns(config.getString("hotspot.file"));
+        PageFilter pageFilter = new PageFilter(0, new int[]{3}, 0L, 0L, 0L);
+        PageDB destPageDB = new PageDB(name+".test");
+        destPageDB.open(PageDB.WRITE+PageDB.UNSORTED);
+        PageDB pdb = new PageDB(name);
+        pdb.open(PageDB.READ);
+        for (Page p : pdb) {
+            String url = p.getUrl();
+            pageFilter.shouldWrite(destPageDB, p);
+//            destPageDB.addPage(p);
+            //hotspots.match(url);
+            //Crawler.urlFilter(url);
+        }
+System.out.println("TOTAL PAGES: "+count0+"  OPT1: "+count1+"  OPT2: "+count2);
+        pdb.close();
+        destPageDB.close();
+
+    }
+    public static void main(String[] args) throws IOException {
+        PageDBTrimmer tr = new PageDBTrimmer();
+        tr.test(args[0]);
+    }
 
 }
 

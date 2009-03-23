@@ -34,7 +34,10 @@ import com.flaptor.hounder.searcher.group.AGroup;
 import com.flaptor.hounder.searcher.group.NoGroup;
 import com.flaptor.hounder.searcher.group.StoredFieldGroup;
 import com.flaptor.hounder.searcher.group.TextSignatureGroup;
+import com.flaptor.hounder.searcher.query.AQuery;
+import com.flaptor.hounder.searcher.query.AndQuery;
 import com.flaptor.hounder.searcher.query.LazyParsedQuery;
+import com.flaptor.hounder.searcher.query.PayloadQuery;
 import com.flaptor.hounder.searcher.sort.ASort;
 import com.flaptor.hounder.searcher.sort.FieldSort;
 import com.flaptor.hounder.searcher.sort.ScoreSort;
@@ -280,6 +283,10 @@ public class OpenSearchHandler extends AbstractHandler {
                 logger.warn("Error parsing timezone", e);        		
         	}
         }
+
+        // Payload (uni-valued)
+        String payloadFieldName = getParameter(params,"payload");
+
         
         boolean useXslt = false;
         String useXsltStr = getParameter(params, "useXslt");
@@ -321,7 +328,11 @@ public class OpenSearchHandler extends AbstractHandler {
         int status = 0;
         String statusMessage = "OK";
         try {
-            sr = searcher.search(new LazyParsedQuery(queryString), start, hitsPerPage, group, groupSize, andFilter, sort);
+            AQuery query = new LazyParsedQuery(queryString);
+            if (null != payloadFieldName) {
+                query = new AndQuery(query, new PayloadQuery(payloadFieldName+"_payload"));
+            }
+            sr = searcher.search(query, start, hitsPerPage, group, groupSize, andFilter, sort);
         } catch (SearcherException e) {
             logger.error("SEARCHING",e);
             status = 200;

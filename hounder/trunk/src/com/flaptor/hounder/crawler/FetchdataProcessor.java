@@ -147,7 +147,7 @@ public class FetchdataProcessor {
             this.oldPageDB = oldPageDB;
             this.newPageDB = newPageDB;
         }
-
+        
         public void run() {
             try {
                 boolean wasHotspot = false;
@@ -235,7 +235,7 @@ public class FetchdataProcessor {
                                 if (!(page.getDistance() > maxDistance && pageurl.equals(link.getUrl()))) { // dont add self-links in a discovery front page
                                     if (Crawler.urlFilter(link.getUrl()) != null) { // if the url is a valid web page (not an image, etc)
                                         logger.debug("    Adding link to " + link + " to the pagedb");
-                                        Page child = new Page(link.getUrl(), 1.0f);
+                                        Page child = new Page(CleanURL(link.getUrl()), 1.0f);
                                         child.setRetries(0);
                                         child.setLastAttempt(0L);
                                         child.setLastSuccess(0L);
@@ -297,6 +297,15 @@ public class FetchdataProcessor {
                 logger.error(e, e);
             }
         }
+
+        private String CleanURL(String url) {
+            int n = url.indexOf("#");
+            if (n >= 0) {
+                return url.substring(0, n);
+            }
+            return url;
+        }
+
     }
 }
 

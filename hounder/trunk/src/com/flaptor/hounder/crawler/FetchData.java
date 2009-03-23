@@ -91,8 +91,10 @@ public class FetchData implements Iterable<FetchDocument> {
 
     public void remove() {
         // free resources
-        list.clear();
-        list = null;
+        if (null != list) {
+            list.clear();
+            list = null;
+        }
     }
 
 }

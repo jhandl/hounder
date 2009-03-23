@@ -87,8 +87,10 @@ public class FetchList implements IPageStore {
      * Free resources
      */
     public void remove() {
-        list.clear();
-        list = null;
+        if (null != list) {
+            list.clear();
+            list = null;
+        }
     }
 
 }
