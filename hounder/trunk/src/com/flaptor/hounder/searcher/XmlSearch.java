@@ -61,7 +61,7 @@ public class XmlSearch {
      * @return a DOM document
      * <br>An empty sr argument means that no results were found.
      */
-    public static final Document buildDom_1_0(String queryString, int start, int count, String orderBy, GroupedSearchResults sr, int status, String statusMessage, String xsltUri) {
+    public static final Document buildXML(String queryString, int start, int count, String orderBy, GroupedSearchResults sr, int status, String statusMessage, String xsltUri) {
 
         Document dom = DocumentHelper.createDocument();
         if (null != xsltUri) {
