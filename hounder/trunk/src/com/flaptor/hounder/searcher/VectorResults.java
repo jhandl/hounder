@@ -45,7 +45,7 @@ import com.flaptor.util.Pair;
  * the results into a portable structure.
  * @author Flaptor Development Team
  */
-public class VectorSearcher {
+public class VectorResults {
 
 	private static final Logger logger = Logger.getLogger(Execute.whoAmI());
 
@@ -55,7 +55,7 @@ public class VectorSearcher {
      * Constructor.
      * Creates a new CompositeSearcher to use.
      */
-    public VectorSearcher() {
+    public VectorResults() {
         searcher = new CompositeSearcher();
     }
     
@@ -64,7 +64,7 @@ public class VectorSearcher {
      * Uses the provided searcher.
      * @param s the searcher to use.
      */
-    public VectorSearcher(ISearcher s) {
+    public VectorResults(ISearcher s) {
         if (null == s) {
             throw new IllegalArgumentException("baseSearcher cannot be null.");
         }

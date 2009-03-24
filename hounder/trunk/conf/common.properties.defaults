@@ -17,8 +17,8 @@ port.offset.indexer.rmi=0
 port.offset.indexer.xml=1
 
 port.offset.searcher.rmi=10
-port.offset.searcher.xml=11
-port.offset.searcher.webOpenSearch=12
+port.offset.searcher.xmlrpc=11
+port.offset.searcher.http=12
 
 port.offset.crawler.pageCache.rmi=20
 port.offset.cacheServer.http=30

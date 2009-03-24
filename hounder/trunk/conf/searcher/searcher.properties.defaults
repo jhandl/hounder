@@ -3,6 +3,14 @@ searcher.dir=searcher
 
 searcher.isMultiSearcher=false
 
+#These booleans indicate what rpc interfaces will be available when starting the MultipleRpcSearcher.
+rmiInterface=yes
+xmlRpcInterface=yes
+openSearchInterface=yes
+webInterface=yes
+xmlInterface=yes
+
+
 #Configuration for QueryParser.
 #nonTokenizedFields is a comma-separated list of field names, that will not be tokenized when
 #resolving queries.
@@ -53,8 +61,9 @@ Searcher.snippetFragmentBoundary=[.!?\\n]
 websearch.redirect=no
 websearch.redirect.from=/
 websearch.redirect.to=/websearch
-websearch.context=/websearch
 opensearch.context=/opensearch
+websearch.context=/websearch
+xmlsearch.context=/xmlsearch
 
 # Whether to use payloads or not
 Searcher.usePayloads=no

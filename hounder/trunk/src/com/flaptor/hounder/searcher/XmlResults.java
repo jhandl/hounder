@@ -41,23 +41,23 @@ import java.util.List;
 /**
  * @author Flaptor Development Team
  */
-public class XmlSearch {
+public class XmlResults {
 
     /**
      * Private empty default constructor to prevent inheritance and instantiation.
      */
-    private XmlSearch() {}
+    private XmlResults() {}
 
     /**
      * Creates a XML search results document.
      * The generated dom contains only valid xml characters (infringing chars are removed).
-     * @param baseUrl the url of the webapp
-     * @param htmlSearcher the name of the component (servlet/jsp) that returns the search results in an HTML page
-     * @param extraParams the parameters present in the request, not passed explicitly (such as sort, reverse, etc.)
      * @param queryString the query string, as entered by the user
      * @param start the offset of the first result
      * @param count the number of results requested (the actual number of results found may be smaller)
-     * @param sr the SearchResults structure containing the result of performing the query
+     * @param orderBy the field by which the results are sorted
+     * @param sr the GroupedSearchResults structure containing the result of performing the query
+     * @param status the code returned by the searcher
+     * @param statusMessage the status description
      * @return a DOM document
      * <br>An empty sr argument means that no results were found.
      */
