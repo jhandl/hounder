@@ -48,7 +48,7 @@ public class LuceneUnicodeTest extends TestCase {
     private File dir;
 
     @Override
-    public void setUp() {
+    public void setUp() throws Exception {
         dir = com.flaptor.util.FileUtil.createTempDir("test", ".tmp"); 
         try {
             writer = new IndexWriter(dir, new StandardAnalyzer(), true);

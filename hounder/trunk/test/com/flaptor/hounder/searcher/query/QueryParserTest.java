@@ -28,11 +28,12 @@ import com.flaptor.util.TestUtils;
  */
 public class QueryParserTest extends TestCase {
 
-    File dir = FileUtil.createTempDir("queryParserTest", ".tmp");
+    File dir;
 
     QueryParser qp;
     
     protected void setUp() throws Exception {
+        dir = FileUtil.createTempDir("queryParserTest", ".tmp");
         String phrasesFile = dir.getAbsolutePath()+File.separator+"phrases.txt";
         TestUtils.writeFile(phrasesFile, "yo soy marto\nvoy a la casa de mono\nla casa\nsoy de river plate\n");
         String synonymFile = dir.getAbsolutePath()+File.separator+"synonyms.txt";

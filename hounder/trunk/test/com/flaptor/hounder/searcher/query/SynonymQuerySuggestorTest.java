@@ -39,13 +39,14 @@ import com.flaptor.util.TestUtils;
  */
 public class SynonymQuerySuggestorTest extends TestCase {
 
-    private File dir = FileUtil.createTempDir("SynonymQuerySuggestorTest", ".tmp");
+    private File dir;
     private ISearcher baseSearcher;
     private ISearcher suggestSearcher;
     private final float factor = 0.5f;
     
     @Override
     protected void setUp() throws Exception {
+        dir = FileUtil.createTempDir("SynonymQuerySuggestorTest", ".tmp");
         String synonymFile = dir.getAbsolutePath()+File.separator+"synonyms.txt";
         TestUtils.writeFile(synonymFile,"foo=house,bar\nfoo1=bar1\nfoos=bar,bar1,bar2\ndont=cant,wont");
 

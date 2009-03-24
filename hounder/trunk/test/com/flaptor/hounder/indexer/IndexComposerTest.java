@@ -38,7 +38,7 @@ public class IndexComposerTest extends TestCase {
     private String tmpDir;
     private ArrayList<Indexer> indexers;
 
-    protected void setUp() throws Exception{
+    protected void setUp() throws Exception {
         StringBuffer sb = new StringBuffer();
         for (int i = 0; i < numServers; i++) {
         //    setUpIndexer(i);

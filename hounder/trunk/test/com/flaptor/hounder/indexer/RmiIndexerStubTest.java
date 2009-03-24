@@ -31,7 +31,7 @@ public class RmiIndexerStubTest extends TestCase {
     private static final int OFFSET_RMI = 0;
 
     @Override
-    protected void setUp() {
+    protected void setUp() throws Exception {
         Config common = Config.getConfig("common.properties");
         common.set("port.base", "" + BASE_PORT);
         common.set("port.offset.indexer.rmi", "" + OFFSET_RMI);

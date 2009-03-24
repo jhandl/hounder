@@ -40,7 +40,7 @@ public class MultiIndexerTest extends TestCase {
     private static int basePort = 30000;
 
 	@Override
-    public void setUp() {
+    public void setUp() throws Exception {
         filterOutput("the webserver never freed up");
 	    
         tmpDirs = new ArrayList<String>(numIndexers);
@@ -61,7 +61,7 @@ public class MultiIndexerTest extends TestCase {
     }
 
 
-    public void setUpIndexer(int i){
+    public void setUpIndexer(int i) throws Exception {
         String tmpDir = com.flaptor.util.FileUtil.createTempDir("junit", ".tmp").getAbsolutePath();
         com.flaptor.util.FileUtil.deleteDir(tmpDir);
         tmpDirs.add(tmpDir);

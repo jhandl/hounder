@@ -32,7 +32,7 @@ public class RmiIndexerTest extends TestCase {
 	private String tmpDir = null;
     
     @Override
-    public void setUp() {
+    public void setUp() throws Exception {
 		tmpDir = com.flaptor.util.FileUtil.createTempDir("RmiIndexerStubTest", ".tmp").getAbsolutePath();
 		Config commonConfig = Config.getConfig("common.properties");
         commonConfig.set("baseDir", tmpDir);
