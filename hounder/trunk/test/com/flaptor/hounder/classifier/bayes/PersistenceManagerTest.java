@@ -37,7 +37,7 @@ public class PersistenceManagerTest extends TestCase {
     /**
      * Creates both probabilities and counters maps.
      */
-    public void setUp() {
+    public void setUp() throws Exception {
         dirname = FileUtil.createTempDir("persistenceManagerTest", ".tmp").getAbsolutePath();
         category = "test_category";
         probabilities = new HashMap<String,Double>();

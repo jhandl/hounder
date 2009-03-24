@@ -31,7 +31,7 @@ public class IndexManagerTest extends TestCase {
     private IndexManager man;
     
     @Override
-    public void setUp() {
+    public void setUp() throws Exception {
         tmpDir = com.flaptor.util.FileUtil.createTempDir("junit", ".tmp").getAbsolutePath();
         // Configuration
         // common

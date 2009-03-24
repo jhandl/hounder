@@ -42,7 +42,7 @@ public class PageTest extends TestCase {
     String tmpDir;
     
 
-    public void setUp() {
+    public void setUp() throws Exception {
         String log4jConfigPath = com.flaptor.util.FileUtil.getFilePathFromClasspath("log4j.properties");
         if (null != log4jConfigPath) {
             PropertyConfigurator.configureAndWatch(log4jConfigPath);

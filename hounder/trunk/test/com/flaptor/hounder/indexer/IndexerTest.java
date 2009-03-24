@@ -30,7 +30,7 @@ public class IndexerTest extends TestCase {
 	private String tmpDir = null;
 
 	@Override
-    public void setUp() {
+    public void setUp() throws Exception {
 		tmpDir = com.flaptor.util.FileUtil.createTempDir("junit", ".tmp").getAbsolutePath();
         com.flaptor.util.FileUtil.deleteDir(tmpDir);
         Config config = Config.getConfig("indexer.properties");

@@ -39,7 +39,7 @@ public class LoggerModuleTest extends TestCase {
     private String logFileName="loggerModule.out";
     private String tmpDir;
 
-    public void setUp() {
+    public void setUp() throws Exception {
         filterOutputRegex("[0-9 ]*(parsing|Using|impl:|not including|logging|No FS|Plugins|status|[a-z\\.]* = ).*");
         tmpDir = FileUtil.createTempDir("loggermoduletest",".tmp").getAbsolutePath();
         globalConfig = Config.getConfig("crawler.properties");

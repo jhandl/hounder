@@ -120,7 +120,7 @@ public class MultiSearcherTest extends TestCase {
         indexers.add(indexer);
 
         ISearcher baseSearcher = new CompositeSearcher();
-        ISearcher searcher = new MultipleRpcSearcher(baseSearcher,true/*rmi*/,false,false,false);
+        ISearcher searcher = new MultipleRpcSearcher(baseSearcher, true/*rmi*/, false, false, false, false);
         searchers.add(searcher);
 
         tmpDirs.add(tmpDir);

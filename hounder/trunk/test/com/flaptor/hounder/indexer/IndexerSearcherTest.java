@@ -105,7 +105,7 @@ public class IndexerSearcherTest extends TestCase {
 
 
 	@Override
-	public void setUp() {
+	public void setUp() throws Exception {
         String log4jConfigPath = com.flaptor.util.FileUtil.getFilePathFromClasspath("log4j.properties");
         if (null != log4jConfigPath) {
             PropertyConfigurator.configureAndWatch(log4jConfigPath);

@@ -98,9 +98,8 @@ sleep 10s
 if ./status.sh
 then
     RMI=`${GET_PORT} getPort searcher.rmi`
-    XMLRPC=`${GET_PORT} getPort searcher.xml`
-    WEB=`${GET_PORT} getPort searcher.webOpenSearch`
-    ONC=`${GET_PORT} getPort searcher.onc`
+    XMLRPC=`${GET_PORT} getPort searcher.xmlrpc`
+    WEB=`${GET_PORT} getPort searcher.http`
 
     echo
     echo    Searcher started, listening:
@@ -108,7 +107,6 @@ then
     echo        opensearch:  http://localhost:${WEB}/opensearch
     echo        rmi          ${RMI}
     echo        xmlrpc       ${XMLRPC}
-    echo        onc rpc      ${ONC}
     echo
 else
     echo Searcher did not start correctly, please check the logs.

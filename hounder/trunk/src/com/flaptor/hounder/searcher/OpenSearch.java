@@ -174,6 +174,11 @@ public class OpenSearch {
         item.addElement("title").addText(DomUtil.filterXml(title));
         item.addElement("link").addText(linkPrefix + DomUtil.filterXml(link));
         String desc = DomUtil.filterXml(description);
+        System.out.println("===================================================================================");
+        System.out.println("description: " + description);
+        System.out.println("-----------------------------------------------------------------------------------");
+        System.out.println("desc: " + desc);
+        System.out.println("===================================================================================");
         item.addElement("description").addText(desc);
 
         for (Iterator iter = doc.getFields().iterator(); iter.hasNext(); ) {
