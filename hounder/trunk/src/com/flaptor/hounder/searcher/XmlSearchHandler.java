@@ -23,9 +23,17 @@ import java.util.Map;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerConfigurationException;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.stream.StreamSource;
+import javax.xml.transform.stream.StreamResult;
+
 
 import org.apache.log4j.Logger;
 import org.dom4j.Document;
+import org.dom4j.io.DocumentSource;
 import org.mortbay.jetty.handler.AbstractHandler;
 
 import com.flaptor.hounder.indexer.XsltModule;
@@ -56,7 +64,7 @@ public class XmlSearchHandler extends AbstractHandler {
 
     private static final Logger logger = Logger.getLogger(Execute.whoAmI());
     private final ISearcher searcher;
-    private final XsltModule xsltModule;
+    private final Transformer transformer; 
 
     /**
      * Constructor.
@@ -75,8 +83,19 @@ public class XmlSearchHandler extends AbstractHandler {
             throw new RuntimeException("OpenSearchHandler constructor: base searcher cannot be null.");
         }
         searcher = s;
-        Config properties = Config.getConfig("searcher.properties");
-        xsltModule = new XsltModule(properties);
+        Config config = Config.getConfig("searcher.properties");
+
+        String xsltFileName = config.getString("XsltModule.file");
+        try {
+            System.setProperty("javax.xml.transform.TransformerFactory", "net.sf.saxon.TransformerFactoryImpl");
+            TransformerFactory tFactory = TransformerFactory.newInstance();
+            transformer = tFactory.newTransformer(new StreamSource(xsltFileName));
+        } catch (TransformerConfigurationException e) {
+            logger.error("constructor: error creating the transformer.");
+            throw new IllegalStateException(e);
+        }
+
+
     }
 
     /**
@@ -332,26 +351,29 @@ public class XmlSearchHandler extends AbstractHandler {
      * this method is a merge of search-base.jsp, opensearch.jsp and http://docs.codehaus.org/display/JETTY/Embedding+Jetty
      */
     public void handle(String target, HttpServletRequest request, HttpServletResponse response, int dispatch) throws IOException, ServletException {
-        Document originalDom = doQuery(request, searcher);
-        Document modifiedDom;
-        String rawStr = getParameter(request.getParameterMap(), "raw");
-        if (null != rawStr && rawStr.equalsIgnoreCase("true")) {
-            modifiedDom = originalDom;
-        } else {
-            Document[] modifiedDoms = xsltModule.process(originalDom);
-            if (modifiedDoms.length != 1) {
-                logger.error("The XmlModule returned: " + modifiedDoms.length + " documents.");
-                logger.debug("The original document was: " + originalDom);
-                response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Error processing internal xslt.");
-                return;
-            }
-            modifiedDom = modifiedDoms[0];
-        }
-        String openSearchResults = DomUtil.domToString(modifiedDom);
         response.setContentType("text/xml");
         response.setCharacterEncoding("utf-8");
         PrintWriter pw = response.getWriter();
-        pw.print(openSearchResults);
-        pw.flush();
+
+        Document originalDom = doQuery(request, searcher);
+        String rawStr = getParameter(request.getParameterMap(), "raw");
+        if (null != rawStr && rawStr.equalsIgnoreCase("true")) {
+            String openSearchResults = DomUtil.domToString(originalDom);
+            pw.print(openSearchResults);
+            pw.flush();
+        } else {
+            DocumentSource source = new DocumentSource(originalDom);
+            StreamResult result = new StreamResult(pw);
+            try {
+                synchronized(transformer) {
+                    transformer.transform(source, result);
+                }
+            } catch (TransformerException e) {
+                logger.error("internalProcess: exception while transforming document. (set error level to debug to see the offending document)", e);
+                logger.debug("offending document was: " + DomUtil.domToString(originalDom));
+                response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Error processing internal xslt.");
+                return;
+            }
+        }
     }
 }
