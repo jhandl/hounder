@@ -75,7 +75,7 @@ public class XmlSearchHandler extends AbstractHandler {
             throw new RuntimeException("OpenSearchHandler constructor: base searcher cannot be null.");
         }
         searcher = s;
-        Config properties = Config.getConfig("opensearch.properties");
+        Config properties = Config.getConfig("searcher.properties");
         xsltModule = new XsltModule(properties);
     }
 
@@ -234,10 +234,10 @@ public class XmlSearchHandler extends AbstractHandler {
         String groupParam = getParameter(params,"group");
         AGroup group = new NoGroup();
         if (groupParam != null) {
-            if (groupParam.equals("site")) {
-                group = new StoredFieldGroup("site");
-            } else if (groupParam.equals("signature")) {
+            if (groupParam.equals("signature")) {
                 group = new TextSignatureGroup("text");
+            } else {
+                group = new StoredFieldGroup(groupParam);
             }
         }
         int groupSize=1;
@@ -255,17 +255,17 @@ public class XmlSearchHandler extends AbstractHandler {
         int timezone = 0;
         String tzParam = getParameter(params, "tz");
         if (tzParam != null) {
-        	try {
-        		timezone = Integer.parseInt(tzParam);
-        	} catch (Exception e) {
+            try {
+                timezone = Integer.parseInt(tzParam);
+            } catch (Exception e) {
                 logger.warn("Error parsing timezone", e);        		
-        	}
+            }
         }
 
         // Payload (uni-valued)
         String payloadFieldName = getParameter(params,"payload");
 
-        
+
         //If useXsltStr is null, it means we should not include the directive to transform the
         //xml with an xslt
         String xsltUri = getParameter(params, "xsltUri");
@@ -303,7 +303,7 @@ public class XmlSearchHandler extends AbstractHandler {
             logger.error("SEARCHING",e);
             status = 200;
             statusMessage = e.getMessage();
-        	sr = new GroupedSearchResults();
+            sr = new GroupedSearchResults();
         } catch (RuntimeException e) {
             logger.error("SEARCHING",e);
             status = 100;
@@ -314,7 +314,7 @@ public class XmlSearchHandler extends AbstractHandler {
         Document dom = XmlResults.buildXml(queryString, start, hitsPerPage, orderByParam, sr, status, statusMessage, xsltUri);
         return dom;
     }
-    
+
 
     /**
      * Request can have the following parameters:
