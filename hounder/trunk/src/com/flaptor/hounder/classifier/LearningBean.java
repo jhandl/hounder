@@ -16,6 +16,7 @@ limitations under the License.
 package com.flaptor.hounder.classifier;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -35,7 +36,7 @@ import com.flaptor.util.FileUtil;
  */
 public class LearningBean extends TrainingBean{
     private static final Logger LOGGER = Logger.getLogger(Execute.whoAmI());
-    private static final File TMP_DIR= FileUtil.createTempDir("training", Execute.whoAmI()); 
+    private static File TMP_DIR;
 
 
 
@@ -45,7 +46,8 @@ public class LearningBean extends TrainingBean{
 
     private List<String> inputData;
 
-    public LearningBean() {
+    public LearningBean() throws IOException {
+    	TMP_DIR = FileUtil.createTempDir("training", Execute.whoAmI()); 
     }
 
 
