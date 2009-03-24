@@ -81,7 +81,7 @@ public class MultipleRpcSearcher implements ISearcher {
             int port = PortUtil.getPort("searcher.xml");
             logger.info("MultipleRpcSearcher constructor: starting xmlRpc searcher on port " + port);
             xmlRpcServer = new XmlrpcServer(port);
-            xmlRpcServer.addHandler(XMLRPC_CONTEXT, new XmlSearcher(baseSearcher));
+            xmlRpcServer.addHandler(XMLRPC_CONTEXT, new VectorSearcher(baseSearcher));
             xmlRpcServer.start();
         }
         if (openSearch || web) {

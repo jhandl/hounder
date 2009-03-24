@@ -132,7 +132,7 @@ public class Installer {
 	        File installBasePath = FileUtil.createOrGetDir(commonConfig.installOnBaseDir.getPath(), true, true); 
 	        logger.info("installing in " + installBasePath);
 	        FileUtil.deleteDir(installBasePath);
-	        installBasePath.mkdirs();
+	        installBasePath.mkdirs(); // TODO: This line is not needed; the dir has been already created.
 	      	installBase(installBasePath, distDir);
 		}        
         updateProgress(installProgress, 10, "configuring searcher", ui);
