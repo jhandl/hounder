@@ -18,6 +18,7 @@ package com.flaptor.hounder.searcher;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
+import java.util.HashMap;
 import java.util.Map;
 
 import javax.servlet.ServletException;
@@ -50,9 +51,10 @@ import com.flaptor.hounder.searcher.query.PayloadQuery;
 import com.flaptor.hounder.searcher.sort.ASort;
 import com.flaptor.hounder.searcher.sort.FieldSort;
 import com.flaptor.hounder.searcher.sort.ScoreSort;
+import com.flaptor.util.Config;
 import com.flaptor.util.DomUtil;
 import com.flaptor.util.Execute;
-import com.flaptor.util.Config;
+import com.flaptor.util.Pair;
 
 
 /**
@@ -64,7 +66,7 @@ public class XmlSearchHandler extends AbstractHandler {
 
     private static final Logger logger = Logger.getLogger(Execute.whoAmI());
     private final ISearcher searcher;
-    private final Transformer transformer; 
+    private Map<String, Pair<Transformer, String>> transformMap;
 
     /**
      * Constructor.
@@ -76,7 +78,10 @@ public class XmlSearchHandler extends AbstractHandler {
     
     /**
      * Constructor.
-     * @param s a searcher to use.
+     * It gets form the configuration file (searcher.properties) the variable "XmlSearchHandler.transformMap"
+     * and interprets it as a comma separated list of semicolon separated triads. Each triad has (urlPath,
+     * contentType, xsltFilePath).
+     * @param s the base searcher to use.
      */
     public XmlSearchHandler(ISearcher s) {
         if (null == s) {
@@ -85,14 +90,26 @@ public class XmlSearchHandler extends AbstractHandler {
         searcher = s;
         Config config = Config.getConfig("searcher.properties");
 
-        String xsltFileName = config.getString("XsltModule.file");
-        try {
-            System.setProperty("javax.xml.transform.TransformerFactory", "net.sf.saxon.TransformerFactoryImpl");
-            TransformerFactory tFactory = TransformerFactory.newInstance();
-            transformer = tFactory.newTransformer(new StreamSource(xsltFileName));
-        } catch (TransformerConfigurationException e) {
-            logger.error("constructor: error creating the transformer.");
-            throw new IllegalStateException(e);
+        transformMap = new HashMap<String, Pair<Transformer, String>>();
+        String[] mappings = config.getStringArray("XmlSearchHandler.transformMap");
+        System.setProperty("javax.xml.transform.TransformerFactory", "net.sf.saxon.TransformerFactoryImpl");
+        TransformerFactory tFactory = TransformerFactory.newInstance();
+        for ( String mapping : mappings) {
+            String[] parameters = mapping.split(";");
+            if (parameters.length != 3) {
+                throw new IllegalArgumentException("Invalid format in XmlSearchHandler.transformMap.");
+            }
+            String subPath= parameters[0];
+            String contentType = parameters[1];
+            String xmltPath = parameters[2];
+            Transformer transformer;
+            try {
+                transformer = tFactory.newTransformer(new StreamSource(xmltPath));
+            } catch (TransformerConfigurationException e) {
+                logger.error("constructor: compiling the xsl transformation.");
+                throw new IllegalArgumentException(e);
+            }
+            transformMap.put(subPath, new Pair<Transformer, String>(transformer, contentType));
         }
 
 
@@ -351,22 +368,29 @@ public class XmlSearchHandler extends AbstractHandler {
      * this method is a merge of search-base.jsp, opensearch.jsp and http://docs.codehaus.org/display/JETTY/Embedding+Jetty
      */
     public void handle(String target, HttpServletRequest request, HttpServletResponse response, int dispatch) throws IOException, ServletException {
-        response.setContentType("text/xml");
         response.setCharacterEncoding("utf-8");
         PrintWriter pw = response.getWriter();
 
         Document originalDom = doQuery(request, searcher);
         String rawStr = getParameter(request.getParameterMap(), "raw");
-        if (null != rawStr && rawStr.equalsIgnoreCase("true")) {
+        if (Boolean.parseBoolean(rawStr) || transformMap.isEmpty()) {
+            response.setContentType("text/xml");
             String openSearchResults = DomUtil.domToString(originalDom);
             pw.print(openSearchResults);
             pw.flush();
         } else {
-            DocumentSource source = new DocumentSource(originalDom);
-            StreamResult result = new StreamResult(pw);
+            Pair<Transformer, String> value = transformMap.get(request.getPathInfo());
+            if (null == value) {
+                response.sendError(HttpServletResponse.SC_NOT_FOUND, "There's no xslt to serve this context.");
+                return;
+            }
+            Transformer transformer = value.first();
+            String contentType = value.last();
+
+            response.setContentType(contentType);
             try {
                 synchronized(transformer) {
-                    transformer.transform(source, result);
+                    transformer.transform(new DocumentSource(originalDom), new StreamResult(pw));
                 }
             } catch (TransformerException e) {
                 logger.error("internalProcess: exception while transforming document. (set error level to debug to see the offending document)", e);
