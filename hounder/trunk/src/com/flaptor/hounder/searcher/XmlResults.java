@@ -57,7 +57,7 @@ public class XmlResults {
      * @param orderBy the field by which the results are sorted
      * @param sr the GroupedSearchResults structure containing the result of performing the query
      * @param status the code returned by the searcher
-     * @param statusMessage the status description
+     * @param statusDesc the status description
      * @return a DOM document
      * <br>An empty sr argument means that no results were found.
      */
