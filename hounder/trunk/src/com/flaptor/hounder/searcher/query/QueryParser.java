@@ -30,6 +30,7 @@ import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.search.BooleanClause;
 
 import com.flaptor.util.Config;
+import com.flaptor.util.Execute;
 import com.flaptor.util.Pair;
 
 /**

@@ -330,7 +330,7 @@ public class OpenSearchHandler extends AbstractHandler {
         try {
             AQuery query = new LazyParsedQuery(queryString);
             if (null != payloadFieldName) {
-                query = new AndQuery(query, new PayloadQuery(payloadFieldName+"_payload"));
+                query = new AndQuery(query, new PayloadQuery(payloadFieldName));
             }
             sr = searcher.search(query, start, hitsPerPage, group, groupSize, andFilter, sort);
         } catch (SearcherException e) {

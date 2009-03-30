@@ -35,34 +35,37 @@ public class ShortDatePayloadScorer extends DefaultSimilarity implements Payload
     private static final long serialVersionUID = 1L;
     private static final Logger logger = Logger.getLogger(com.flaptor.util.Execute.whoAmI());
     private static Calendar cal;
-    private static float weight;
+    private static float weight, damp;
     static {
         cal = new GregorianCalendar();
         weight = Config.getConfig("searcher.properties").getFloat("short.date.payload.weight");
+        damp = Config.getConfig("searcher.properties").getFloat("short.date.payload.damp");
     }
 
 
     public float scorePayload(byte[] payload) {
-        if (payload.length == 0) return 1f;
-        try {
-            long shortDate = new LongPayload(payload).asLong();
-            int year = (int)(shortDate/10000);
-            shortDate -= year*10000;
-            int month = (int)(shortDate/100);
-            shortDate -= month*100;
-            int day = (int)shortDate;
-            cal.clear();
-            cal.set(year,month-1,day);
-            long date = cal.getTimeInMillis();
-            long now = System.currentTimeMillis();
-            float diff = Math.abs(now - date)/(1000L*60*60*24);  // days
-            if (0 == diff) diff = 0.5f;
-// System.out.println("Paylaod: "+year+"/"+month+"/"+day+"  now="+now+"  date="+date+"  days="+diff+"   ret:"+(100f/diff));
-            return 1f+weight/diff;
-        } catch (Exception e) {
-            logger.error("scorePayload: " + e.getMessage(),e);
-            return 1f;
+        float boost = 1f;
+        if (payload.length >= 0) {
+            try {
+                long shortDate = new LongPayload(payload).asLong();
+                int year = (int)(shortDate/10000);
+                shortDate -= year*10000;
+                int month = (int)(shortDate/100);
+                shortDate -= month*100;
+                int day = (int)shortDate;
+                cal.clear();
+                cal.set(year,month-1,day);
+                long date = cal.getTimeInMillis();
+                long now = System.currentTimeMillis();
+                float diff = Math.abs(now - date)/(1000L*60*60*24);  // days
+                if (diff+damp == 0) diff += 0.1f;
+                boost = 1f+(weight*damp)/(diff+damp);
+System.out.println("Paylaod: "+year+"/"+month+"/"+day+"  now="+now+"  date="+date+"  days="+diff+"   ret:"+boost);
+            } catch (Exception e) {
+                logger.error("scorePayload: " + e.getMessage(),e);
+            }
         }
+        return boost;
     }
 
     @Override

@@ -37,7 +37,6 @@ import org.dom4j.Document;
 import org.dom4j.io.DocumentSource;
 import org.mortbay.jetty.handler.AbstractHandler;
 
-import com.flaptor.hounder.indexer.XsltModule;
 import com.flaptor.hounder.searcher.filter.BooleanFilter;
 import com.flaptor.hounder.searcher.filter.ValueFilter;
 import com.flaptor.hounder.searcher.group.AGroup;
@@ -48,6 +47,7 @@ import com.flaptor.hounder.searcher.query.AQuery;
 import com.flaptor.hounder.searcher.query.AndQuery;
 import com.flaptor.hounder.searcher.query.LazyParsedQuery;
 import com.flaptor.hounder.searcher.query.PayloadQuery;
+import com.flaptor.hounder.searcher.query.RangeQuery;
 import com.flaptor.hounder.searcher.sort.ASort;
 import com.flaptor.hounder.searcher.sort.FieldSort;
 import com.flaptor.hounder.searcher.sort.ScoreSort;
@@ -55,6 +55,9 @@ import com.flaptor.util.Config;
 import com.flaptor.util.DomUtil;
 import com.flaptor.util.Execute;
 import com.flaptor.util.Pair;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
 
 
 /**
@@ -218,12 +221,12 @@ public class XmlSearchHandler extends AbstractHandler {
             sort = new ScoreSort();
             for (int i = (sortingCriteria.length-1); i >= 0; i--) {
                 String sortingCriterion = sortingCriteria[i];
-                String parts[] = sortingCriterion.toLowerCase().split(":");
+                String parts[] = sortingCriterion.split(":");
                 String sortField = parts[0];
                 FieldSort.OrderType orderType = FieldSort.OrderType.STRING;
                 boolean reverse = false;
                 for (int p = 1; p < parts.length; p++) {
-                	String part = parts[p];
+                	String part = parts[p].toLowerCase();
                 	if ("reverse".equals(part) || "reversed".equals(part)) {
                 		reverse = true;
                 		continue;
@@ -265,6 +268,41 @@ public class XmlSearchHandler extends AbstractHandler {
                 andFilter.addFilter(orFilter);
             }
         }
+        
+        // Range filter
+        String rangeParam = getParameter(params,"range");
+        String rangeField = null;
+        String rangeStart = null;
+        String rangeEnd = null;
+        if (null != rangeParam) {
+            String parts[] = rangeParam.split(":");
+            if (parts.length > 1) {
+                rangeField = parts[0];
+                String limits[] = parts[1].split("-");
+                if (limits.length > 1) {
+                    rangeStart = limits[0];
+                    rangeEnd = limits[1];
+                }
+            }
+        }
+
+        // Date filter
+        String pastParam = getParameter(params,"past");
+        if (null != pastParam) {
+            String parts[] = pastParam.split(":");
+            if (parts.length > 2) {
+                rangeField = parts[0];
+                int days = Integer.parseInt(parts[1]);
+                SimpleDateFormat dateFormatter = new SimpleDateFormat(parts[2]);
+                Calendar cal = new GregorianCalendar();
+                rangeEnd = dateFormatter.format(cal.getTime());
+                cal.add(Calendar.DAY_OF_YEAR, -days);
+                rangeStart = dateFormatter.format(cal.getTime());
+            }
+        }
+
+
+
 
         // Group (uni-valued)
         String groupParam = getParameter(params,"group");
@@ -332,7 +370,10 @@ public class XmlSearchHandler extends AbstractHandler {
         try {
             AQuery query = new LazyParsedQuery(queryString);
             if (null != payloadFieldName) {
-                query = new AndQuery(query, new PayloadQuery(payloadFieldName+"_payload"));
+                query = new AndQuery(query, new PayloadQuery(payloadFieldName));
+            }
+            if (null != rangeField) {
+                query = new AndQuery(query, new RangeQuery(rangeField,rangeStart,rangeEnd,true,true));
             }
             sr = searcher.search(query, start, hitsPerPage, group, groupSize, andFilter, sort);
         } catch (SearcherException e) {
@@ -350,7 +391,6 @@ public class XmlSearchHandler extends AbstractHandler {
         Document dom = XmlResults.buildXml(queryString, start, hitsPerPage, orderByParam, sr, status, statusMessage, xsltUri);
         return dom;
     }
-
 
     /**
      * Request can have the following parameters:

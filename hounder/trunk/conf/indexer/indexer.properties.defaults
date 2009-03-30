@@ -45,6 +45,14 @@ HtmlParser.outputFieldNames=text
 HtmlParser.stored=true
 HtmlParser.indexed=true
 
+# SanitizerModule default config
+SanitizerModule.XPath = //field[@name='$']
+#SanitizerModule.XPath = //$
+SanitizerModule.html = title,text
+SanitizerModule.xml = 
+SanitizerModule.accents = 
+
+
 ###
 ### Used by the htmlparser on the crawler side
 ###

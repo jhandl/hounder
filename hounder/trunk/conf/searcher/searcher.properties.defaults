@@ -122,4 +122,8 @@ Searcher.query.sample.size = 0
 
 
 # which payloadscorer to use with each field
-SimilarityForwarder.scorers=date_payload:com.flaptor.hounder.searcher.payload.DatePayloadScorer
+#SimilarityForwarder.scorers=date_payload:com.flaptor.hounder.searcher.payload.DatePayloadScorer
+SimilarityForwarder.scorers=
+short.date.payload.weight = 0
+short.date.payload.damp = 0
+

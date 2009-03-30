@@ -105,6 +105,8 @@ public class MultipleRpcSearcher implements ISearcher {
                 String context = config.getString("xmlsearch.context");
                 logger.info("MultipleRpcSearcher constructor: starting xml searcher on port " + httpServerPort  + " context "+context);
                 webServer.addHandler(context, new XmlSearchHandler(baseSearcher));
+                String webappPath = this.getClass().getClassLoader().getResource("web-searcher").getPath();
+                webServer.addWebAppHandler("/", webappPath);
             }
             boolean redirect = config.getBoolean("websearch.redirect");
             if (redirect) {

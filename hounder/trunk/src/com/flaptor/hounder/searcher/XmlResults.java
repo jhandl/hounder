@@ -25,6 +25,8 @@ import java.util.Vector;
 import java.util.Map;
 import java.util.HashMap;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.apache.lucene.document.Field;
 import org.dom4j.Document;
 import org.dom4j.DocumentHelper;
@@ -35,6 +37,7 @@ import org.dom4j.QName;
 import com.flaptor.hounder.searcher.query.AQuery;
 import com.flaptor.util.Config;
 import com.flaptor.util.DomUtil;
+import com.flaptor.util.HtmlParser;
 import com.flaptor.util.StringUtil;
 import java.util.List;
 
@@ -43,6 +46,9 @@ import java.util.List;
  */
 public class XmlResults {
 
+    
+    private static HtmlParser htmlParser = new HtmlParser();
+    
     /**
      * Private empty default constructor to prevent inheritance and instantiation.
      */
@@ -102,9 +108,10 @@ public class XmlResults {
         Element item = parent.addElement("result");            
         for (Iterator iter = doc.getFields().iterator(); iter.hasNext(); ) {
             Field f = (Field) iter.next();
-            item.addElement(f.name()).addText(DomUtil.filterXml(f.stringValue()));
+            item.addElement(f.name()).addText(f.stringValue());
         }
         return item;
     }
+
 }
 
