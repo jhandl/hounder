@@ -80,7 +80,8 @@ public class XmlResults {
         Element group;
         root = dom.addElement("SearchResults");
 
-        root.addElement("totalResults").addText(Integer.toString(sr.totalGroupsEstimation()));
+        root.addElement("totalResults").addText(Integer.toString(sr.totalResults()));
+        root.addElement("totalGroupsEstimation").addText(Integer.toString(sr.totalGroupsEstimation()));
         root.addElement("startIndex").addText(Integer.toString(start));
         root.addElement("itemsPerPage").addText(Integer.toString(count));
         root.addElement("orderBy").addText(DomUtil.filterXml(orderBy));
