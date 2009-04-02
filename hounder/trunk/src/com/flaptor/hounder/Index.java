@@ -25,7 +25,6 @@ import java.util.Properties;
 
 import org.apache.log4j.Logger;
 import org.apache.lucene.analysis.Analyzer;
-import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.index.ConcurrentMergeScheduler;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexWriter;
@@ -353,7 +352,7 @@ public class Index {
         Config config = Config.getConfig("common.properties");
         String[] stopwords = config.getString("stopwords").split(",");
         logger.info("Using the following stopwords: " + java.util.Arrays.toString(stopwords));
-        analyzer = new StandardAnalyzer(stopwords);
+        analyzer = new LatinStandardAnalyzer(stopwords);
     }
 
     /**
