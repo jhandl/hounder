@@ -41,6 +41,8 @@ import org.apache.lucene.search.highlight.QueryScorer;
 import org.apache.lucene.search.highlight.SimpleHTMLFormatter;
 import org.apache.lucene.search.highlight.TextFragment;
 
+import com.google.common.base.Preconditions;
+
 import com.flaptor.hounder.searcher.filter.AFilter;
 import com.flaptor.hounder.searcher.group.AGroup;
 import com.flaptor.hounder.searcher.query.AQuery;
@@ -98,8 +100,8 @@ public class SnippetSearcher implements ISearcher{
     /**
      * Strings used to mark the highlighted term.
      */
-    private static final String HIGHLIGHTER_PREFIX = "<B>";
-    private static final String HIGHLIGHTER_SUFFIX = "</B>";
+    private final String HIGHLIGHTER_PREFIX;
+    private final String HIGHLIGHTER_SUFFIX;
 
     /**
      * Comparators used to sort the Fragment array by the fragment score or position
@@ -138,7 +140,9 @@ public class SnippetSearcher implements ISearcher{
                 config.getIntArray("Searcher.snippetLength"),
                 config.getString("Searcher.snippetFragmentSeparator"),
                 config.getString("Searcher.snippetFragmentBoundary"),
-                config.getBoolean("Searcher.emptySnippetsAllowed"));        
+                config.getBoolean("Searcher.emptySnippetsAllowed"),
+                config.getString("Searcher.highlighterPrefix"),
+                config.getString("Searcher.highlighterSuffix"));        
     }
 
     /**
@@ -153,11 +157,15 @@ public class SnippetSearcher implements ISearcher{
     public SnippetSearcher(ISearcher searcher, String[] snippetOfFields, 
             int[] snippetsLength,
             String fragmentSeparator, String fragmentBoundary,
-            boolean emptySnippetsAllowed) {
+            boolean emptySnippetsAllowed, String highlighterPrefix, String highlighterSuffix ) {
 
         if (null == searcher) {
             throw new IllegalArgumentException("searcher cannot be null.");
         }
+        Preconditions.checkNotNull(highlighterPrefix, "highlighter prefix cannot be null. Use \"\" instead.");
+        HIGHLIGHTER_PREFIX = highlighterPrefix;
+        Preconditions.checkNotNull(highlighterSuffix, "highlighter suffix cannot be null. Use \"\" instead.");
+        HIGHLIGHTER_SUFFIX = highlighterSuffix;
         this.searcher = searcher;
         this.queryParser = new QueryParser();
 
@@ -207,9 +215,7 @@ public class SnippetSearcher implements ISearcher{
      * Add snippets to the search-results. It adds a new field 
      * SNIPPET_FIELDNAME_PREFIX_field with the snippet for each field
      */
-    private void addSnippets (GroupedSearchResults res,  
-            org.apache.lucene.search.Query query) throws IOException {    
-
+    private void addSnippets (GroupedSearchResults res, org.apache.lucene.search.Query query) throws IOException {    
         Formatter simpleHtmlFormatter= new SimpleHTMLFormatter(HIGHLIGHTER_PREFIX, HIGHLIGHTER_SUFFIX);
         for (int i= 0; i < snippetOfFields.length; i++) {
             String fieldToSnippet = snippetOfFields[i];   
