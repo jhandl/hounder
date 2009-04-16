@@ -59,7 +59,7 @@ Searcher.highlighterSuffix=</B>
 # Note that to use a '-' you must escape it: [\\-], else is considered range
 Searcher.snippetFragmentBoundary=[.!?\\n]
 
-# Context for the two http interfaces
+# Context for the http interfaces
 websearch.redirect=no
 websearch.redirect.from=/
 websearch.redirect.to=/websearch
@@ -78,6 +78,7 @@ Searcher.payloadScorer=
 
 #PhraseMatcher configuration
 QueryParser.phrasesFile=
+QueryParser.usePhraseAdder=false
 
 #TrafficLimitingSearcher
 searcher.trafficLimiting.maxSimultaneousQueries=10

@@ -31,6 +31,10 @@ public class DatePayloadScorer extends DefaultSimilarity implements PayloadScore
     private static final long serialVersionUID = 1L;
     private static final Logger logger = Logger.getLogger(com.flaptor.util.Execute.whoAmI());
 
+    public DatePayloadScorer(String fieldName) {
+        /* do nothing */
+    }
+    
     public float scorePayload(byte[] payload) {
         if (payload.length == 0) return 1f;
         try {

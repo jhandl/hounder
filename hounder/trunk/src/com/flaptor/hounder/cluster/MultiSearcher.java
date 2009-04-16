@@ -130,6 +130,7 @@ public class MultiSearcher implements ISearcher {
         //other results may come after the timeout, a change in the size of the result set could cause problems
         synchronized(execution) {
             for (Results<GroupedSearchResults> result : execution.getResultsList()) {
+                @SuppressWarnings("unchecked")
                 int numSearcher = ((CallableWithId<GroupedSearchResults, Integer>)result.getTask()).getId();
                 if (result.isFinishedOk()) {
                 	GroupedSearchResults gsr = result.getResults();

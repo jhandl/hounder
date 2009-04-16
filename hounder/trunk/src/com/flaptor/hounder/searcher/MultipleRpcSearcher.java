@@ -42,7 +42,7 @@ public class MultipleRpcSearcher implements ISearcher {
     private RmiSearcherWrapper rmiSearcherWrapper;
     private RmiServer rmiServer = null;
     private XmlrpcServer xmlRpcServer = null;
-    private WebServer webServer = null;
+    private WebServer httpServer = null;
 
 
     @Override
@@ -87,34 +87,32 @@ public class MultipleRpcSearcher implements ISearcher {
         if (openSearch || web || xml) {
             Config config = Config.getConfig("searcher.properties");
             int httpServerPort = PortUtil.getPort("searcher.http");
-            webServer = new WebServer(httpServerPort); 
+            httpServer = new WebServer(httpServerPort); 
 
             if (openSearch) {
                 String context = config.getString("opensearch.context");
                 logger.info("MultipleRpcSearcher constructor: starting OpenSearch searcher on port " + httpServerPort + " context "+context);
-                webServer.addHandler(context, new OpenSearchHandler(baseSearcher));
+                httpServer.addHandler(context, new OpenSearchHandler(baseSearcher));
+            }
+            if (xml) {
+                String context = config.getString("xmlsearch.context");
+                logger.info("MultipleRpcSearcher constructor: starting xml searcher on port " + httpServerPort  + " context "+context);
+                httpServer.addHandler(context, new XmlSearchHandler(baseSearcher));
             }
             if (web) {
                 String context = config.getString("websearch.context");
                 logger.info("MultipleRpcSearcher constructor: starting web searcher on port " + httpServerPort  + " context "+context);
                 WebSearchUtil.setSearcher(baseSearcher);
                 String webappPath = this.getClass().getClassLoader().getResource("web-searcher").getPath();
-                webServer.addWebAppHandler(context, webappPath);
-            }
-            if (xml) {
-                String context = config.getString("xmlsearch.context");
-                logger.info("MultipleRpcSearcher constructor: starting xml searcher on port " + httpServerPort  + " context "+context);
-                webServer.addHandler(context, new XmlSearchHandler(baseSearcher));
-                String webappPath = this.getClass().getClassLoader().getResource("web-searcher").getPath();
-                webServer.addWebAppHandler("/", webappPath);
+                httpServer.addWebAppHandler(context, webappPath);
             }
             boolean redirect = config.getBoolean("websearch.redirect");
             if (redirect) {
                 String from = config.getString("websearch.redirect.from");
                 String to = config.getString("websearch.redirect.to");
-                webServer.addHandler("/", new RedirectHandler(from,to));
+                httpServer.addHandler("/", new RedirectHandler(from,to));
             }
-            try {webServer.start();} catch (Exception e) {throw new RuntimeException(e);}
+            try {httpServer.start();} catch (Exception e) {throw new RuntimeException(e);}
         }
     }
 

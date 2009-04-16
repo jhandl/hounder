@@ -57,6 +57,7 @@ import com.flaptor.util.Execute;
 import com.flaptor.util.Pair;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.GregorianCalendar;
 
 
@@ -70,7 +71,8 @@ public class XmlSearchHandler extends AbstractHandler {
     private static final Logger logger = Logger.getLogger(Execute.whoAmI());
     private final ISearcher searcher;
     private Map<String, Pair<Transformer, String>> transformMap;
-
+    private static SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd-HHmmss");
+    
     /**
      * Constructor.
      * Internally constructs a new CompositeSearcher to search.
@@ -86,15 +88,14 @@ public class XmlSearchHandler extends AbstractHandler {
      * contentType, xsltFilePath).
      * @param s the base searcher to use.
      */
-    public XmlSearchHandler(ISearcher s) {
-        if (null == s) {
+    public XmlSearchHandler(ISearcher searcher) {
+        if (null == searcher) {
             throw new RuntimeException("OpenSearchHandler constructor: base searcher cannot be null.");
         }
-        searcher = s;
+        this.searcher = searcher;
         Config config = Config.getConfig("searcher.properties");
-
         transformMap = new HashMap<String, Pair<Transformer, String>>();
-        String[] mappings = config.getStringArray("XmlSearchHandler.transformMap");
+        String[] mappings = config.getStringArray("xmlsearch.transformMap");
         System.setProperty("javax.xml.transform.TransformerFactory", "net.sf.saxon.TransformerFactoryImpl");
         TransformerFactory tFactory = TransformerFactory.newInstance();
         for ( String mapping : mappings) {
@@ -102,9 +103,9 @@ public class XmlSearchHandler extends AbstractHandler {
             if (parameters.length != 3) {
                 throw new IllegalArgumentException("Invalid format in XmlSearchHandler.transformMap.");
             }
-            String subPath= parameters[0];
-            String contentType = parameters[1];
-            String xmltPath = parameters[2];
+            String subPath = parameters[0].trim();
+            String contentType = parameters[1].trim();
+            String xmltPath = parameters[2].trim();
             Transformer transformer;
             try {
                 transformer = tFactory.newTransformer(new StreamSource(xmltPath));
@@ -114,8 +115,6 @@ public class XmlSearchHandler extends AbstractHandler {
             }
             transformMap.put(subPath, new Pair<Transformer, String>(transformer, contentType));
         }
-
-
     }
 
     /**
@@ -305,7 +304,7 @@ public class XmlSearchHandler extends AbstractHandler {
 
 
         // Group (uni-valued)
-        String groupParam = getParameter(params,"group");
+        String groupParam = getParameter(params,"groupBy");
         AGroup group = new NoGroup();
         if (groupParam != null) {
             if (groupParam.equals("signature")) {
@@ -336,8 +335,12 @@ public class XmlSearchHandler extends AbstractHandler {
             }
         }
 
-        // Payload (uni-valued)
-        String payloadFieldName = getParameter(params,"payload");
+        // Payloads
+        String payloadParam = getParameter(params,"payload");
+        String[] payloadFields = null;
+        if (null != payloadParam) {
+            payloadFields = payloadParam.split(",");
+        }
 
 
         //If useXsltStr is null, it means we should not include the directive to transform the
@@ -369,8 +372,10 @@ public class XmlSearchHandler extends AbstractHandler {
         String statusMessage = "OK";
         try {
             AQuery query = new LazyParsedQuery(queryString);
-            if (null != payloadFieldName) {
-                query = new AndQuery(query, new PayloadQuery(payloadFieldName));
+            if (null != payloadFields) {
+                for (String fieldName : payloadFields) {
+                    query = new AndQuery(query, new PayloadQuery(fieldName));
+                }
             }
             if (null != rangeField) {
                 query = new AndQuery(query, new RangeQuery(rangeField,rangeStart,rangeEnd,true,true));
@@ -387,8 +392,9 @@ public class XmlSearchHandler extends AbstractHandler {
             statusMessage = "Internal error in OpenSearchHandler: " +e.getMessage();
             sr = new GroupedSearchResults();
         }
-
-        Document dom = XmlResults.buildXml(queryString, start, hitsPerPage, orderByParam, sr, status, statusMessage, xsltUri);
+        System.out.println(formatter.format(new Date())+" q="+queryString);
+ 
+        Document dom = XmlResults.buildXml(queryString, start, hitsPerPage, orderByParam, sr, status, statusMessage, xsltUri, rangeField, rangeStart, rangeEnd, params);
         return dom;
     }
 
@@ -412,6 +418,11 @@ public class XmlSearchHandler extends AbstractHandler {
         PrintWriter pw = response.getWriter();
 
         Document originalDom = doQuery(request, searcher);
+        originalDom.getRootElement()
+                .addAttribute("SearchEngine","Hounder (hounder.org)")
+                .addAttribute("DevelopedBy","Flaptor (flaptor.com)");
+
+        @SuppressWarnings("unchecked")
         String rawStr = getParameter(request.getParameterMap(), "raw");
         if (Boolean.parseBoolean(rawStr) || transformMap.isEmpty()) {
             response.setContentType("text/xml");
@@ -420,6 +431,7 @@ public class XmlSearchHandler extends AbstractHandler {
             pw.flush();
         } else {
             Pair<Transformer, String> value = transformMap.get(request.getPathInfo());
+//System.out.println("XML HANDLE: path="+request.getPathInfo()+"  value="+value);
             if (null == value) {
                 response.sendError(HttpServletResponse.SC_NOT_FOUND, "There's no xslt to serve this context.");
                 return;

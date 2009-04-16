@@ -35,6 +35,7 @@ import org.dom4j.Namespace;
 import org.dom4j.QName;
 
 import com.flaptor.hounder.searcher.query.AQuery;
+import com.flaptor.hounder.searcher.query.LazyParsedQuery;
 import com.flaptor.util.Config;
 import com.flaptor.util.DomUtil;
 import com.flaptor.util.HtmlParser;
@@ -48,7 +49,7 @@ public class XmlResults {
 
     
     private static HtmlParser htmlParser = new HtmlParser();
-    
+
     /**
      * Private empty default constructor to prevent inheritance and instantiation.
      */
@@ -63,11 +64,17 @@ public class XmlResults {
      * @param orderBy the field by which the results are sorted
      * @param sr the GroupedSearchResults structure containing the result of performing the query
      * @param status the code returned by the searcher
-     * @param statusDesc the status description
+     * @param statusMessage the status description
+     * @param xsltUri the uri for the xslt used to process the xml on the client side, 
+     *          or null if no client-side processing is needed
+     * @param rangeField field for which a range filter will be applied, or null if no filter used.
+     * @param rangeStart start value for the range filter.
+     * @param rangeEnd end value for the range filter.
+     * @param params a map of parameters sent to the searcher with the request.
      * @return a DOM document
      * <br>An empty sr argument means that no results were found.
      */
-    public static final Document buildXml(String queryString, int start, int count, String orderBy, GroupedSearchResults sr, int status, String statusMessage, String xsltUri) {
+    public static final Document buildXml(String queryString, int start, int count, String orderBy, GroupedSearchResults sr, int status, String statusMessage, String xsltUri, String rangeField, String rangeStart, String rangeEnd, Map<String,String[]> params) {
 
         Document dom = DocumentHelper.createDocument();
         if (null != xsltUri) {
@@ -79,16 +86,29 @@ public class XmlResults {
         Element root;
         Element group;
         root = dom.addElement("SearchResults");
-
         root.addElement("totalResults").addText(Integer.toString(sr.totalResults()));
         root.addElement("totalGroupsEstimation").addText(Integer.toString(sr.totalGroupsEstimation()));
         root.addElement("startIndex").addText(Integer.toString(start));
         root.addElement("itemsPerPage").addText(Integer.toString(count));
         root.addElement("orderBy").addText(DomUtil.filterXml(orderBy));
         root.addElement("query").addText(DomUtil.filterXml(queryString));
+        if (null != rangeField) {
+            root.addElement("filter").
+                    addAttribute("field",rangeField).
+                    addAttribute("start",rangeStart).
+                    addAttribute("end",rangeEnd);
+        }
+        if (null != params) {
+            for (String key : params.keySet()) {
+                if (null == root.selectSingleNode(key)) {
+                    String val = params.get(key)[0];
+                    root.addElement(key).addText(val);
+                }
+            }
+        }
         AQuery suggestedQuery = sr.getSuggestedQuery();
         if (null != suggestedQuery) {
-            root.addElement("suggestedQuery").addText(DomUtil.filterXml(suggestedQuery.toString()));
+            root.addElement("suggestedQuery").addText(DomUtil.filterXml(((LazyParsedQuery)suggestedQuery).getQueryString()));
         }
         root.addElement("status").addText(Integer.toString(status));
         root.addElement("statusDesc").addText(statusMessage);

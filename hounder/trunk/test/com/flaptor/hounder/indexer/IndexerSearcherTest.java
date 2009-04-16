@@ -85,6 +85,7 @@ public class IndexerSearcherTest extends TestCase {
 	private String group2b = "<documentAdd><documentId>group2b</documentId><field name=\"content\" stored=\"true\" indexed=\"true\" tokenized=\"true\">b</field><field name=\"group\" stored=\"true\" indexed=\"true\" tokenized=\"true\">group2</field></documentAdd>";
 	private String group3a = "<documentAdd><documentId>group3a</documentId><field name=\"content\" stored=\"true\" indexed=\"true\" tokenized=\"true\">a</field><field name=\"group\" stored=\"true\" indexed=\"true\" tokenized=\"true\">group3</field></documentAdd>";
 
+	private String latin1 = "<documentAdd><documentId>latin1</documentId><field name=\"content\" stored=\"true\" indexed=\"true\" tokenized=\"true\">xsín xcón</field></documentAdd>";
 
 
     // boosted by 10, but no payload.
@@ -179,6 +180,26 @@ public class IndexerSearcherTest extends TestCase {
             unfilterOutput();
         }
 
+
+
+	/**
+	 * Tests filters that do not mach any document, filter them all.
+	 */
+    @TestInfo(testType = TestInfo.TestType.SYSTEM,
+            requiresPort = {10000, 10001, 10010, 10011, 10012})
+	public void testLatinText() throws SearcherException{
+		indexer.index(latin1);
+		Execute.sleep(8000);
+		GroupedSearchResults sr;
+        sr = searcher.search(new LazyParsedQuery("xsín"), 0, 10, noGroup, 1, null, null);
+		assertEquals("Searching 'xsín'", 1, sr.totalGroupsEstimation());
+        sr = searcher.search(new LazyParsedQuery("xsin"), 0, 10, noGroup, 1, null, null);
+		assertEquals("Searching 'xsin'", 1, sr.totalGroupsEstimation());
+        sr = searcher.search(new LazyParsedQuery("xcón"), 0, 10, noGroup, 1, null, null);
+		assertEquals("Searching 'xcón'", 1, sr.totalGroupsEstimation());
+        sr = searcher.search(new LazyParsedQuery("xcon"), 0, 10, noGroup, 1, null, null);
+		assertEquals("Searching 'xcon'", 1, sr.totalGroupsEstimation());
+	}
 
 
     @TestInfo(testType = TestInfo.TestType.SYSTEM,

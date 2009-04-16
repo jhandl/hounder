@@ -18,14 +18,16 @@ package com.flaptor.hounder.indexer;
 
 import com.flaptor.util.Config;
 import com.flaptor.util.DomUtil;
+import com.flaptor.util.Execute;
+
 import org.apache.log4j.Logger;
+
 import org.dom4j.Document;
+import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
 
-import com.flaptor.util.Execute;
 import java.util.Arrays;
 import java.util.HashSet;
-import org.dom4j.DocumentHelper;
 
 /**
  * This class implements a module that captures commands and executes them.
@@ -97,32 +99,45 @@ public class SanitizerModule extends AModule {
 
     private String filterAccents(String text) {
         StringBuffer buf = new StringBuffer();
+        text = text.toLowerCase();
         for (int i=0; i<text.length(); i++) {
             char c = text.charAt(i);
             switch (c) {
                 case 'á':
-                case 'Á':
+                case 'à':
+                case 'â':
+                case 'ä':
                     c = 'a';
                     break;
                 case 'é':
-                case 'É':
+                case 'è':
+                case 'ê':
+                case 'ë':
                     c = 'e';
                     break;
                 case 'í':
-                case 'Í':
+                case 'ì':
+                case 'î':
+                case 'ï':
                     c = 'i';
                     break;
                 case 'ó':
-                case 'Ó':
+                case 'ò':
+                case 'ô':
+                case 'ö':
                     c = 'o';
                     break;
                 case 'ú':
-                case 'Ú':
+                case 'ù':
+                case 'û':
+                case 'ü':
                     c = 'u';
                     break;
                 case 'ñ':
-                case 'Ñ':
                     c = 'n';
+                    break;
+                case 'ç':
+                    c = 'c';
                     break;
             }
             buf.append(c);

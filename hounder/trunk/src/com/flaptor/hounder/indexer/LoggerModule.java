@@ -20,6 +20,8 @@ import org.dom4j.Document;
 
 import com.flaptor.util.DomUtil;
 import com.flaptor.util.Execute;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 /**
  * This class implements a module that logs the xml document that passes through
@@ -31,13 +33,14 @@ import com.flaptor.util.Execute;
 public final class LoggerModule extends AModule {
 
     private static final Logger logger = Logger.getLogger(Execute.whoAmI());
+    private static final SimpleDateFormat formatter = new SimpleDateFormat("yyyy.MM.dd HH:mm:ss.SSS");
 
     /**
      * Processes the document. Takes the xml document, prints it to the logger,
      * and returns the same document.
      */
     protected Document[] internalProcess(final Document doc) {
-        logger.info(DomUtil.domToString(doc));
+        logger.info("LoggerModule: "+formatter.format(new Date())+"  "+DomUtil.domToString(doc));
         Document[] docs = {doc};
         return docs;
     }

@@ -242,7 +242,7 @@ public class DocumentConverter {
                 ldoc.add(new Field(payloadName,new FixedValueTokenStream(payloadName,payloadValue)));
                 logger.debug("Adding payload \""+payloadName+"\" to document \"" + docIdText + "\" with value " + payloadValue);
             } catch (NumberFormatException nfe) {
-                throw new IllegalDocumentException("Writer - while parsing Long payload: " + nfe.getMessage());
+                throw new IllegalDocumentException("Writer - while parsing Long payload \""+payloadName+"\": " + nfe.getMessage());
             }
         }
 

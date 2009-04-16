@@ -48,7 +48,7 @@ public class SimilarityForwarder extends DefaultSimilarity {
         try { 
             for (Pair<String,String> pair: pairs) {
 
-                PayloadScorer scorer = (PayloadScorer)Class.forName(pair.last()).newInstance();
+                PayloadScorer scorer = (PayloadScorer)Class.forName(pair.last()).getConstructor(new Class[]{String.class}).newInstance(new Object[]{pair.first()});
 
                 if (scorers.containsKey(pair.first())) {
                     PayloadScorer oldScorer = scorers.get(pair.first());

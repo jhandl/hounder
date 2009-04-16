@@ -262,9 +262,9 @@ public class Index {
         mp.setMinMergeMB(smallSegmentSize);
         mp.setMergeFactor(config.getInt("Index.mergeFactor"));
         mergePolicy = mp;
-        
-        
+       
         createAnalyzer();
+
         setUpDirectory(create);
     }
     

@@ -78,7 +78,7 @@ public class Indexer implements IRmiIndexer, IIndexer, Stoppable {
     // Statistics instance, to report events, and constants
     private final Statistics statistics = Statistics.getStatistics();
     public static final String DOCUMENT_ENQUEUED = "Indexer.DocumentEnqueued";
-
+    private static long lastTime = System.currentTimeMillis();
 
     /**
      * Constructor.
@@ -158,6 +158,7 @@ public class Indexer implements IRmiIndexer, IIndexer, Stoppable {
      */
     public IndexerReturnCode index(final Document doc) {
     // Changed from indexDom because there is no need to use the param type as part of the method name.
+        IndexerReturnCode resp = null;
         logger.debug("indexDom: received data to index");
         if (state != RunningState.RUNNING) {
             String s = "indexDom: Trying to index a document but the Indexer is no longer running.";
@@ -166,11 +167,12 @@ public class Indexer implements IRmiIndexer, IIndexer, Stoppable {
         }
         if (queue.enqueueNoBlock(doc)) {
             statistics.notifyEventValue(DOCUMENT_ENQUEUED,1f);
-            return IndexerReturnCode.SUCCESS;
+            resp = IndexerReturnCode.SUCCESS;
         } else {
             statistics.notifyEventError(DOCUMENT_ENQUEUED);
-            return IndexerReturnCode.RETRY_QUEUE_FULL;
+            resp = IndexerReturnCode.RETRY_QUEUE_FULL;
         }
+        return resp;
     }
 
     /**
@@ -185,22 +187,27 @@ public class Indexer implements IRmiIndexer, IIndexer, Stoppable {
         // so it reduces the impact of a denial-of-service attack
         // (not necessarily malicious, it could be due to a bug in the
         // client)
+        logger.debug("REQUEST: "+(System.currentTimeMillis()-lastTime));
+
+        lastTime = System.currentTimeMillis();
+        IndexerReturnCode resp = null;
         if (state != RunningState.RUNNING) {
             String s = "indexDom: Trying to index a document but the Indexer is no longer running.";
             logger.error(s);
             throw new IllegalStateException(s);
         }
         if (queue.isFull()) {
-            return IndexerReturnCode.RETRY_QUEUE_FULL;
+            resp = IndexerReturnCode.RETRY_QUEUE_FULL;
+            logger.debug("Refusing to accept document. Indexer Queue full.");
         } else {
             Document doc = parser.genDocument(text);
             if (null == doc) {
-                return IndexerReturnCode.PARSE_ERROR;
+                resp = IndexerReturnCode.PARSE_ERROR;
             } else {
-                return index(doc);
+                resp = index(doc);
             }
         }
-
+        return resp;
     }
 
     /**

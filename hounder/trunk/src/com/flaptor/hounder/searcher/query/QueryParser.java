@@ -15,6 +15,7 @@ limitations under the License.
 */
 package com.flaptor.hounder.searcher.query;
 
+import com.flaptor.hounder.LatinStandardAnalyzer;
 import java.io.File;
 import java.io.IOException;
 import java.io.Reader;
@@ -49,6 +50,7 @@ public class QueryParser implements Serializable {
 	protected Analyzer analyzer = null;
 	protected Pair<?,?> fieldsAndWeights[] = null;
     protected PhraseMatcher phraseMatcher = null;
+    protected PhraseAdder phraseAdder = null;
 
 	/**
 	  Constructor.
@@ -57,6 +59,7 @@ public class QueryParser implements Serializable {
 	public QueryParser() {
 		analyzer = createAnalyzer();   
         phraseMatcher = createPhraseMatcher();
+        phraseAdder = createPhraseAdder();
         
         // Queryparser config
         String fields[] = searcherConfig.getString("QueryParser.searchFields").split(",");
@@ -81,7 +84,7 @@ public class QueryParser implements Serializable {
 	*/
 	private Analyzer createAnalyzer() {
         final String[] stopwords = commonConfig.getStringArray("stopwords");
-        StandardAnalyzer stdAnalyzer = new StandardAnalyzer(stopwords);
+        StandardAnalyzer stdAnalyzer = new LatinStandardAnalyzer(stopwords);
 		PerFieldAnalyzerWrapper retval = new PerFieldAnalyzerWrapper(stdAnalyzer);
 		String[] nonTokenizedField = searcherConfig.getStringArray("QueryParser.nonTokenizedFields");
         String[] synonymFields = searcherConfig.getStringArray("QueryParser.synonymFields");
@@ -127,7 +130,26 @@ public class QueryParser implements Serializable {
         return pm;
     }
 
+    private PhraseAdder createPhraseAdder() {
+        PhraseAdder pa = null;
+        if (searcherConfig.getBoolean("QueryParser.usePhraseAdder")) {
+            pa = new PhraseAdder();
+        }
+        return pa;
+    }
 
+    private class PhraseAdder {
+        public String addPhrase(String queryStr) {
+            if (queryStr.indexOf('"') == -1) {
+                queryStr = "(" + queryStr.trim() + ") OR \"" + queryStr.trim() + "\"";
+            }
+            if (logger.isDebugEnabled()) {
+                logger.debug("QUERYSTR: ["+queryStr+"]");
+            }
+            return queryStr;
+        }
+    }
+    
     /**
      * Returns a query from a string.
      * @see org.apache.lucene.queryParser.QueryParser for the format of the input string.
@@ -140,8 +162,8 @@ public class QueryParser implements Serializable {
             logger.error(s);
             throw new NullPointerException(s);
         }
-
         queryStr = matchPhrases(queryStr);
+        queryStr = addPhrase(queryStr);
 
         org.apache.lucene.search.Query q[];
         org.apache.lucene.search.BooleanQuery bq = new org.apache.lucene.search.BooleanQuery();
@@ -200,7 +222,12 @@ public class QueryParser implements Serializable {
         return newQuery.toString().trim();
     }
 
-
+    private String addPhrase(String queryStr) {
+        if (null != phraseAdder) {
+            queryStr = phraseAdder.addPhrase(queryStr);
+        }
+        return queryStr;
+    }
 
     public TokenStream tokenStream(String arg0, Reader arg1) {
         return analyzer.tokenStream(arg0, arg1);
