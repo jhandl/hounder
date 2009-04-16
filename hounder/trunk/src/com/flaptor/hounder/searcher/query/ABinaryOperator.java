@@ -57,5 +57,12 @@ abstract class ABinaryOperator extends AQuery implements Serializable {
         leftTerm = lt;
         rightTerm = rt;
     }
-    
+
+
+    public AQuery getLeftTerm(){
+        return leftTerm;
+    }
+    public AQuery getRightTerm(){
+        return rightTerm;
+    }
 }

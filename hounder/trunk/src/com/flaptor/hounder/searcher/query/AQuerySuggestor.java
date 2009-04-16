@@ -56,10 +56,26 @@ public class AQuerySuggestor {
      *          A List<AQuery> of suggested queries.
      */
     public List<AQuery> suggest(AQuery query) {
+        query = findLazyParsedQuery(query);
         List<AQuery> suggested = suggestLinear(query);
         return suggested;
     }
-    
+   
+    private AQuery findLazyParsedQuery(AQuery query){
+        if (query instanceof LazyParsedQuery) return query;
+        if (query instanceof ABinaryOperator) {
+            ABinaryOperator binary = (ABinaryOperator)query;
+            AQuery res = findLazyParsedQuery(binary.getLeftTerm());
+            if (res != null ) return res;
+
+            res = findLazyParsedQuery(binary.getRightTerm());
+            if (res != null ) return res;
+        }
+
+        // else
+        return null;
+    }
+
     private List<AQuery> suggestLinear(AQuery query) {
 
         List<AQuery> queries = new ArrayList<AQuery>();
