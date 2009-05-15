@@ -25,11 +25,14 @@ import org.apache.log4j.Logger;
 
 import com.flaptor.hounder.crawler.pagedb.Link;
 import com.flaptor.hounder.crawler.pagedb.Page;
-import com.flaptor.util.HtmlParser;
+import com.flaptor.util.parser.HtmlParser;
 import com.flaptor.util.Config;
 import com.flaptor.util.Execute;
 import com.flaptor.util.Pair;
 import com.flaptor.util.TextSignature;
+import com.flaptor.util.parser.IParser;
+import com.flaptor.util.parser.ParseOutput;
+import com.flaptor.util.parser.PdfParser;
 
 /**
  * 
@@ -43,15 +46,6 @@ public class FetchDocument {
     private HashMap<String,Object> attributes;
     private HashMap<String,Object> indexableAttributes;
     private HashSet<String> categories;
-    private static HtmlParser parser= null;
-
-    static{
-        Config conf = Config.getConfig("crawler.properties");
-        String removedXPathElements = conf.getString("HtmlParser.removedXPath");
-        String[] separatorTags = conf.getStringArray("HtmlParser.separatorTags");
-        parser = new com.flaptor.util.HtmlParser(removedXPathElements,separatorTags);
-    }
-
     private String origUrl;
     private String text;
     private String title;
@@ -114,28 +108,57 @@ public class FetchDocument {
     public String getMimeType () {
         return "text/html";
     }
-
-    private void parse () {
-        try {
-            String enc_content;
+    
+    private IParser getParser() {
+        final int HTML = 1, PDF = 2;
+        IParser parser = null;
+        int docType = 0;
+        String mimetype = header.get("content-type");
+        if ("text/html".equals(mimetype)) {
+            docType = HTML;
+        } else if ("application/pdf".equals(mimetype)) {
+            docType = PDF;
+        } else {
+            if (origUrl.toLowerCase().endsWith(".pdf")) {
+                docType = PDF;
+            } else {
+                // web pages can have arbitrary extensions.
+                // TODO: check for .doc, etc.
+                docType = HTML; 
+            }
+        }
+        switch (docType) {
+            case HTML:
+                Config conf = Config.getConfig("crawler.properties");
+                String removedXPathElements = conf.getString("HtmlParser.removedXPath");
+                String[] separatorTags = conf.getStringArray("HtmlParser.separatorTags");
+                parser = new HtmlParser(removedXPathElements,separatorTags);
+                break;
+            case PDF:
+                parser = new PdfParser();
+                break;
+        }
+        return parser;
+    }
+    
+    private void parse() {
+        IParser parser = getParser();
+        if (null != parser) {
             try {
-                enc_content = new String(content,getEncoding());
-            } catch (Exception ee) {
-                logger.warn("Encoding String with charset ("+getEncoding()+"): "+ee);
-                enc_content = new String(content);
+                String encoding = getEncoding();
+                ParseOutput out = parser.parse(page.getUrl(), content, encoding);
+                this.text = out.getText();
+                this.title = out.getTitle();
+                List<Pair<String,String>> ol = out.getLinks();
+                links = new Link[ol.size()];
+                int i = 0;
+                for (Pair<String,String> lnk : ol) {
+                    links[i++] = new Link(lnk.first(), lnk.last());
+                }
+                checkTextChanges();
+            } catch (Exception e) {
+                logger.error("Parsing content",e);
             }
-            HtmlParser.Output out = parser.parse(page.getUrl(), enc_content);
-            this.text = out.getText();
-            this.title = out.getTitle();
-            List<Pair<String,String>> ol = out.getLinks();
-            links = new Link[ol.size()];
-            int i = 0;
-            for (Pair<String,String> lnk : ol) {
-                links[i++] = new Link(lnk.first(), lnk.last());
-            }
-            checkTextChanges();
-        } catch (Exception e) {
-            logger.error("Parsing html content",e);
         }
         alreadyParsed = true;
     }
@@ -224,6 +247,7 @@ public class FetchDocument {
         // if not found, use default encoding
         if (null == encoding) {
             encoding = java.nio.charset.Charset.defaultCharset().name();
+//            encoding = System.getProperty("file.encoding");
         }
         return encoding;
     }

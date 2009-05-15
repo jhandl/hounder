@@ -392,7 +392,7 @@ public class XmlSearchHandler extends AbstractHandler {
             statusMessage = "Internal error in OpenSearchHandler: " +e.getMessage();
             sr = new GroupedSearchResults();
         }
-        System.out.println(formatter.format(new Date())+" q="+queryString);
+        System.out.println("Q "+formatter.format(new Date())+" "+sr.totalResults()+" "+queryString);
  
         Document dom = XmlResults.buildXml(queryString, start, hitsPerPage, orderByParam, sr, status, statusMessage, xsltUri, rangeField, rangeStart, rangeEnd, params);
         return dom;

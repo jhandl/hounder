@@ -53,7 +53,7 @@ public class SpellChecker implements WordSuggestor{
      * Boost value for start and end grams
      */
     private float bStart=2.0f;
-    private float bEnd=1.0f;
+    private float bEnd=2.0f;
 
 
     private IndexReader reader;
@@ -67,7 +67,7 @@ public class SpellChecker implements WordSuggestor{
     /**
      *  Set the accuracy 0 &lt; min &lt; 1; default 0.5
      */
-    public void setAccuraty (float min) {
+    public void setAccuracy (float min) {
         this.min=min;
     }
 
@@ -281,7 +281,7 @@ public class SpellChecker implements WordSuggestor{
         if (l>5) {
             return 3;
         }
-        if (l==5) {
+        if (l>4) {
             return 2;
         }
         return 1;
@@ -292,7 +292,7 @@ public class SpellChecker implements WordSuggestor{
         if (l>5) {
             return 4;
         }
-        if (l==5) {
+        if (l>4) {
             return 3;
         }
         return 2;

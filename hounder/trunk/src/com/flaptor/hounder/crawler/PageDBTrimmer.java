@@ -192,9 +192,9 @@ public class PageDBTrimmer {
                 if (distance <= maxDistance) { // the page is within the allowed distance from a hotspot
                     if (!tooManyRetries(page)) { // the page has not exceeded the number of retries for its distance and it has no inlinks.
                         if (distance > 0 || hotspots.match(url)) { // if the page was a hotspot, it still is (needed for trimmer.main)
-                            if (Crawler.urlFilter(url) != null) { // matches url regex filter file
+//                            if (Crawler.urlFilter(url) != null) { // matches url regex filter file
                                 okToWrite = true;
-                            } else motive = "discarded by url regex file";
+//                            } else motive = "discarded by url regex file";
                         } else motive = "no longer a hotspot";
                     } else motive = "too many retries "+retries+">"+maxRetries[distance]+" and no inlinks";
                 } else { // it is outside of the hostpot vicinity
@@ -206,10 +206,10 @@ public class PageDBTrimmer {
                                     // otherwise, we only fetch pages that are not in the wave birthline (so we don't create a new wave with each cycle)
                                     if (discoveryPagesWritten < discoveryFrontSize) { // there is room for more discovery pages
                                         if (addAll || rnd.nextFloat() <= discoveryFrontRatio) { // this page has K/N chances of getting in (K=max, N=available)
-                                            if (Crawler.urlFilter(url) != null) { // matches url regex filter file
+//                                            if (Crawler.urlFilter(url) != null) { // matches url regex filter file
                                                 okToWrite = true;
                                                 discoveryPagesWritten++;
-                                            } else motive = "discarded by url regex file";
+//                                            } else motive = "discarded by url regex file";
                                         } else motive = "discovery page wasn't lucky enough to make it to the front";
                                     } else motive = "too many discovery pages written "+discoveryPagesWritten+">"+discoveryFrontSize;
                                 } else motive = startingNewDiscoveryWave ? "not at the birthline (dist="+(maxDistance+1)+") when we want to start a new wave" 

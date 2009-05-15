@@ -15,11 +15,7 @@ limitations under the License.
 */
 package com.flaptor.hounder.searcher.payload;
 
-import com.flaptor.hounder.searcher.payload.*;
 import com.flaptor.util.Config;
-import com.flaptor.util.QuadCurve;
-import java.util.Calendar;
-import java.util.GregorianCalendar;
 import org.apache.log4j.Logger;
 import org.apache.lucene.search.DefaultSimilarity;
 
@@ -52,10 +48,8 @@ public class ScalarPayloadScorer extends DefaultSimilarity implements PayloadSco
         if (payload.length >= 0) {
             try {
                 long value = new LongPayload(payload).asLong();
-System.out.print("PAYLOAD("+name+")="+value);
                 value = Math.min(value,maxValue);
                 boost = 1f+weight*value/maxValue;
-System.out.println("  boost="+boost);
             } catch (Exception e) {
                 logger.error("scorePayload: ",e);
             }

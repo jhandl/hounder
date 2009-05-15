@@ -42,7 +42,7 @@ import java.util.HashSet;
  */
 public class SanitizerModule extends AModule {
 	private static final Logger logger = Logger.getLogger(Execute.whoAmI());
-    private static com.flaptor.util.HtmlParser htmlParser = new com.flaptor.util.HtmlParser();
+    private static com.flaptor.util.parser.HtmlParser htmlParser = new com.flaptor.util.parser.HtmlParser();
     private HashSet<String> htmlFields,xmlFields,accentFields,allFields;
     private String xpath;
     
@@ -75,7 +75,7 @@ public class SanitizerModule extends AModule {
                         String text = elem.getText();
                         
                         if (htmlFields.contains(name)) {
-                            text = htmlParser.parse("internal document", text).getText();
+                            text = htmlParser.parse("internal document", text.getBytes("UTF-8"), "UTF-8").getText();
                         }
                         
                         if (xmlFields.contains(name)) {

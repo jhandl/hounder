@@ -15,9 +15,7 @@ limitations under the License.
 */
 package com.flaptor.hounder.searcher.payload;
 
-import com.flaptor.hounder.searcher.payload.*;
 import com.flaptor.util.Config;
-import com.flaptor.util.QuadCurve;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import org.apache.log4j.Logger;

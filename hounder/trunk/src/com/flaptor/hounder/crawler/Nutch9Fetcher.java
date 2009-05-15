@@ -47,6 +47,7 @@ import com.flaptor.util.Config;
 import com.flaptor.util.Execute;
 import com.flaptor.util.FileUtil;
 import org.apache.nutch.metadata.Nutch;
+import org.apache.nutch.parse.ParseText;
 import org.apache.nutch.protocol.ProtocolStatus;
 
 /**
@@ -145,8 +146,8 @@ public class Nutch9Fetcher implements IFetcher {
 
 
     /**
-     * Determine if the fetch error is recoverable.
-     * @return true if the fetch error is recoverable.
+     * Determine if the fetch is successful.
+     * @return true if the fetch is successful.
      */
     private static boolean success (SegmentRecord rec) {
         return (rec.status == CrawlDatum.STATUS_FETCH_SUCCESS);
@@ -183,7 +184,7 @@ public class Nutch9Fetcher implements IFetcher {
         for (SegmentRecord rec : segment) {
             // Get original page from the fetchlist
             page = fetchlist.getPage(rec.origurl);
-            if (null == page) { 
+            if (null == page) {
                 // This is the destination page of a redirect. 
                 // At this point, we don't know this url and have no info on 
                 // the original url, so we store the fetched data for later use.
@@ -208,10 +209,12 @@ public class Nutch9Fetcher implements IFetcher {
                 page = fetchlist.getPage(rec.origurl);
                 if (null != page) {
                     // Override URL with fetched URL if the fetcher is configured to do so
-                    if (!keepUrl) try {
-                        page.setUrl(rec.newurl);
-                    } catch (MalformedURLException e) {
-                        logger.debug("Malformed redirect url. Keeping original url.",e);
+                    if (!keepUrl) {
+                        try {
+                            page.setUrl(rec.newurl);
+                        } catch (MalformedURLException e) {
+                            logger.debug("Malformed redirect url. Keeping original url.",e);
+                        }
                     }
                     // finally we could reconstruct the redirect and can now store the page.
                     doc = new FetchDocument(page, rec.origurl, rec.content, rec.header, success(rec), recoverable(rec), internalError(rec), true);
@@ -267,20 +270,24 @@ public class Nutch9Fetcher implements IFetcher {
                 parts.add(FetchlistData, getParts(segmentDir, CrawlDatum.GENERATE_DIR_NAME));
                 parts.add(StatusData, getParts(segmentDir, CrawlDatum.FETCH_DIR_NAME));
                 parts.add(ContentData, getParts(segmentDir, Content.DIR_NAME));
-                readers = new SequenceFile.Reader[3];
+                readers = new SequenceFile.Reader[4];
                 hasnext = true;
                 logger.debug("ITERATOR INIT");
                 advance();
             }
 
             public boolean hasNext() {
-                logger.debug("ITERATOR HAS_NEXT? "+hasnext);
+                if (logger.isDebugEnabled()) {
+                    logger.debug("ITERATOR HAS_NEXT? "+hasnext);
+                }
                 return hasnext;
             }
 
             public SegmentRecord next() {
                 if (!hasnext) return null;
-                logger.debug("ITERATOR NEXT "+currRec.origurl);
+                if (logger.isDebugEnabled()) {
+                    logger.debug("ITERATOR NEXT "+currRec.origurl);
+                }
                 SegmentRecord rec = currRec;
                 advance();
                 return rec;
@@ -289,15 +296,17 @@ public class Nutch9Fetcher implements IFetcher {
             private ArrayList<Path> getParts(String segmentDir, String name) {
                 File segment = new File(segmentDir, name);
                 ArrayList<Path> partList = new ArrayList<Path>();
-                for (File part : segment.listFiles()) {
-                    if (part.getName().startsWith("part-")) {
-                        File target;
-                        if (part.isFile()) {
-                            target = part;
-                        } else {
-                            target = new File(part,"data");
+                if (null != segment && null != segment.listFiles()) {
+                    for (File part : segment.listFiles()) {
+                        if (part.getName().startsWith("part-")) {
+                            File target;
+                            if (part.isFile()) {
+                                target = part;
+                            } else {
+                                target = new File(part,"data");
+                            }
+                            partList.add(new Path(target.getAbsolutePath()));
                         }
-                        partList.add(new Path(target.getAbsolutePath()));
                     }
                 }
                 return partList;
@@ -341,7 +350,9 @@ public class Nutch9Fetcher implements IFetcher {
                             currRec.status = value.getStatus();
                             ProtocolStatus pstatus = (ProtocolStatus) value.getMetaData().get(Nutch.WRITABLE_PROTO_STATUS_KEY);
                             currRec.protocol_code = (null == pstatus) ? 0 : pstatus.getCode();
-                            logger.debug("       STATUS OF "+key.toString()+": "+currRec.status+" "+CrawlDatum.getStatusName(currRec.status)+" (code "+currRec.protocol_code+")");
+                            if (logger.isDebugEnabled()) {
+                                logger.debug("       STATUS OF "+key.toString()+": "+currRec.status+" "+CrawlDatum.getStatusName(currRec.status)+" (code "+currRec.protocol_code+")");
+                            }
                             break;
                         } else {
                             closeReader(StatusData);
@@ -354,7 +365,9 @@ public class Nutch9Fetcher implements IFetcher {
                         Text key = new Text();
                         Content value = new Content();
                         if (readers[ContentData].next(key, value)) { 
-                            logger.debug("       CONTENT OF "+key.toString()+":");
+                            if (logger.isDebugEnabled()) {
+                                logger.debug("       CONTENT OF "+key.toString()+":");
+                            }
                             currRec.origurl = value.getUrl();
                             currRec.newurl = value.getBaseUrl();
                             currRec.content = value.getContent();
@@ -371,15 +384,18 @@ public class Nutch9Fetcher implements IFetcher {
                                     || currRec.status == CrawlDatum.STATUS_FETCH_REDIR_TEMP) {
                                 currRec.newurl = currRec.header.get("location");
                             }
-                            logger.debug("         origurl: "+currRec.origurl);
-                            logger.debug("         new url: "+currRec.newurl);
-                            logger.debug("         content: "+currRec.content.length+" bytes");
-                            logger.debug("         metadat: "+currRec.header);
+                            if (logger.isDebugEnabled()) {
+                                logger.debug("         origurl: "+currRec.origurl);
+                                logger.debug("         new url: "+currRec.newurl);
+                                logger.debug("         content: "+currRec.content.length+" bytes");
+                                logger.debug("         metadat: "+currRec.header);
+                            }
                             break;
                         } else {
                             closeReader(ContentData);
                         }
                     }
+
                 } catch (IOException e) {
                     logger.error("Reading data from a nutch segment",e);
                     hasnext = false;

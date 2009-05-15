@@ -38,7 +38,7 @@ public class LoggerModule extends AProcessorModule {
     static final String CAT_STR="CATEGORIES";
     static final String TAGS_STR="TAGS";
     
-    private PrintStream out;
+    private PrintStream out = null;
     private Set<String> attributesToLog;
     private Set<String> tagsToLog;
     private Set<String> categoriesToLog;
@@ -58,12 +58,13 @@ public class LoggerModule extends AProcessorModule {
         String outputFileName= mdlConfig.getString("log.file.name");
 
         if (null == outputFileName || 0 == outputFileName.length() ||
-                outputFileName.equalsIgnoreCase("stderr")){
-            out= System.err;
-        } else if (outputFileName.equalsIgnoreCase("stdout")){
+                outputFileName.equalsIgnoreCase("stdout")){
             out= System.out;
+        } else if (outputFileName.equalsIgnoreCase("stderr")){
+            out= System.err;
+        } else {
+            out= new PrintStream(outputFileName);
         }
-        out= new PrintStream(outputFileName);
     }
     
 

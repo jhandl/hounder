@@ -15,40 +15,25 @@ limitations under the License.
 */
 package com.flaptor.hounder.searcher;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.Iterator;
-import java.util.Set;
 import java.util.Vector;
 import java.util.Map;
 import java.util.HashMap;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.apache.lucene.document.Field;
 import org.dom4j.Document;
 import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
-import org.dom4j.Namespace;
-import org.dom4j.QName;
 
 import com.flaptor.hounder.searcher.query.AQuery;
 import com.flaptor.hounder.searcher.query.LazyParsedQuery;
-import com.flaptor.util.Config;
 import com.flaptor.util.DomUtil;
-import com.flaptor.util.HtmlParser;
-import com.flaptor.util.StringUtil;
-import java.util.List;
 
 /**
  * @author Flaptor Development Team
  */
 public class XmlResults {
 
-    
-    private static HtmlParser htmlParser = new HtmlParser();
 
     /**
      * Private empty default constructor to prevent inheritance and instantiation.

@@ -31,6 +31,7 @@ import org.dom4j.Node;
 import com.flaptor.util.Config;
 import com.flaptor.util.Execute;
 import com.flaptor.util.Pair;
+import com.flaptor.util.parser.ParseOutput;
 
 /**
  * This class implements a parser for html documents contained in the body
@@ -45,7 +46,7 @@ public class HtmlParser extends AModule {
     private final Set<Pair<String,String>> tags;
     private final boolean STORED;
     private final boolean INDEXED;
-    private com.flaptor.util.HtmlParser parser;
+    private com.flaptor.util.parser.HtmlParser parser;
     // List of extra fields to extract. useful to extract META tags, and such.
     private final List<String> extraFields;
 
@@ -59,7 +60,6 @@ public class HtmlParser extends AModule {
      */
     public HtmlParser() {
         Config conf = Config.getConfig("indexer.properties");
-
         String[] inputTagNames = conf.getStringArray("HtmlParser.inputTagNames");
         String[] outputFieldNames= conf.getStringArray("HtmlParser.outputFieldNames");
         if (inputTagNames.length != outputFieldNames.length) {
@@ -82,7 +82,7 @@ public class HtmlParser extends AModule {
             extraFields.add(pair.first());
         }
         
-        parser = new com.flaptor.util.HtmlParser(removedXPathElements, separatorTags,mapping);
+        parser = new com.flaptor.util.parser.HtmlParser(removedXPathElements, separatorTags,mapping);
 
         STORED = conf.getBoolean("HtmlParser.stored");
         INDEXED = conf.getBoolean("HtmlParser.indexed");
@@ -138,7 +138,7 @@ public class HtmlParser extends AModule {
             return;
         }
 
-        com.flaptor.util.HtmlParser.Output out = parser.parse("",bodyElement.getText());
+        ParseOutput out = parser.parse("",bodyElement.getText().getBytes("UTF-8"),"UTF-8");
 
 
         for (String field: extraFields) {

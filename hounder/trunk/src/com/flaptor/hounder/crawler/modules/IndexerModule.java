@@ -64,7 +64,8 @@ public class IndexerModule extends AProcessorModule {
     private int spamrankBoostDamp; // the amount of damping for the spamrankBoost value in the boost formula.
     private int logBoostDamp; // the amount of damping for the log value in the boost formula.
     private int freshnessBoostDamp; // the amount of damping for the freshnessBoost value in the boost formula.
-    private QuadCurve freshnessCurve; // the curve that describes the amount of boost for any given freshness.
+    private int freshnessWeight; // the weight of the freshness parameter
+    private int freshnessDamp; // the number of days at which the freshness value halves.
     private IRemoteIndexer[] indexers; // a list of Hounder indexer.
     private APageMapper pageMapper; // a mapper to choose an indexer for a given page.
     private String crawlName; // the name of the crawl, added to the index so searches can be restricted to the results of this crawler.
@@ -87,7 +88,9 @@ public class IndexerModule extends AProcessorModule {
         spamrankBoostDamp = weightToDamp(mdlConfig.getFloat("spamrank.boost.weight"));
         logBoostDamp = weightToDamp(mdlConfig.getFloat("log.boost.weight"));
         freshnessBoostDamp = weightToDamp(mdlConfig.getFloat("freshness.boost.weight"));
-        prepareFreshnessBoost(mdlConfig.getString("freshness.times"));
+        int[] freshnessParams = mdlConfig.getIntArray("freshness.params");
+        freshnessWeight = freshnessParams[0];
+        freshnessDamp = freshnessParams[1];
         hostStopWords = new HashSet<String>(Arrays.asList(mdlConfig.getStringArray("host.stopwords")));
         sendContent = mdlConfig.getBoolean("send.content.to.indexer");
 
@@ -250,41 +253,12 @@ public class IndexerModule extends AProcessorModule {
     }
 
 
-    // Prepare the freshness boost.
-    private void prepareFreshnessBoost (String timesDef) {
-        double t1=0, t2=0, t3=0;
-        boolean ok = false;
-        try {
-            Scanner times = new Scanner(timesDef).useDelimiter(",");
-            t1 = (double)times.nextInt();
-            t2 = (double)times.nextInt();
-            t3 = (double)times.nextInt();
-            if (t1 == t2 || t1 == t3 || t2 == t3) {
-                logger.error("The times defined for the freshness boost cannot be the same (currently set to "+t1+","+t2+","+t3+")");
-            } else if (t1 > t2 || t1 > t3 || t2 > t3) {
-                logger.error("The times defined for the freshness boost must be in growing sequence (currently set to"+t1+","+t2+","+t3+")");
-            } else {
-                ok = true;
-            }
-        } catch (Exception e) {
-            logger.error("The three different times (in days) must be defined for the freshness boost: max, normal and min (example: 0,7,90 for now, a week, and 3 months)", e);
-        }
-        if (!ok) {
-            t1 = 0; // now
-            t2 = 7; // one week
-            t3 = 90; // three months
-            logger.warn("The following times will be used for the freshness boost: "+t1+","+t2+","+t3+" days");
-        }
-        freshnessCurve = new QuadCurve(t1,10,t2,1,t3,0.1);
-    }
-
-
     // Calcuate the freshness boost. TODO: range?
     private float calculateFreshnessBoost (Page page) {
         final long MILLIS_IN_A_DAY = 24*60*60*1000L;
         long daysSinceLastChange = (System.currentTimeMillis() - page.getLastChange()) / MILLIS_IN_A_DAY;
         if (0 == daysSinceLastChange) daysSinceLastChange = 1;
-        return (float)freshnessCurve.getY(daysSinceLastChange);
+        return 1f+(freshnessWeight*freshnessDamp)/(daysSinceLastChange+freshnessDamp);
     }
 
 
