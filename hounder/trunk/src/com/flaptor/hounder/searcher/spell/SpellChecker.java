@@ -53,7 +53,7 @@ public class SpellChecker implements WordSuggestor{
      * Boost value for start and end grams
      */
     private float bStart=2.0f;
-    private float bEnd=2.0f;
+    private float bEnd=1.0f;
 
 
     private IndexReader reader;

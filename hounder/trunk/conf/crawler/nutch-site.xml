@@ -65,7 +65,7 @@
 
 <property>
   <name>http.agent.email</name>
-  <value>bot@flaptor.com</value>
+  <value></value>
 </property>
 
 <property>
