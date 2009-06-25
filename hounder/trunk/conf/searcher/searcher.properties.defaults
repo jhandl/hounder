@@ -85,12 +85,17 @@ searcher.trafficLimiting.maxSimultaneousQueries=10
 searcher.trafficLimiting.maxTimeInQueue=1000
 
 #SuggestQuerySearcher
-#The query suggestor will only make a suggestion based on this rule:
-# if a query returns N results, and the suggested query returns M,
-# the suggestion will be made only if N < M * factor.
-# So, if a query returns 2 results and its suggested query returns 4,
-# the suggestion will be made in case factor is at least 0.5
-searcher.suggestQuerySearcher.factor=0.5
+#The query suggestor will make a suggestion based on these rules:
+# 1. The query must return less than minResults.
+# 2. If a query returns N results and the suggested query returns M,
+#    the suggestion will be made only if M > N * factor. So, if a 
+#    query returns 3 results and its suggested query returns 6,
+#    the suggestion will be made in case factor is at least 2.
+# 3. The above test will be applied to the first maxSuggestionsToTry
+#    suggestions, and the one having more results is returned.
+searcher.suggestQuerySearcher.minResults=100
+searcher.suggestQuerySearcher.suggestionBetterByFactor=2
+searcher.suggestQuerySearcher.maxSuggestionsToTry=5
 # The directory where the dictionary for spellchecker is located.
 searcher.suggestQuerySearcher.dictionaryDir=
 

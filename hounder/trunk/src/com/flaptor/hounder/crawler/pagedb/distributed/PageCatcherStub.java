@@ -48,8 +48,10 @@ public class PageCatcherStub extends ARmiClientStub implements IRemotePageCatche
         long start = System.currentTimeMillis();
         while (!connected) {
             try {
-                super.checkConnection();
-                connected = true;
+                if (super.checkConnection()) {
+                    connected = true;
+                    super.connectionSuccess();
+                }
             } catch (RemoteException ex) { }
             if (!connected) {
                 long now = System.currentTimeMillis();
@@ -70,13 +72,20 @@ public class PageCatcherStub extends ARmiClientStub implements IRemotePageCatche
      */
     public void addPage(Page page) throws RpcException {
         try {
-            super.checkConnection();
-            remotePageCatcher.addPage(page);
-            super.connectionSuccess();
+            if (super.checkConnection()) {
+                remotePageCatcher.addPage(page);
+                super.connectionSuccess();
+            } else {
+                throw new RpcException("AddPage failed trying to connect to remote PageCatcher");
+            }
         } catch (RemoteException e) {
             logger.error(e,e);
             super.connectionFailure();
             throw new RpcException(e);
+        } catch (RpcException e) {
+            logger.error(e,e);
+            super.connectionFailure();
+            throw e;
         }
     }
 

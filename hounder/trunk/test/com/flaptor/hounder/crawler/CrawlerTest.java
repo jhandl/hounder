@@ -97,6 +97,7 @@ public class CrawlerTest extends TestCase {
         config.set("page.similarity.threshold","1");
         config.set("pagedb.is.distributed","false");
         config.set("clustering.enable","false");
+        config.set("protect.against.empty.pagedb","false");
 
         TestUtils.writeFile(tmpDir+"/testhotspot", "*");
 
@@ -173,39 +174,48 @@ public class CrawlerTest extends TestCase {
         config.set("keep.original.url.on.redirect", "true");
 
         TestUtils.writeFile(tmpDir+"/web/test.html", "<html><head><title>title</title></head><body>"+TestUtils.randomText(25,25)+"</body></html>");
-        WebServer server = new WebServer(8085);
-        server.addResourceHandler("/", tmpDir+"/web");
-        server.start();
 
         Page out, in;
         in = PageTest.randomPage();
         in.setUrl(url);
 
-        PageDB db = new PageDB(tmpDir+"/testdb");
-        db.open(PageDB.WRITE);
-        db.addPage(in);
-        db.close();
+        WebServer server = null;
+        Crawler crawler = null;
+        try {
+            server = new WebServer(8085);
+            server.addResourceHandler("/", tmpDir+"/web");
+            server.start();
 
-        Crawler crawler = new Crawler();
-
-        int tries = 0;
-        int maxTries = 10;
-        do {
-            tries++;
-
-            crawler.crawl(1);
-
-            db.open(PageDB.READ);
-            Iterator<Page> pages = db.iterator();
-            assertTrue("The crawler lost or discarded the test page", pages.hasNext());
-            out = pages.next();
-            assertFalse("The crawler has more than the test page", pages.hasNext());
+            PageDB db = new PageDB(tmpDir+"/testdb");
+            db.open(PageDB.WRITE);
+            db.addPage(in);
             db.close();
-        } while (out.getRetries() > 0 && tries <= maxTries);
 
-        server.requestStop();
-        while (! server.isStopped()) {
-            Execute.sleep(20);
+            crawler = new Crawler();
+
+            int tries = 0;
+            int maxTries = 10;
+            do {
+                tries++;
+
+                crawler.crawl(1);
+
+                db.open(PageDB.READ);
+                Iterator<Page> pages = db.iterator();
+                assertTrue("The crawler lost or discarded the test page", pages.hasNext());
+                out = pages.next();
+                assertFalse("The crawler has more than the test page", pages.hasNext());
+                db.close();
+            } while (out.getRetries() > 0 && tries <= maxTries);
+
+        } finally {
+            if (null != crawler) {
+                crawler.cleanup();
+            }
+            server.requestStop();
+            while (! server.isStopped()) {
+                Execute.sleep(20);
+            }
         }
 
         assertTrue("Test page url changed", in.getUrl().equals(out.getUrl()));
@@ -240,35 +250,44 @@ public class CrawlerTest extends TestCase {
 
         TestUtils.writeFile(tmpDir+"/web/one.html", "<a href='page two.html?a <b> c#d'>two</a>");
         TestUtils.writeFile(tmpDir+"/web/page two.html", "content");
-        WebServer server = new WebServer(8087);
-        server.addResourceHandler("/", tmpDir+"/web");
-        server.start();
+        
+        WebServer server = null;
+        Crawler crawler = null;
 
         Page in, one, two;
         in = PageTest.randomPage();
         in.setUrl(url);
+        
+        try {
+            server = new WebServer(8087);
+            server.addResourceHandler("/", tmpDir+"/web");
+            server.start();
 
-        PageDB db = new PageDB(tmpDir+"/testdb");
-        db.open(PageDB.WRITE);
-        db.addPage(in);
-        db.close();
+            PageDB db = new PageDB(tmpDir+"/testdb");
+            db.open(PageDB.WRITE);
+            db.addPage(in);
+            db.close();
 
-        Crawler crawler = new Crawler();
+            crawler = new Crawler();
 
-        crawler.crawl(2);
+            crawler.crawl(2);
 
-        db.open(PageDB.READ);
-        Iterator<Page> pages = db.iterator();
-        assertTrue("The crawler lost or discarded all test pages", pages.hasNext());
-        one = pages.next();
-        assertTrue("The crawler lost or discarded the second test page", pages.hasNext());
-        two = pages.next();
-        assertFalse("The crawler has more than two pages", pages.hasNext());
-        db.close();
-
-        server.requestStop();
-        while (!server.isStopped()) {
-            Execute.sleep(20);
+            db.open(PageDB.READ);
+            Iterator<Page> pages = db.iterator();
+            assertTrue("The crawler lost or discarded all test pages", pages.hasNext());
+            one = pages.next();
+            assertTrue("The crawler lost or discarded the second test page", pages.hasNext());
+            two = pages.next();
+            assertFalse("The crawler has more than two pages", pages.hasNext());
+            db.close();
+        } finally {
+            if (null != crawler) {
+                crawler.cleanup();
+            }
+            server.requestStop();
+            while (!server.isStopped()) {
+                Execute.sleep(20);
+            }
         }
 
         assertTrue("Failed in fetching both test pages", (one.getLastSuccess() > 0) && (two.getLastSuccess() > 0));
@@ -300,6 +319,7 @@ public class CrawlerTest extends TestCase {
                     completed = true;
                 }
             }
+            crawler.cleanup();
             assertTrue("The crawl did not reach the " + size + " pages after " + cycles + " cycles", reached == dbsize && dbsize == size);
         }
     }
@@ -317,6 +337,7 @@ public class CrawlerTest extends TestCase {
             }
         }
         TestUtils.writeFile(tmpDir+"/testhotspot", hotspotSpec);
+        Crawler crawler = null;
         int size = expectedReach.length;
         for (int distance=0; distance<size; distance++) {
             config.set("max.distance", String.valueOf(distance));
@@ -326,7 +347,7 @@ public class CrawlerTest extends TestCase {
 // System.out.println("distance="+distance);
             SimWeb web = new SimWeb(size);
             SimFetcher fetcher = new SimFetcher(web);
-            Crawler crawler = new Crawler(fetcher);
+            crawler = new Crawler(fetcher);
             if (null != links) {
                 for (int i=0; i<links.length-1; i+=2) {
                     web.addLink(links[i], links[i+1]);
@@ -340,6 +361,9 @@ public class CrawlerTest extends TestCase {
 // System.out.println("reached "+reached+" expected "+expected);
             assertFalse("Crawl stoped short of reaching the limit of the hotspot neighborhood ("+reached+"<"+expected+")", reached < expected);
             assertFalse("Crawl reached a page outside of the hotspot neighborhood ("+reached+">"+expected+")", reached > expected);
+        }
+        if (null != crawler) {
+            crawler.cleanup();
         }
     }
 
@@ -367,14 +391,18 @@ public class CrawlerTest extends TestCase {
         config.set("discovery.front.stocastic", "true");
         config.set("cycles.between.discovery.waves", "0");
         Set<String> reachedSet = new HashSet<String>();
+        Crawler crawler = null;
         for (int iter=0; iter<iterations; iter++) {
             SimWeb web = new SimWeb(size);
             SimFetcher fetcher = new SimFetcher(web);
-            Crawler crawler = new Crawler(fetcher);
+            crawler = new Crawler(fetcher);
             web.fullLinks();
             preparePageDB(web, 0);
             crawler.crawl(1);
             reachedSet.addAll(pageDBlist());
+        }
+        if (null != crawler) {
+            crawler.cleanup();
         }
         assertTrue("The random walk did not reach different nodes each time", reachedSet.size() > frontSize + 1);
         assertTrue("The random walk did not reach most of the web", reachedSet.size() > size * 0.75);
@@ -483,7 +511,7 @@ public class CrawlerTest extends TestCase {
             assertTrue("More than the expected proportion of pages has been fetched", num <= (TEST_PAGES * PERCENTILE / 100) + 1);
             assertTrue("Less than the expected proportion of pages has been fetched", num >= (TEST_PAGES * PERCENTILE / 100) - 1);
         }
-
+        crawler.cleanup();
 
         config.set("priority.percentile.to.fetch", "100");
         crawler = new Crawler();
@@ -516,6 +544,7 @@ public class CrawlerTest extends TestCase {
             assertTrue("Changed page has lower priority than static page", pri[i] <= pri[CHANGED_PAGE]);
         }
 
+        crawler.cleanup();
         server.stop();
     }
 
@@ -569,6 +598,7 @@ public class CrawlerTest extends TestCase {
             for (int i = 1; i < size; i++) {
                 assertTrue("Page with fewer inlinks has a higher score than page with more inlinks", score[i] > score[i-1]);
             }
+            crawler.cleanup();
         }
     }
 
@@ -584,6 +614,7 @@ public class CrawlerTest extends TestCase {
         config.set("record.parents", "true");
         config.set("modules", "com.flaptor.hounder.crawler.modules.WhiteListModule,whitelist|com.flaptor.hounder.crawler.modules.SpamDetectorModule,spam|com.flaptor.hounder.crawler.modules.IndexerModule,indexer");
         int tests = 1;
+        Crawler crawler = null;
         for (int test = 0; test < tests; test++) {
             int size = 3;// + rnd.nextInt(10);
             config.set("discovery.front.size", String.valueOf(size));
@@ -594,7 +625,7 @@ public class CrawlerTest extends TestCase {
             }
             preparePageDB(web, 0);
             SimFetcher fetcher = new SimFetcher(web);
-            Crawler crawler = new Crawler(fetcher);
+            crawler = new Crawler(fetcher);
             crawler.crawl(size);
             float[] antiScore = getPageDBAntiScores(web);
 /*
@@ -612,6 +643,9 @@ public class CrawlerTest extends TestCase {
             for (int i = 2; i < antiScore.length; i++) {
                 assertTrue("Non-spam page has antiScore ("+antiScore[i]+")", antiScore[i]==0f);
             }
+        }
+        if (null != crawler) {
+            crawler.cleanup();
         }
     }
 
@@ -639,7 +673,7 @@ public class CrawlerTest extends TestCase {
             crawler.crawl(1);
         }
         assertTrue("injected pages not reached on multiple cycles. Reached="+web.countReached()+ "expected="+size , web.countReached() == size);
-
+        crawler.cleanup();
 
         web = new SimWeb(size);
         fetcher = new SimSlowFetcher(web,5000);
@@ -657,8 +691,7 @@ public class CrawlerTest extends TestCase {
         }
         crawler.crawl(1);
         assertTrue("injected pages not reached on single cycle with multiple injections. Reached="+web.countReached()+ "expected="+size , web.countReached() == size);
-
-
+        crawler.cleanup();
     }
 
     private class InjecterThread extends TestThread {

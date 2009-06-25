@@ -14,6 +14,9 @@ fetcher.plugin = com.flaptor.hounder.crawler.Nutch9Fetcher
 # When an entire fetchlist fails we assume it is due to a disconection from the web. In that case, we can ignore or retry.
 retry.fetch.on.disconnect = false
 
+# Abort if the new pagedb would be empty.
+protect.against.empty.pagedb = true
+
 # The directory of the pagedb.
 pagedb.dir = pagedb
 

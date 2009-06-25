@@ -71,10 +71,13 @@ public class RmiIndexerStub extends ARmiClientStub implements IRemoteIndexer {
 
     public IndexerReturnCode index(Document doc) throws RpcException {
         try {
-            super.checkConnection();
-            IndexerReturnCode res = remoteIndexer.index(doc);
-            super.connectionSuccess();
-            return res;
+            if (super.checkConnection()) {
+                IndexerReturnCode res = remoteIndexer.index(doc);
+                super.connectionSuccess();
+                return res;
+            } else {
+                throw new RpcException("Couldn't connect to remote indexer to send a document");
+            }
         } catch (RemoteException e) {
             logger.error(e,e);
             super.connectionFailure();
@@ -84,10 +87,13 @@ public class RmiIndexerStub extends ARmiClientStub implements IRemoteIndexer {
 
     public IndexerReturnCode index(String text) throws RpcException {
         try {
-            super.checkConnection();
-            IndexerReturnCode res = remoteIndexer.index(text);
-            super.connectionSuccess();
-            return res;
+            if (super.checkConnection()) {
+                IndexerReturnCode res = remoteIndexer.index(text);
+                super.connectionSuccess();
+                return res;
+            } else {
+                throw new RpcException("Couldn't connect to remote indexer to send a document");
+            }
         } catch (RemoteException e) {
             logger.error(e,e);
             super.connectionFailure();

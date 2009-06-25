@@ -444,6 +444,19 @@ public class CrawlerProgress implements Serializable {
         }
     }
 
+    /**
+     * Deletes the progess report files.
+     */
+    public static void cleanup() {
+        Config config = Config.getConfig("crawler.properties");
+        String baseFileName = config.getString("progress.report.filename");
+        File baseFile = new File(".",baseFileName);
+        File dir = baseFile.getParentFile();
+        for (File file : dir.listFiles(new Filter(baseFile.getName()))) {
+            FileUtil.deleteFile(file);
+        }
+    }
+
     
     /* Persistence management */
     

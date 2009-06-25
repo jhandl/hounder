@@ -25,6 +25,7 @@ import com.flaptor.util.Execute;
 import com.flaptor.util.FileUtil;
 import com.flaptor.util.remote.RmiServer;
 import com.flaptor.util.remote.RpcException;
+import java.io.File;
 
 
 
@@ -81,12 +82,26 @@ public class PageCatcher implements IRemotePageCatcher {
      * Stop the catcher by unregistering it.
      */
     public synchronized void stop () {
+System.out.println("STOPPING THE CATCHER !!!");
+Execute.printStackTrace();
         if (running) {
             this.server.requestStop();
             while (!this.server.isStopped()) {Execute.sleep(20);}
         }
     }
 
+    /**
+     * 
+     */
+    public boolean deleteDir() {
+        boolean ok = true;
+        stop();
+        if (new File(catchDir).exists()) {
+            ok = FileUtil.deleteDir(catchDir);
+        }
+        return ok;
+    }
+    
     /**
      * Add pages sent by remote dpagedb via RMI.
      * @param page the page sent by a remote dpagedb.

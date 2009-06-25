@@ -37,15 +37,16 @@ public class SuggestQuerySearcher implements ISearcher{
     
     private ISearcher searcher;
     private AQuerySuggestor suggestor;
-    private float factor;
+    private float suggestionBetterByFactor;
     private int groupsThreshold;
+    private int maxSuggestionsToTry;
 
     /**
      * @param searcher the base searcher
      * @param suggestor suggests queries
      * @param factor if (suggested results > original results * factor) it suggests the results
      */
-    public SuggestQuerySearcher(ISearcher searcher, AQuerySuggestor suggestor, int groupsThreshold, float factor) {
+    public SuggestQuerySearcher(ISearcher searcher, AQuerySuggestor suggestor, int groupsThreshold, float suggestionBetterByFactor, int maxSuggestionsToTry) {
         if (null == searcher) {
             throw new IllegalArgumentException("searcher cannot be null.");
         }
@@ -54,30 +55,40 @@ public class SuggestQuerySearcher implements ISearcher{
         }
         this.searcher = searcher;
         this.suggestor = suggestor;
-        this.factor = factor;
+        this.suggestionBetterByFactor = suggestionBetterByFactor;
         this.groupsThreshold = groupsThreshold;
+        this.maxSuggestionsToTry = maxSuggestionsToTry;
     }
 
     public GroupedSearchResults search(AQuery query, int firstResult, int count, AGroup groupBy, int groupSize, AFilter afilter, ASort asort)  throws SearcherException{        
         GroupedSearchResults res = searcher.search(query, firstResult, count, groupBy, groupSize, afilter, asort);
-        if (null == res) throw new SearcherException("GroupedSearchResults is NULL");
+        if (null == res) { throw new SearcherException("GroupedSearchResults is NULL"); }
 
         // Check if there's the need to find a suggested query.
         if (res.totalGroupsEstimation() < groupsThreshold) {  
-            if (logger.isDebugEnabled()) logger.debug("did not get enough results for query " + query.toString() + " . trying to suggest.");
-
+            if (logger.isDebugEnabled()) { logger.debug("did not get enough results for query " + query.toString() + " . trying to suggest."); }
+            long start = System.currentTimeMillis();
             // suggest queries for this query
             List<AQuery> suggestions = suggestor.suggest(query);
-            
-            long start = System.currentTimeMillis();
-            for (AQuery suggested: suggestions) {
-                if (logger.isDebugEnabled()) logger.debug("tryng suggested query " + suggested.toString() + " for query " + query.toString());
-                GroupedSearchResults resSuggested = searcher.search(suggested, firstResult, count, groupBy, groupSize, afilter, asort);
+            int bestSuggestion = -1;
+            float minResultCount = res.totalResults() * suggestionBetterByFactor;
+// System.out.println("Suggestion for query ["+query.toString()+"]: "+suggestions.toString());
+            for (int i=0; i<suggestions.size() && i<maxSuggestionsToTry; i++) {
+// System.out.println("  "+suggestions.get(i).toString());
+                if (logger.isDebugEnabled()) { logger.debug("tryng suggested query " + suggestions.get(i).toString() + " for query " + query.toString()); }
+                // Do the search with the suggested query, using the same filter and grouping and ignoring 
+                // sorting as it doesn't affect the number of results and slows down the operation.
+                GroupedSearchResults resSuggested = searcher.search(suggestions.get(i), 0, 1, groupBy, groupSize, afilter, null);
                 // check that there are enough results for suggestion
-                if (resSuggested.totalGroupsEstimation() > (res.totalGroupsEstimation() * factor)) {
-                    res.setSuggestedQuery(suggested);
-                    break;
+// System.out.println("  ..."+resSuggested.totalGroupsEstimation()+" results");
+                if (resSuggested.totalGroupsEstimation() > minResultCount) {
+                    bestSuggestion = i;
+                    minResultCount = resSuggested.totalGroupsEstimation();
                 }
+            }
+// System.out.println("  best: "+bestSuggestion);
+            if (bestSuggestion >= 0) {
+                res.setSuggestedQuery(suggestions.get(bestSuggestion));
             }
             long end = System.currentTimeMillis();
             Statistics.getStatistics().notifyEventValue("suggestQuery", (end - start)/1000.0f);

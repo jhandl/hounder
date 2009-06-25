@@ -69,6 +69,7 @@ public class Crawler {
     private boolean distributed; // if true, the underlying pagedb will be distributed.
     private boolean starting; // if true, this is the first cycle since the crawler started.
     private long pagedbSize; // the size of the current pagedb.
+    private boolean protectAgainstEmptyPageDB; // abort if the new pagedb would be empty.
     private CrawlerProgress progress; // the progress stats for the current crawl cycle
     private PageCatcher pageCatcher = null;
     private NodeListener nodeListener;
@@ -96,6 +97,7 @@ public class Crawler {
         pagedbDir = config.getString("pagedb.dir");
         injectedPagedbDir = config.getString("injected.pagedb.dir");
         distributed = config.getBoolean("pagedb.is.distributed");
+        protectAgainstEmptyPageDB = config.getBoolean("protect.against.empty.pagedb");
         starting = true;
         fetchlistQueue = new CloseableQueue<FetchList>(1); // max one fetchlists in the queue
         injectedFetchlistQueue = new CloseableQueue<FetchList>(); //TODO: put a limit, a large injectdb causes an OutOfMemoryError.
@@ -126,6 +128,8 @@ public class Crawler {
 
     // Stops the crawler
     private void stopCrawler () {
+System.out.println("STOPPING THE CRAWLER !!!");
+Execute.printStackTrace();
         StopMonitor.stop();
         if (null != pageCatcher) {
             pageCatcher.stop();
@@ -255,7 +259,7 @@ public class Crawler {
                             // End with this pageDB
                             logger.debug("Injected pagedb exhausted. Deleting it");
                             pageDB.close();
-                            pageDB.deleteDir();
+                            pageDB.deleteDir(true);
                             // Discard previous factory
                             factory = null;
                         }
@@ -470,10 +474,10 @@ public class Crawler {
                 newPageDB.close();
                 String oldName = oldPageDB.getDir();
                 PageDB tmpPageDB = new PageDB(pagedbDir+".tmp");
-                tmpPageDB.deleteDir();
+                tmpPageDB.deleteDir(false);
                 if (attempt(oldPageDB.rename(tmpPageDB.getDir()), "renaming pagedb -> pagedb.tmp")) {
                     if (attempt(newPageDB.rename(oldName), "renaming pagedb.new -> pagedb")) {
-                        if (attempt(tmpPageDB.deleteDir(), "deleting pagedb.tmp")) {
+                        if (attempt(tmpPageDB.deleteDir(false), "deleting pagedb.tmp")) {
                             logger.info("Done redistributing.");
                         }
                     }
@@ -485,6 +489,22 @@ public class Crawler {
         stopCrawler();
     }
 
+    /**
+     * Delete all temporary files and directories.
+     * Usefull for cleanup after testing.
+     */
+    public void cleanup() {
+        CrawlerProgress.cleanup();
+        PageDB tmpPageDB;
+        if (distributed) {
+            tmpPageDB = new DPageDB(pagedbDir + ".tmp", pageCatcher);
+        } else {
+            tmpPageDB = new PageDB(pagedbDir + ".tmp");
+        }
+        PageDB newPageDB = new PageDB(pagedbDir + ".new");
+        tmpPageDB.deleteDir(true);
+        newPageDB.deleteDir(true);
+    }
 
     /** 
      * Runs the crawl cycles.
@@ -577,13 +597,14 @@ public class Crawler {
             newPageDB = new NoPageDB();
         }
         // delete leftover new pagedb
-        newPageDB.deleteDir();
+        newPageDB.deleteDir(false);
         // prepare the new pagedb
         oldPageDB.open(PageDB.READ);
 
         // Crawl recovery attempt
         boolean skipFetch = false;
         long skip = 0;
+        
         progress = CrawlerProgress.restartCrawlerProgress();
         if (null != progress) { 
             // the previous cycle was interrupted
@@ -623,7 +644,7 @@ public class Crawler {
         }
         if (null == progress) { 
             // there was no interrupted previous cycle or it was inconsistent
-            tmpPageDB.deleteDir();
+            tmpPageDB.deleteDir(false);
             tmpPageDB.open(PageDB.WRITE);
             tmpPageDB.setNextCycleOf(oldPageDB);
             progress = new CrawlerProgress(tmpPageDB.getCycles());
@@ -647,6 +668,7 @@ public class Crawler {
             injectedFetchlistFeeder.start();
             fetchdataConsumer.start();
 
+            // This is where the main thread spends its time while the crawl cycle takes place.
             // Wait until the fetchlist and fetchdata threads are done
             synchronized(cycleFinishedMonitor) {
                 while (running() && !cycleFinished) {
@@ -668,14 +690,19 @@ public class Crawler {
                 // dedup & trim
                 new PageDBTrimmer().trimPageDB(tmpPageDB, newPageDB, progress);
 
+                // check the trimmed pagedb size
+                if (protectAgainstEmptyPageDB && newPageDB.getSize() == 0) {
+                    logger.error("The new PageDB is empty, will stop the crawler before replacing the old PageDB. Please check the hotspots, modules and other settings before restarting.");
+                    stopCrawler();
+                }
+                
                 if (running()) {
-                    // TODO overwrite old with new
                     boolean ok = false;
                     String oldName = oldPageDB.getDir();
-                    if (attempt(tmpPageDB.deleteDir(), "deleting pagedb.tmp")) {
+                    if (attempt(tmpPageDB.deleteDir(false), "deleting pagedb.tmp")) {
                         if (attempt(oldPageDB.rename(tmpPageDB.getDir()), "renaming pagedb -> pagedb.tmp")) {
                             if (attempt(newPageDB.rename(oldName), "renaming pagedb.new -> pagedb")) {
-                                if (attempt(tmpPageDB.deleteDir(), "deleting pagedb.tmp (2)")) {
+                                if (attempt(tmpPageDB.deleteDir(false), "deleting pagedb.tmp (2)")) {
                                     ok = true;
                                 }
                             }

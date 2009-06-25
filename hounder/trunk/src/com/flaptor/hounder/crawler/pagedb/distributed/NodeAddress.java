@@ -24,8 +24,8 @@ import java.io.Serializable;
 public class NodeAddress implements Serializable {
 
     private static final long serialVersionUID = 1L;
-    private String ip;
-    private int port;
+    private final String ip;
+    private final int port;
 
     /**
      * Creates a new NodeAddress.

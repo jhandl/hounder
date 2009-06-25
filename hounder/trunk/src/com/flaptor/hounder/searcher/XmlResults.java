@@ -41,7 +41,18 @@ public class XmlResults {
     private XmlResults() {}
 
     /**
-     * Creates a XML search results document.
+     * Creates an XML search results document.
+     * @param sr the GroupedSearchResults structure containing the result of performing the query.
+     * @param status the code returned by the searcher.
+     * @param statusMessage the status description.
+     * @return a DOM document.
+     */
+    public static final Document buildXml(GroupedSearchResults sr, int status, String statusMsg) {
+        return buildXml(null,0,0,null,sr,status,statusMsg,null,null,null,null,null);
+    }
+    
+    /**
+     * Creates a XML search results document (verbose version).
      * The generated dom contains only valid xml characters (infringing chars are removed).
      * @param queryString the query string, as entered by the user
      * @param start the offset of the first result
@@ -49,7 +60,7 @@ public class XmlResults {
      * @param orderBy the field by which the results are sorted
      * @param sr the GroupedSearchResults structure containing the result of performing the query
      * @param status the code returned by the searcher
-     * @param statusMessage the status description
+     * @param statusMsg the status description
      * @param xsltUri the uri for the xslt used to process the xml on the client side, 
      *          or null if no client-side processing is needed
      * @param rangeField field for which a range filter will be applied, or null if no filter used.
@@ -59,7 +70,7 @@ public class XmlResults {
      * @return a DOM document
      * <br>An empty sr argument means that no results were found.
      */
-    public static final Document buildXml(String queryString, int start, int count, String orderBy, GroupedSearchResults sr, int status, String statusMessage, String xsltUri, String rangeField, String rangeStart, String rangeEnd, Map<String,String[]> params) {
+    public static final Document buildXml(String queryString, int start, int count, String orderBy, GroupedSearchResults sr, int status, String statusMsg, String xsltUri, String rangeField, String rangeStart, String rangeEnd, Map<String,String[]> params) {
 
         Document dom = DocumentHelper.createDocument();
         if (null != xsltUri) {
@@ -73,10 +84,10 @@ public class XmlResults {
         root = dom.addElement("SearchResults");
         root.addElement("totalResults").addText(Integer.toString(sr.totalResults()));
         root.addElement("totalGroupsEstimation").addText(Integer.toString(sr.totalGroupsEstimation()));
-        root.addElement("startIndex").addText(Integer.toString(start));
-        root.addElement("itemsPerPage").addText(Integer.toString(count));
-        root.addElement("orderBy").addText(DomUtil.filterXml(orderBy));
-        root.addElement("query").addText(DomUtil.filterXml(queryString));
+        if (count > 0) { root.addElement("startIndex").addText(Integer.toString(start)); }
+        if (count > 0) { root.addElement("itemsPerPage").addText(Integer.toString(count)); }
+        if (null != orderBy) { root.addElement("orderBy").addText(DomUtil.filterXml(orderBy)); }
+        if (null != queryString) { root.addElement("query").addText(DomUtil.filterXml(queryString)); }
         if (null != rangeField) {
             root.addElement("filter").
                     addAttribute("field",rangeField).
@@ -96,7 +107,7 @@ public class XmlResults {
             root.addElement("suggestedQuery").addText(DomUtil.filterXml(((LazyParsedQuery)suggestedQuery).getQueryString()));
         }
         root.addElement("status").addText(Integer.toString(status));
-        root.addElement("statusDesc").addText(statusMessage);
+        root.addElement("statusDesc").addText(statusMsg);
 
         for (int i=0; i<sr.groups(); i++) {
             String name = sr.getGroup(i).first();

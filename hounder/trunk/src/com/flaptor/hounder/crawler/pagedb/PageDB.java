@@ -710,8 +710,10 @@ public class PageDB implements IPageStore {
 
     /**
      * Delete the pagedb.
+     * @param cleanup true if all associated files should be deleted or only the pagedb dir.
+     * (not used in the pagedb)
      */
-    public boolean deleteDir () {
+    public boolean deleteDir (boolean cleanup) {
         // logger.debug("PAGEDB deleteDir "+dirname+" ("+new Throwable().getStackTrace()[1].getClassName()+")");
         return FileUtil.deleteDir(dirname);
     }

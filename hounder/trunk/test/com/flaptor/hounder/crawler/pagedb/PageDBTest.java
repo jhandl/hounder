@@ -75,7 +75,7 @@ public class PageDBTest extends TestCase {
     }
 
     private void del() {
-        boolean ok = pagedb.deleteDir();
+        boolean ok = pagedb.deleteDir(true);
         assertTrue("couldn't delete pagedb dir", ok);
     }
 

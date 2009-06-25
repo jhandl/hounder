@@ -57,13 +57,13 @@ public class SynonymQuerySuggestorTest extends TestCase {
 
         
         baseSearcher = new SearcherStub();
-        suggestSearcher = new SuggestQuerySearcher(baseSearcher,new SynonymQuerySuggestor(new File(synonymFile)),100,factor);
+        suggestSearcher = new SuggestQuerySearcher(baseSearcher,new SynonymQuerySuggestor(new File(synonymFile)),100,factor,3);
     }
     
     @Override
     protected void tearDown() throws Exception {
         super.tearDown();
-        FileUtil.deleteFile(dir);
+        FileUtil.deleteDir(dir);
     }
 
 
@@ -72,6 +72,7 @@ public class SynonymQuerySuggestorTest extends TestCase {
         AQuery query = new LazyParsedQuery("foo");
         // a foo query should return no results
         GroupedSearchResults gsr = suggestSearcher.search(query,0,10,new NoGroup(),1,null,null);
+System.out.println("Suggests: "+gsr.getSuggestedQuery().toString());
         assertTrue(gsr.getSuggestedQuery().toString().contains("bar"));
     }    
 

@@ -169,7 +169,7 @@ public class DPageDB extends PageDB {
                 sent = true;
             }
         } catch (RpcException e) {
-            logger.warn("Attempting to send a page to a remote PageCatcher (will store locally): "+e);
+            logger.warn("Attempting to send a page to a remote PageCatcher (will store locally): ",e);
             page.setLocal(false);
         }
         if (!sent) {
@@ -192,7 +192,7 @@ public class DPageDB extends PageDB {
                     super.addPage (page);
                 }
                 Execute.close(db);
-                db.deleteDir();
+                db.deleteDir(false);
             }
             if (catcherIsLocal) {
                 pageCatcher.stop();
@@ -203,6 +203,17 @@ public class DPageDB extends PageDB {
         logger.info("DPageDB closed.");
     }
 
+    /**
+     * Remove the pagedb's dir and the catcher's dir.
+     * @param cleanup true if all associated files should be deleted or only the pagedb dir.
+     */
+    public boolean deleteDir(boolean cleanup) {
+        boolean ok = super.deleteDir(cleanup);
+        if (cleanup) {
+            ok = ok && pageCatcher.deleteDir();
+        }
+        return ok;
+    }
 
 }
 

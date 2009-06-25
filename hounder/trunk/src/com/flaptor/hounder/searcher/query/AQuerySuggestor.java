@@ -62,14 +62,14 @@ public class AQuerySuggestor {
     }
    
     private AQuery findLazyParsedQuery(AQuery query){
-        if (query instanceof LazyParsedQuery) return query;
+        if (query instanceof LazyParsedQuery) { return query; }
         if (query instanceof ABinaryOperator) {
             ABinaryOperator binary = (ABinaryOperator)query;
             AQuery res = findLazyParsedQuery(binary.getLeftTerm());
-            if (res != null ) return res;
+            if (res != null ) { return res; }
 
             res = findLazyParsedQuery(binary.getRightTerm());
-            if (res != null ) return res;
+            if (res != null ) { return res; }
         }
 
         // else
@@ -87,18 +87,17 @@ public class AQuerySuggestor {
             try {
                 while(true) {
                     Token token = tokenizer.next();
-                    if (null == token) break;
+                    if (null == token) { break; }
                     tokens.add(TokenUtil.termText(token));
                 }
 
                 // for every word, suggest something
-                for (int i =0; i< tokens.size(); i++) {
+                for (int i = 0; i < tokens.size(); i++) {
                     StringBuffer sb = new StringBuffer();
+                    sb.append("\"");
                     for (int j = 0; j < i; j++) {
-                        
-                            sb.append(tokens.get(j));
-                            sb.append(" ");
-
+                        sb.append(tokens.get(j));
+                        sb.append(" ");
                     }
                     String[] suggestions = suggestor.suggestWords(tokens.get(i));
                     for (String suggestion: suggestions) {
@@ -110,6 +109,7 @@ public class AQuerySuggestor {
                             sbf.append(tokens.get(k));
                             sbf.append(" ");
                         }
+                        sbf.append("\"");
                         queries.add(new LazyParsedQuery(sbf.toString()));
                     }
                 }

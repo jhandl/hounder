@@ -108,8 +108,9 @@ public class CompositeSearcher implements ISearcher {
             try {
                 searcher = new SuggestQuerySearcher(searcher,
                             new SynonymQuerySuggestor(new File(searcherConfig.getString("searcher.suggestQuerySearcher.synonymFile"))),
-                            100,
-                            searcherConfig.getFloat("searcher.suggestQuerySearcher.factor"));
+                            searcherConfig.getInt("searcher.suggestQuerySearcher.minResults"),
+                            searcherConfig.getFloat("searcher.suggestQuerySearcher.suggestionBetterByFactor"),
+                            searcherConfig.getInt("searcher.suggestQuerySearcher.maxSuggestionsToTry"));
             } catch (java.io.IOException e) {
                 logger.error("While creating WordQuerySuggestor:"+e,e);
                 throw new RuntimeException(e.getMessage(),e);
@@ -120,8 +121,9 @@ public class CompositeSearcher implements ISearcher {
             try {
                 searcher = new SuggestQuerySearcher(searcher,
                         new WordQuerySuggestor(new File(searcherConfig.getString("searcher.suggestQuerySearcher.dictionaryDir"))),
-                        100,//XXX FIXME hardcoded value
-                        searcherConfig.getFloat("searcher.suggestQuerySearcher.factor"));
+                        searcherConfig.getInt("searcher.suggestQuerySearcher.minResults"),
+                        searcherConfig.getFloat("searcher.suggestQuerySearcher.suggestionBetterByFactor"),
+                        searcherConfig.getInt("searcher.suggestQuerySearcher.maxSuggestionsToTry"));
             } catch (java.io.IOException e) {
                 logger.error("While creating WordQuerySuggestor:"+e,e);
                 throw new RuntimeException(e.getMessage(),e);
