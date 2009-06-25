@@ -128,8 +128,6 @@ public class Crawler {
 
     // Stops the crawler
     private void stopCrawler () {
-System.out.println("STOPPING THE CRAWLER !!!");
-Execute.printStackTrace();
         StopMonitor.stop();
         if (null != pageCatcher) {
             pageCatcher.stop();
