@@ -17,6 +17,7 @@ package com.flaptor.hounder.searcher;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.Semaphore;
 
 import org.apache.log4j.Logger;
 
@@ -82,44 +83,37 @@ public class QueriesInProgressSearcher implements ISearcher {
                 inProgress.remove(params);
             }
 
-            synchronized (results) {
-                results.setResults(retvalue, searcherException, runtimeException);
-                results.notifyAll();
-            }
-            //FIXME: possible race condition synchronized(results)
+            results.setResults(retvalue, searcherException, runtimeException);
+            results.valid.release(Integer.MAX_VALUE);
         } else {
             stats.notifyEventValue("mergedQueries", 1);
-            synchronized (results) {
-            	while (!results.isValid()) {
-                    try {
-                        results.wait();
-                    } catch (InterruptedException e) {
-                        logger.error("Interrupted while sleeping", e);
-                    }
-                }
+            try {
+                results.valid.acquire();
+            } catch (InterruptedException e) {
+                logger.error("Interrupted while sleeping", e);
             }
         }
-    	if (results.getResults() != null) return results.getResults();
+        if (results.getResults() != null) return results.getResults();
         else {
-        	if (results.getSearcherException() != null) throw results.getSearcherException();
-        	else throw results.getRuntimeException();
+            if (results.getSearcherException() != null) throw results.getSearcherException();
+            else throw results.getRuntimeException();
         }
     }
 
     @Override
-    public void requestStop() {
-        baseSearcher.requestStop();
-    }
+        public void requestStop() {
+            baseSearcher.requestStop();
+        }
 
     @Override
-    public boolean isStopped() {
-        return baseSearcher.isStopped();
-    }
+        public boolean isStopped() {
+            return baseSearcher.isStopped();
+        }
     private static class QueryResults {
-        private GroupedSearchResults results = null;
-        private SearcherException searcherException = null;
-        private RuntimeException runtimeException = null;
-        private boolean valid = false;
+        private volatile GroupedSearchResults results = null;
+        private volatile SearcherException searcherException = null;
+        private volatile RuntimeException runtimeException = null;
+        public Semaphore valid;
 
         public GroupedSearchResults getResults() {
             return results;
@@ -133,15 +127,11 @@ public class QueriesInProgressSearcher implements ISearcher {
             return runtimeException;
         }
 
-        public boolean isValid() {
-            return valid;
-        }
-
         public void setResults(GroupedSearchResults results, SearcherException searcherException, RuntimeException runtimeException) {
             this.results = results;
             this.searcherException = searcherException;
             this.runtimeException = runtimeException;
-            valid = true;
+            valid = new Semaphore(0);
         }
     }
 }
