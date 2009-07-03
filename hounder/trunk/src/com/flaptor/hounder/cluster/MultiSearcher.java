@@ -68,14 +68,19 @@ public class MultiSearcher implements ISearcher {
     public MultiSearcher(IRetryPolicy policy) {
         Config config = Config.getConfig("multiSearcher.properties");
         String[] hosts = config.getStringArray("multiSearcher.hosts");
+        int workerThreads = config.getInt("multiSearcher.workerThreads");
+        logger.info("init: number of worker threads set to " + workerThreads + " (from config file).");
+        int maxThreadsPerSearcher = (workerThreads * 2 / hosts.length) + 1 ;
+        logger.info("init: setting maxThreadsPerSearcher to " + maxThreadsPerSearcher);
 
         for (int i = 0; i < hosts.length; i++) {
             Pair<String, Integer> host = PortUtil.parseHost(hosts[i]);
-            searchers.add(new RmiSearcherStub(host.last(), host.first(), policy));
+            searchers.add(new RmiSearcherStub(host.last(), host.first(), policy, maxThreadsPerSearcher));
             searcherIPs.add(host.first());
         }
         timeout = config.getLong("multiSearcher.timeout");
-        multiQueryExecutor = new MultiExecutor<GroupedSearchResults>(config.getInt("multiSearcher.workerThreads"), "multiSearcher");
+        logger.info("init: timeout set to " + timeout + "ms (from config file).");
+        multiQueryExecutor = new MultiExecutor<GroupedSearchResults>(workerThreads, "multiSearcher");
     }
 
 
