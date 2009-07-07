@@ -408,7 +408,7 @@ final class ReloadableIndexHandler implements Stoppable {
     }
 
     private class IndexRepository {
-    	private static final int POOL_SIZE = 6;
+    	private static final int POOL_SIZE = 3;
         private final Index index;
     	BlockingQueue<IndexSearcher> searcherPool;
         private final long timeout;
