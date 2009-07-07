@@ -17,17 +17,20 @@ package com.flaptor.hounder.searcher;
 
 import java.rmi.RemoteException;
 
+import org.apache.log4j.Logger;
+
 import com.flaptor.hounder.searcher.filter.AFilter;
 import com.flaptor.hounder.searcher.group.AGroup;
 import com.flaptor.hounder.searcher.query.AQuery;
 import com.flaptor.hounder.searcher.sort.ASort;
+import com.flaptor.util.Execute;
 
 /**
  * wraps a searcher into an RMI Searcher
  * @author Flaptor Development Team
  */
 public class RmiSearcherWrapper implements IRmiSearcher {
-
+    private static final Logger logger = Logger.getLogger(Execute.whoAmI());
 	private ISearcher searcher;
 
 	public RmiSearcherWrapper(ISearcher searcher) {
@@ -38,6 +41,7 @@ public class RmiSearcherWrapper implements IRmiSearcher {
 		try {
 			return searcher.search(query, firstResult, count, group, groupSize, filter, sort);
 		} catch (Exception e) {
+            logger.error("search: exception caught. I will re-throw it as a RemoteException. Original exception is: ", e);
 			throw new RemoteException("Exception on remote searcher", e);
 		}
 	}
