@@ -113,7 +113,7 @@ public class QueriesInProgressSearcher implements ISearcher {
         private volatile GroupedSearchResults results = null;
         private volatile SearcherException searcherException = null;
         private volatile RuntimeException runtimeException = null;
-        public Semaphore valid;
+        public Semaphore valid = new Semaphore(0);
 
         public GroupedSearchResults getResults() {
             return results;
@@ -131,7 +131,6 @@ public class QueriesInProgressSearcher implements ISearcher {
             this.results = results;
             this.searcherException = searcherException;
             this.runtimeException = runtimeException;
-            valid = new Semaphore(0);
         }
     }
 }
