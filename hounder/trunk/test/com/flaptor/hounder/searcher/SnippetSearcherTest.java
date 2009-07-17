@@ -189,18 +189,17 @@ public class SnippetSearcherTest extends TestCase{
     **/
     @TestInfo(testType = TestInfo.TestType.INTEGRATION)
     public void testRealExample() throws SearcherException {
-        int[] lenA={40}; // >= "bla bla surrounding bla bla.".length()
+        int[] lenA={40};
         String[] fieldA={"text"};
         snippetSearcher= new SnippetSearcher(new CompositeSearcher(), fieldA, lenA, FRAG_SEP, PHRASE_BOUND, false, "<B>", "</B>");
 
         GroupedSearchResults results;        
-        results = snippetSearcher.search(new TermQuery("text", "como"), 0, 10, new NoGroup(), 1, null, null);
+        results = snippetSearcher.search(new TermQuery("text", "debut"), 0, 10, new NoGroup(), 1, null, null);
         assertEquals("We get a bad number of groups", 1, results.groups());
         assertEquals("We get a bad number of results within the group", 1, results.getGroup(0).last().size());
         org.apache.lucene.document.Document doc= results.getGroup(0).last().get(0);
         String content= StringUtil.nullToEmpty(doc.get(SnippetSearcher.SNIPPET_FIELDNAME_PREFIX + "text")).trim();
-        System.out.println("Resultado del snippet:\n" + content + '\n');
-        assertEquals("The returned snippet is not as expected", "bla bla <B>surrounding</B> bla bla. bar bar bar bar.", content);
+        assertTrue("The returned snippet is not as expected", content.contains("querido su <B>debut</B> como"));
     }    
 
     @TestInfo(testType = TestInfo.TestType.INTEGRATION)
