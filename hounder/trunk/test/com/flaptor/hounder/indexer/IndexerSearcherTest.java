@@ -133,6 +133,7 @@ public class IndexerSearcherTest extends TestCase {
 
 		// searcher:
 		Config searcherConfig = Config.getConfig("searcher.properties");
+        searcherConfig.set("compositeSearcher.useSpellCheckSuggestQuery", "false");
 		searcherConfig.set("QueryParser.searchFields", "content");
 		searcherConfig.set("QueryParser.searchFieldWeights", "1.0f");
 		searcherConfig.set("QueryParser.nonTokenizedFields", "");
