@@ -240,7 +240,7 @@ public class SnippetSearcher implements ISearcher{
 
         Highlighter highlighter = new Highlighter(simpleHtmlFormatter, scorer);
         highlighter.setTextFragmenter(NULL_FRAGMENTER);
-        highlighter.setMaxDocBytesToAnalyze(Integer.MAX_VALUE); // make sure the whole text will be analyzed
+        highlighter.setMaxDocCharsToAnalyze(Integer.MAX_VALUE); // make sure the whole text will be analyzed
         // Here we store every seen phrase. It is used to give less score to
         // recurrying phrases
         Set<String> usedSnippets= new HashSet<String>();

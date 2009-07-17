@@ -25,10 +25,12 @@ import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.search.BooleanClause;
 import org.apache.lucene.search.BooleanQuery;
-import org.apache.lucene.search.Hits;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.TermQuery;
+import org.apache.lucene.search.TopDocCollector;
+import org.apache.lucene.search.TopDocs;
+import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.store.Directory;
 
 import com.flaptor.hounder.searcher.query.WordSuggestor;
@@ -141,14 +143,15 @@ public class SpellChecker implements WordSuggestor{
         }
 
         IndexSearcher searcher=new IndexSearcher(this.spellindex);
-        Hits hits=searcher.search(query);
+        TopDocCollector collector = new TopDocCollector(10 * num_sug); // go thru more than 'maxr' matches in case the distance filter triggers
+        searcher.search(query, collector);
+        ScoreDoc[] scoreDocs = collector.topDocs().scoreDocs;
+
         SuggestWordQueue sugqueue=new SuggestWordQueue(num_sug);
+        SuggestWord sugword = new SuggestWord();
+        for (int i = 0; i < scoreDocs.length; i++) {
 
-        int stop=Math.min(hits.length(), 10*num_sug); // go thru more than 'maxr' matches in case the distance filter triggers
-        SuggestWord sugword=new SuggestWord();
-        for (int i=0; i<stop; i++) {
-
-            Document doc = hits.doc(i);
+            Document doc = searcher.doc(i);
             sugword.string=doc.get(F_WORD); // get orig word)
 
             if (sugword.string.equals(word)) {
@@ -219,8 +222,8 @@ public class SpellChecker implements WordSuggestor{
 
 
     public void clearIndex () throws IOException {
-        IndexReader.unlock(spellindex);
-        IndexWriter writer=new IndexWriter(spellindex, null, true);
+        IndexWriter.unlock(spellindex);
+        IndexWriter writer=new IndexWriter(spellindex, null, true, IndexWriter.MaxFieldLength.UNLIMITED);
         writer.close();
     }
 
@@ -244,8 +247,8 @@ public class SpellChecker implements WordSuggestor{
      * @throws IOException
      */
     public void indexDictionary (Dictionary dict) throws IOException {
-        IndexReader.unlock(spellindex);
-        IndexWriter writer=new IndexWriter(spellindex, new WhitespaceAnalyzer(), !IndexReader.indexExists(spellindex));
+        IndexWriter.unlock(spellindex);
+        IndexWriter writer=new IndexWriter(spellindex, new WhitespaceAnalyzer(), !IndexReader.indexExists(spellindex), IndexWriter.MaxFieldLength.UNLIMITED);
         writer.setMergeFactor(300);
         writer.setMaxBufferedDocs(150);
 
@@ -300,7 +303,7 @@ public class SpellChecker implements WordSuggestor{
 
     private static Document createDocument (String text, float boost, int ng1, int ng2) {
         Document doc=new Document();
-        doc.add(new Field(F_WORD, text, Field.Store.YES, Field.Index.UN_TOKENIZED)); // orig term
+        doc.add(new Field(F_WORD, text, Field.Store.YES, Field.Index.NOT_ANALYZED)); // orig term
         addGram(text, doc, ng1, ng2);
         doc.add(new Field("boost",Float.toString(boost),Field.Store.YES,Field.Index.NO));
         doc.setBoost(boost);
@@ -315,14 +318,14 @@ public class SpellChecker implements WordSuggestor{
             String end=null;
             for (int i=0; i<len-ng+1; i++) {
                 String gram=text.substring(i, i+ng);
-                doc.add(new Field(key, gram, Field.Store.NO, Field.Index.UN_TOKENIZED));
+                doc.add(new Field(key, gram, Field.Store.NO, Field.Index.NOT_ANALYZED));
                 if (i==0) {
-                    doc.add(new Field("start"+ng, gram, Field.Store.NO, Field.Index.UN_TOKENIZED));
+                    doc.add(new Field("start"+ng, gram, Field.Store.NO, Field.Index.NOT_ANALYZED));
                 }
                 end=gram;
             }
             if (end!=null) { // may not be present if len==ng1
-                doc.add(new Field("end"+ng, end, Field.Store.NO, Field.Index.UN_TOKENIZED));
+                doc.add(new Field("end"+ng, end, Field.Store.NO, Field.Index.NOT_ANALYZED));
             }
         }
     }

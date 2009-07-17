@@ -101,7 +101,7 @@ public final class BatchIndexManager implements Stoppable {
 			return;
 		}
 		Long addId = nextAddId.incrementAndGet();
-        doc.add(new Field("AddId", addId.toString(), Field.Store.YES, Field.Index.UN_TOKENIZED));
+        doc.add(new Field("AddId", addId.toString(), Field.Store.YES, Field.Index.NOT_ANALYZED));
         if ( logger.isEnabledFor(Level.DEBUG)) {
             logger.debug("Adding document with AddId=" + addId + " and docId=" + docId);
         }

@@ -45,45 +45,58 @@ public class TupleTokenizer extends TokenStream {
     public TupleTokenizer(TokenStream ts, int maxTuples ) throws IOException {
 
         MAX_INCREMENT= maxTuples;
-        Token tk;
-        while ((tk = ts.next()) != null) {
-            tokens.add(tk);
+        Token tk = new Token();
+        while ((tk = ts.next(tk)) != null) {
+            tokens.add((Token)tk.clone());
         }        
     }
 
     private Token mergeTokens(Token t1, Token t2){
-        if (null == t1) return t2;
-        return new Token(TokenUtil.termText(t1)+"_"+TokenUtil.termText(t2), 
-                t1.startOffset(), t2.endOffset());
+        Token res = new Token();
+        if (null == t1) {
+            return t2;
+        }
+        char[] text = (TokenUtil.termText(t1)+"_"+TokenUtil.termText(t2)).toCharArray();
+        res.reinit(text, 0, text.length, t1.startOffset(), t2.endOffset());
+        return res;
     }
+
+    @Override
+    @Deprecated
+    public Token next() {
+        throw new UnsupportedOperationException();
+    }
+
     /* (non-Javadoc)
      * @see org.apache.lucene.analysis.TokenStream#next()
      */
     @Override
-    public Token next() throws IOException {
+    public Token next(Token res) throws IOException {
+        if (increment > MAX_INCREMENT){
+            return null;
+        }
         if (0==tokens.size()){
             return null;
         }
-        Token res= null;
+
         if (1 == increment){
             res= tokens.get(index);
             index++;
             if (index == tokens.size()){
                 index=0;
-                increment ++;
+                increment++;
             }
             return res;
         }
-        if (increment > MAX_INCREMENT){
-            return null;
+
+        res = null;
+        for (int i = index; i < increment + index && i < tokens.size(); i++) {
+            res= mergeTokens(res, tokens.get(i));            
         }
 
-        for (int i= index; i< increment+index && i<tokens.size(); i++){
-            res= mergeTokens(res,tokens.get(i));            
-        }
         if (index + increment == tokens.size()){
             index=0;
-            increment ++;
+            increment++;
         } else {
             index++;
         }

@@ -38,37 +38,38 @@ public class TupleTokenizerTest extends TestCase {
     @TestInfo(testType = TestInfo.TestType.UNIT)
     public void testNext() throws IOException {
         TupleTokenizer tt= new TupleTokenizer(new MockTokenStrem(),3);
-        assertEquals("t1", TokenUtil.termText(tt.next()));
-        assertEquals("t2", TokenUtil.termText(tt.next()));
-        assertEquals("t3", TokenUtil.termText(tt.next()));
-        assertEquals("t4", TokenUtil.termText(tt.next()));
-        assertEquals("t5", TokenUtil.termText(tt.next()));
-        assertEquals("t6", TokenUtil.termText(tt.next()));
-        assertEquals("t7", TokenUtil.termText(tt.next()));
-        assertEquals("t8", TokenUtil.termText(tt.next()));
-        assertEquals("t9", TokenUtil.termText(tt.next()));
-        assertEquals("t10", TokenUtil.termText(tt.next()));
+        Token t = new Token();
+        assertEquals("t1", TokenUtil.termText(tt.next(t)));
+        assertEquals("t2", TokenUtil.termText(tt.next(t)));
+        assertEquals("t3", TokenUtil.termText(tt.next(t)));
+        assertEquals("t4", TokenUtil.termText(tt.next(t)));
+        assertEquals("t5", TokenUtil.termText(tt.next(t)));
+        assertEquals("t6", TokenUtil.termText(tt.next(t)));
+        assertEquals("t7", TokenUtil.termText(tt.next(t)));
+        assertEquals("t8", TokenUtil.termText(tt.next(t)));
+        assertEquals("t9", TokenUtil.termText(tt.next(t)));
+        assertEquals("t10", TokenUtil.termText(tt.next(t)));
 
-        assertEquals("t1_t2", TokenUtil.termText(tt.next()));
-        assertEquals("t2_t3", TokenUtil.termText(tt.next()));
-        assertEquals("t3_t4", TokenUtil.termText(tt.next()));
-        assertEquals("t4_t5", TokenUtil.termText(tt.next()));
-        assertEquals("t5_t6", TokenUtil.termText(tt.next()));
-        assertEquals("t6_t7", TokenUtil.termText(tt.next()));
-        assertEquals("t7_t8", TokenUtil.termText(tt.next()));
-        assertEquals("t8_t9", TokenUtil.termText(tt.next()));
-        assertEquals("t9_t10", TokenUtil.termText(tt.next()));
+        assertEquals("t1_t2", TokenUtil.termText(tt.next(t)));
+        assertEquals("t2_t3", TokenUtil.termText(tt.next(t)));
+        assertEquals("t3_t4", TokenUtil.termText(tt.next(t)));
+        assertEquals("t4_t5", TokenUtil.termText(tt.next(t)));
+        assertEquals("t5_t6", TokenUtil.termText(tt.next(t)));
+        assertEquals("t6_t7", TokenUtil.termText(tt.next(t)));
+        assertEquals("t7_t8", TokenUtil.termText(tt.next(t)));
+        assertEquals("t8_t9", TokenUtil.termText(tt.next(t)));
+        assertEquals("t9_t10", TokenUtil.termText(tt.next(t)));
         
-        assertEquals("t1_t2_t3", TokenUtil.termText(tt.next()));
-        assertEquals("t2_t3_t4", TokenUtil.termText(tt.next()));
-        assertEquals("t3_t4_t5", TokenUtil.termText(tt.next()));
-        assertEquals("t4_t5_t6", TokenUtil.termText(tt.next()));
-        assertEquals("t5_t6_t7", TokenUtil.termText(tt.next()));
-        assertEquals("t6_t7_t8", TokenUtil.termText(tt.next()));
-        assertEquals("t7_t8_t9", TokenUtil.termText(tt.next()));
-        assertEquals("t8_t9_t10", TokenUtil.termText(tt.next()));
+        assertEquals("t1_t2_t3", TokenUtil.termText(tt.next(t)));
+        assertEquals("t2_t3_t4", TokenUtil.termText(tt.next(t)));
+        assertEquals("t3_t4_t5", TokenUtil.termText(tt.next(t)));
+        assertEquals("t4_t5_t6", TokenUtil.termText(tt.next(t)));
+        assertEquals("t5_t6_t7", TokenUtil.termText(tt.next(t)));
+        assertEquals("t6_t7_t8", TokenUtil.termText(tt.next(t)));
+        assertEquals("t7_t8_t9", TokenUtil.termText(tt.next(t)));
+        assertEquals("t8_t9_t10", TokenUtil.termText(tt.next(t)));
         
-        assertNull(tt.next());
+        assertNull(tt.next(t));
     }
 
     private class MockTokenStrem extends TokenStream{
@@ -89,9 +90,17 @@ public class TupleTokenizerTest extends TestCase {
         }
 
         @Override
-        public Token next() throws IOException {
+        @Deprecated
+        public Token next() {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public Token next(Token t) throws IOException {
             if (index == v.size()) return null;
-            return new Token(v.get(index++),index*2,index*2+2);
+            char[] text = v.get(index++).toCharArray();
+            t.reinit(text, 0, text.length, index * 2, index * 2 + 2);
+            return t;
         }        
     }
 }

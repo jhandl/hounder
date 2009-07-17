@@ -53,7 +53,7 @@ public final class SplitIndex {
                         if (toOptimize.size() == 0) break;
                         String writer = (String)toOptimize.elementAt(0);
                         toOptimize.remove(0);
-                        iw = new IndexWriter(writer, new org.apache.lucene.analysis.standard.StandardAnalyzer(), false);
+                        iw = new IndexWriter(writer, new org.apache.lucene.analysis.standard.StandardAnalyzer(), false, IndexWriter.MaxFieldLength.UNLIMITED);
                     }
                     System.out.println("starting optimization of " + iw.getDirectory() + " at " + new Date());
                     iw.setMaxBufferedDocs(1000);

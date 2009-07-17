@@ -15,7 +15,7 @@ public class FixedValueTokenStream extends TokenStream {
 
     private boolean ended;
     private final long payload;
-    private final String value;
+    private final char[] value;
 
     /**
      * @param value
@@ -25,8 +25,19 @@ public class FixedValueTokenStream extends TokenStream {
      */
     public FixedValueTokenStream(String value, long payload){
         this.ended = false;
-        this.value = value;
+        this.value = value.toCharArray();
         this.payload = payload;
+    }
+
+
+    /**
+     * Use FixedValueTokenStream.next(Token) instead.
+     * @throws UnsupportedOperationException always.
+    **/
+    @Override
+    @Deprecated
+    public Token next() {
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -36,10 +47,11 @@ public class FixedValueTokenStream extends TokenStream {
      *      called. Every further call to this method will return null.
      * 
      */
-    public Token next() {
+    @Override
+    public Token next(Token token) {
         if (this.ended) return null;
         this.ended = true;
-        Token token = new Token(value,0,value.length());
+        token.reinit(value, 0, value.length, 0, value.length -1);
         LongPayload lPayload = new LongPayload(payload);
         token.setPayload(lPayload.asPayload());
         return token;

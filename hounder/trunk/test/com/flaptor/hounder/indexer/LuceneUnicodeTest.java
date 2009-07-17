@@ -51,7 +51,7 @@ public class LuceneUnicodeTest extends TestCase {
     public void setUp() throws Exception {
         dir = com.flaptor.util.FileUtil.createTempDir("test", ".tmp"); 
         try {
-            writer = new IndexWriter(dir, new StandardAnalyzer(), true);
+            writer = new IndexWriter(dir, new StandardAnalyzer(), true, IndexWriter.MaxFieldLength.UNLIMITED);
         } catch (Exception e) {
             assertTrue(false);
         }
@@ -79,8 +79,7 @@ public class LuceneUnicodeTest extends TestCase {
             String testString = getTestString();
             logger.debug("Using test string: " + testString);
             Document doc = new Document();
-            doc.add(new Field("field1", testString, Field.Store.YES,
-                    Field.Index.UN_TOKENIZED));
+            doc.add(new Field("field1", testString, Field.Store.YES, Field.Index.NOT_ANALYZED));
             writer.addDocument(doc);
             writer.optimize();
             writer.close();
@@ -88,8 +87,7 @@ public class LuceneUnicodeTest extends TestCase {
             Document doc2 = reader.document(0);
             String recoveredString = doc2.get("field1");
             logger.debug("Recovered String: " + recoveredString);
-            assertTrue("Strings do not match", testString
-                    .equals(recoveredString));
+            assertTrue("Strings do not match", testString.equals(recoveredString));
         } catch (Exception e) {
             logger.error("Exception caught:" + e);
             assertTrue("exception", false);
@@ -103,13 +101,14 @@ public class LuceneUnicodeTest extends TestCase {
             logger.debug("Using test string: " + testString);
             Document doc = new Document();
             doc.add(new Field("field1", testString, Field.Store.YES,
-                    Field.Index.TOKENIZED));
+                    Field.Index.ANALYZED));
             writer.addDocument(doc);
             writer.optimize();
             writer.close();
             IndexReader reader = IndexReader.open(dir);
             IndexSearcher searcher = new IndexSearcher(reader); 
-            Document doc2 = searcher.search(new TermQuery(new Term("field1", testString))).doc(0);
+            int docId = searcher.search(new TermQuery(new Term("field1", testString)), null, 10).scoreDocs[0].doc;
+            Document doc2 = searcher.doc(docId);
             String recoveredString = doc2.get("field1");
             logger.debug("Recovered String: " + recoveredString);
             assertTrue("Strings do not match", testString
@@ -126,7 +125,10 @@ public class LuceneUnicodeTest extends TestCase {
      */
     private String getTestString() {
         StringBuffer buf = new StringBuffer();
-        for (char i = 0; i < 0xffff; i++) {
+        for (char i = 0; i < 0xD800; i++) {
+            buf.append(i);
+        }
+        for (char i = 0xF900; i < 0xF8F; i++) {
             buf.append(i);
         }
         return buf.toString();

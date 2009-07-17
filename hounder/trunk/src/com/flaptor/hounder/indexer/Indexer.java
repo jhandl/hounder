@@ -78,7 +78,6 @@ public class Indexer implements IRmiIndexer, IIndexer, Stoppable {
     // Statistics instance, to report events, and constants
     private final Statistics statistics = Statistics.getStatistics();
     public static final String DOCUMENT_ENQUEUED = "Indexer.DocumentEnqueued";
-    private static long lastTime = System.currentTimeMillis();
 
     /**
      * Constructor.
@@ -187,9 +186,6 @@ public class Indexer implements IRmiIndexer, IIndexer, Stoppable {
         // so it reduces the impact of a denial-of-service attack
         // (not necessarily malicious, it could be due to a bug in the
         // client)
-        logger.debug("REQUEST: "+(System.currentTimeMillis()-lastTime));
-
-        lastTime = System.currentTimeMillis();
         IndexerReturnCode resp = null;
         if (state != RunningState.RUNNING) {
             String s = "indexDom: Trying to index a document but the Indexer is no longer running.";

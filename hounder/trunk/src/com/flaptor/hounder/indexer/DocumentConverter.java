@@ -140,7 +140,7 @@ public class DocumentConverter {
 		}
 		String docIdText = node.getText();
 		//now we add the documentId as another field, using the name provided in the configuration (docIdName)
-		Field lfield = new Field(docIdName, docIdText, Field.Store.YES, Field.Index.UN_TOKENIZED);
+		Field lfield = new Field(docIdName, docIdText, Field.Store.YES, Field.Index.NOT_ANALYZED);
 		ldoc.add(lfield);
 		providedFields.add(docIdName);
         if ( logger.isEnabledFor(Level.DEBUG)) { 
@@ -202,7 +202,7 @@ public class DocumentConverter {
 			// Now we add the fields. Depending on the parameter stored, indexed
 			// and tokenized we call a different field constructor.
 			lfield = null;
-			Field.Index indexType = (indexed ? (tokenized ? Field.Index.TOKENIZED : Field.Index.UN_TOKENIZED) : Field.Index.NO);
+			Field.Index indexType = (indexed ? (tokenized ? Field.Index.ANALYZED : Field.Index.NOT_ANALYZED) : Field.Index.NO);
 			Field.Store storeType;
 			if (!stored) {
 				storeType = Field.Store.NO;

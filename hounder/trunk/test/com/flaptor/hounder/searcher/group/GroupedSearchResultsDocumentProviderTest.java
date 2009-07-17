@@ -84,7 +84,7 @@ public class GroupedSearchResultsDocumentProviderTest extends TestCase {
             scores = new Vector<Vector<Float>>();
             for (int i = 0; i < 10; i++) {
                 Document doc = new Document();
-                Field field = new Field("int",String.valueOf(10*j + i),Field.Store.YES,Field.Index.TOKENIZED);
+                Field field = new Field("int",String.valueOf(10*j + i),Field.Store.YES,Field.Index.ANALYZED);
                 doc.add(field);
                 Vector<Document> group = new Vector<Document>();
                 group.add(doc);

@@ -29,13 +29,15 @@ import org.apache.lucene.document.Field;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.Term;
-import org.apache.lucene.search.Hits;
 import org.apache.lucene.search.IndexSearcher;
+import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.search.TermQuery;
 
 import com.flaptor.hounder.Index;
 import com.flaptor.hounder.IndexDescriptor;
 import com.flaptor.hounder.indexer.util.Hash;
+import com.flaptor.hounder.lucene.ScorelessHitCollector;
+import com.flaptor.hounder.lucene.HashSetScorelessHitCollector;
 import com.flaptor.util.AStoppableThread;
 import com.flaptor.util.Config;
 import com.flaptor.util.Execute;
@@ -314,7 +316,7 @@ public final class IndexManager implements IndexWriteProvider, Stoppable {
             return;
         }
 		Long addId = generateAddId();
-        doc.add(new Field("AddId", addId.toString(), Field.Store.YES, Field.Index.UN_TOKENIZED));
+        doc.add(new Field("AddId", addId.toString(), Field.Store.YES, Field.Index.NOT_ANALYZED));
 		try {
             if ( logger.isEnabledFor(Level.DEBUG)) { 
                 logger.debug("Adding document with AddId=" + addId + " and docId=" + docId);
@@ -385,18 +387,20 @@ public final class IndexManager implements IndexWriteProvider, Stoppable {
                 if ( logger.isEnabledFor(Level.DEBUG)) { 
 				    logger.debug("Applying deletes: searching " + docIdName	+ " = [" + key + "]");
                 }
-				Hits hits = searcher.search(new TermQuery(new Term(docIdName, key)));
+                ScorelessHitCollector collector = new HashSetScorelessHitCollector();
+                searcher.search(new TermQuery(new Term(docIdName, key)), collector);
+                Set<Integer> docIds = collector.getMatchingDocuments();
                 if ( logger.isEnabledFor(Level.DEBUG)) { 
-                    logger.debug("Applying deletes: found matches: " + hits.length());
+                    logger.debug("Applying deletes: found matches: " + docIds.size());
                 }
-                logger.debug("HITS LENGTH: " + hits.length());
-				for (int i = 0; i < hits.length(); i++) {
-					String addId = hits.doc(i).get("AddId");
+                for (Integer docId : docIds) {
+                    Document d = searcher.doc(docId);
+					String addId = d.get("AddId");
 					if (!lastAddition.equals(addId)) {
                         if ( logger.isEnabledFor(Level.DEBUG)) { 
                             logger.debug("Applying deletes: deleting AddId:" + addId);
                         }
-                        documentsToDelete.add(hits.id(i));
+                        documentsToDelete.add(docId);
 					}
 				}
 			}

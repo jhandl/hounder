@@ -33,7 +33,7 @@ public class MergeIndexes {
 			System.exit(-1);
 		}
 		try {
-			IndexWriter iw = new IndexWriter(args[0], new StandardAnalyzer(), true);
+			IndexWriter iw = new IndexWriter(args[0], new StandardAnalyzer(), true, IndexWriter.MaxFieldLength.UNLIMITED);
             iw.setMaxBufferedDocs(1000);
 			IndexReader readers[] = new IndexReader[args.length -1];
 			for (int i = 0; i < args.length - 1; i++) {

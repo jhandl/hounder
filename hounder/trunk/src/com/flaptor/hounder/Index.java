@@ -119,7 +119,7 @@ public class Index {
             throw new IllegalStateException("Can't get writer: the index is closed.");
         }
         try {
-            IndexWriter writer = new IndexWriter(directory, analyzer, false);
+            IndexWriter writer = new IndexWriter(directory, analyzer, false, IndexWriter.MaxFieldLength.UNLIMITED);
             writer.setMergePolicy(mergePolicy);
             writer.setMergeScheduler(mergeScheduler);
             writer.setMaxBufferedDocs(IndexWriter.DISABLE_AUTO_FLUSH);
@@ -329,7 +329,7 @@ public class Index {
         try {
             directory = FSDirectory.getDirectory(path);
             if (create) {
-                new IndexWriter(directory, analyzer, create).close();
+                new IndexWriter(directory, analyzer, create, IndexWriter.MaxFieldLength.UNLIMITED).close();
                 writeProperties();
             } else { 
                 try {

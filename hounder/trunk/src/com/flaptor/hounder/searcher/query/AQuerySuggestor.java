@@ -77,7 +77,6 @@ public class AQuerySuggestor {
     }
 
     private List<AQuery> suggestLinear(AQuery query) {
-
         List<AQuery> queries = new ArrayList<AQuery>();
 
         if (query instanceof LazyParsedQuery) {
@@ -85,10 +84,11 @@ public class AQuerySuggestor {
             StandardTokenizer tokenizer = new StandardTokenizer(new StringReader(originalString));
             List<String> tokens = new ArrayList<String>();
             try {
+                Token token = new Token();
                 while(true) {
-                    Token token = tokenizer.next();
+                    token = tokenizer.next(token);
                     if (null == token) { break; }
-                    tokens.add(TokenUtil.termText(token));
+                    tokens.add(TokenUtil.termText((Token)token.clone()));
                 }
 
                 // for every word, suggest something

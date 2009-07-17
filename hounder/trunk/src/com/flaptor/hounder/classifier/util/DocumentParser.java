@@ -77,14 +77,13 @@ public class DocumentParser {
         Analyzer analyzer = new StandardAnalyzer();
         Reader docReader = new StringReader(doc);
         TokenStream tokenStream = analyzer.tokenStream(null, docReader);
-
-        Token token = null;
         
         try {
             if (1 < maxTuple ){
                 tokenStream= new TupleTokenizer(tokenStream, maxTuple);
             }
-            while ((token = tokenStream.next()) != null) {
+            Token token = new Token();
+            while ((token = tokenStream.next(token)) != null) {
                 String term = TokenUtil.termText(token);
                 int[] count = tokenCount.get(term);
                 if (count == null) {

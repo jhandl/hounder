@@ -31,10 +31,10 @@ limitations under the License.
 		<dirset dir="${conf.dir}">
 			<include name="**/*" />
 		</dirset>
+		<path refid="cp-for-tools" />
 		<fileset dir="${basedir}/plugins">
 			<include name="**/*.jar" />
 		</fileset>
-		<path refid="cp-for-tools" />
 	</path>
 
 	<taskdef name="cobertura-instrument" classname="net.sourceforge.cobertura.ant.InstrumentTask">

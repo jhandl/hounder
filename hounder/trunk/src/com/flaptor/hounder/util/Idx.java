@@ -18,6 +18,7 @@ package com.flaptor.hounder.util;
 import java.io.File;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
@@ -26,10 +27,13 @@ import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.index.TermEnum;
-import org.apache.lucene.search.Hit;
-import org.apache.lucene.search.Hits;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.TermQuery;
+import org.apache.lucene.search.ScoreDoc;
+
+import com.flaptor.hounder.lucene.ScorelessHitCollector;
+import com.flaptor.hounder.lucene.HashSetScorelessHitCollector;
+import com.flaptor.hounder.lucene.CountingHitCollector;
 
 /**
  * @author Flaptor Development Team
@@ -96,12 +100,12 @@ public class Idx {
             String field = arg[2];
             String value = arg[3];
             IndexSearcher searcher = new IndexSearcher(IndexReader.open(idx));
-            Hits hits = searcher.search(new TermQuery(new Term(field, value)));
-            System.out.println("\nNumber of hits: "+hits.length()+"\n");
-            Iterator it = hits.iterator();
-            while (it.hasNext()) {
-                Hit hit = (Hit)it.next();
-                Document doc = hit.getDocument();
+            ScorelessHitCollector collector = new HashSetScorelessHitCollector();
+            searcher.search(new TermQuery(new Term(field, value)), collector);
+            Set<Integer> docIds = collector.getMatchingDocuments();
+            System.out.println("\nNumber of hits: " + docIds.size() + "\n");
+            for (Integer docId : docIds) {
+                Document doc = searcher.doc(docId);
                 List flds = doc.getFields();
                 Iterator iter = flds.iterator();
                 while (iter.hasNext()) {
@@ -120,7 +124,7 @@ public class Idx {
             reader.deleteDocuments(new Term(field,value));
             reader.close();
         } else if ("optimize".equals(cmd)) {
-            IndexWriter writer = new IndexWriter(idx, new StandardAnalyzer(), false);
+            IndexWriter writer = new IndexWriter(idx, new StandardAnalyzer(), false, IndexWriter.MaxFieldLength.UNLIMITED);
             writer.optimize();
             writer.close();
         } else if ("merge".equals(cmd)) {
@@ -129,7 +133,7 @@ public class Idx {
             check(idx.exists(), "Index dir 1 not found");
             check(idx2.exists(), "Index dir 2 not found");
             IndexReader reader = IndexReader.open(idx2);
-            IndexWriter writer = new IndexWriter(idx, new StandardAnalyzer(), false);
+            IndexWriter writer = new IndexWriter(idx, new StandardAnalyzer(), false, IndexWriter.MaxFieldLength.UNLIMITED);
             writer.addIndexes(new IndexReader[] {reader});
             writer.close();
             reader.close();
@@ -153,16 +157,17 @@ public class Idx {
             String field = arg[2];
             String value = arg[3];
             IndexSearcher searcher = new IndexSearcher(IndexReader.open(idx));
-            Hits hits = searcher.search(new TermQuery(new Term(field, value)));
-            System.out.println("\nNumber of hits: "+hits.length()+"\n");
+            CountingHitCollector collector = new CountingHitCollector();
+            searcher.search(new TermQuery(new Term(field, value)), collector);
+            System.out.println("\nNumber of hits: " + collector.getDocCount() + "\n");
             searcher.close();
         } else if ("uncompound".equals(cmd)) {
-            IndexWriter writer = new IndexWriter(idx, new StandardAnalyzer(), false);
+            IndexWriter writer = new IndexWriter(idx, new StandardAnalyzer(), false, IndexWriter.MaxFieldLength.UNLIMITED);
             writer.setUseCompoundFile(false);
             writer.optimize();
             writer.close();
         } else if ("compound".equals(cmd)) {
-            IndexWriter writer = new IndexWriter(idx, new StandardAnalyzer(), false);
+            IndexWriter writer = new IndexWriter(idx, new StandardAnalyzer(), false, IndexWriter.MaxFieldLength.UNLIMITED);
             writer.setUseCompoundFile(true);
             writer.optimize();
             writer.close();

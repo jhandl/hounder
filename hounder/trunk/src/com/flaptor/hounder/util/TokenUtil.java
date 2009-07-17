@@ -28,6 +28,6 @@ public class TokenUtil {
     // it is adviced to use termBuffer and termLength to generate
     // Strings.
     public static String termText(Token token) {
-        return new String (token.termBuffer(),0,token.termLength());
+        return new String (token.termBuffer(), 0, token.termLength());
     }
 }

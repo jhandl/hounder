@@ -59,7 +59,7 @@ public class IndexManagerTest extends TestCase {
 
     private Document createField() {
         Document doc = new Document();
-        doc.add(new Field("docId", "theOnlyDocId", Field.Store.YES, Field.Index.UN_TOKENIZED));
+        doc.add(new Field("docId", "theOnlyDocId", Field.Store.YES, Field.Index.NOT_ANALYZED));
         return doc;
     }
     
