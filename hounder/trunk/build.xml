@@ -190,6 +190,8 @@ limitations under the License.
             </and>
         </condition>
         <echo message="version ${version}" />
+        <echo message="revision.max ${revision.max}" />
+        <echo message="revision.range ${revision.range}" />
     </target>
 
 
