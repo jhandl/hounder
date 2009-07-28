@@ -15,7 +15,6 @@ limitations under the License.
 -->
 <project name="hounder" default="product" basedir=".">
 	<property name="project" value="hounder"/>
-	<property name="version" value="trunk"/>
 
     <property name="src.dir" value="${basedir}/src"/>
     <property name="test.dir" value="${basedir}/test"/>
@@ -133,6 +132,7 @@ limitations under the License.
         </javac>
     </target>
 
+    <!--******************************************************************************************************-->
 
     <target name="check-jsp"  description="compiles jsp files to java files, for verification">
 
@@ -177,7 +177,25 @@ limitations under the License.
 
 
     <!--******************************************************************************************************-->
-    <target name="prepare">
+
+    <typedef  resource="org/tigris/subversion/svnant/svnantlib.xml"  classpathref="classpath.jars.tools"  />
+    <target name="setVersion" >
+        <svn>
+            <wcVersion  path="./" />
+        </svn>
+        <condition property="version" value="r${revision.max}" else="dirty" >
+            <and>
+                <equals arg1="${modified}" arg2="no" />
+                <equals arg1="${revision.max}" arg2="${revision.range}" />
+            </and>
+        </condition>
+        <echo message="version ${version}" />
+    </target>
+
+
+    <!--******************************************************************************************************-->
+
+    <target name="prepare" depends="setVersion" >
         <delete dir="${output.dir}"/>
         <mkdir dir="${build.dir}"/>
         <mkdir dir="${output.dir}"/>
@@ -331,7 +349,7 @@ limitations under the License.
 
 	<!--******************************************************************************************************-->
     <target name="depjar" depends="prepare" description="builds the Hounder jar file" >
-		<jar jarfile="${output.dir}/${project}-${version}-deps.jar" >
+		<jar jarfile="${output.dir}/${project}-deps-${version}.jar" >
 			<manifest>
 				<attribute name="Built-By" value="${user.name}"/>
 				<attribute name="Version" value="${version}"/>
@@ -497,7 +515,7 @@ limitations under the License.
         <tar destfile="${dist.dir}/lib.tgz" compression="gzip">
             <tarfileset dir="${output.dir}" prefix="lib">
                 <include name="${project}-${version}.jar" />
-            	<include name="${project}-${version}-deps.jar" />
+            	<include name="${project}-deps-${version}.jar" />
             </tarfileset>
         </tar>
    	</target>
