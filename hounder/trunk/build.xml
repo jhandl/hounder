@@ -185,13 +185,14 @@ limitations under the License.
         </svn>
         <condition property="version" value="r${revision.max}" else="dirty" >
             <and>
-                <equals arg1="${modified}" arg2="no" />
+                <equals arg1="${modified}" arg2="false" />
                 <equals arg1="${revision.max}" arg2="${revision.range}" />
             </and>
         </condition>
         <echo message="version ${version}" />
         <echo message="revision.max ${revision.max}" />
         <echo message="revision.range ${revision.range}" />
+        <echo message="modified ${modified}" />
     </target>
 
 
