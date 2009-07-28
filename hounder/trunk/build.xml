@@ -185,7 +185,9 @@ limitations under the License.
         </svn>
         <condition property="version" value="r${revision.max}" else="dirty" >
             <and>
-                <equals arg1="${modified}" arg2="false" />
+                <not>
+                    <equals arg1="${modified}" arg2="true" />
+                </not>
                 <equals arg1="${revision.max}" arg2="${revision.range}" />
             </and>
         </condition>
