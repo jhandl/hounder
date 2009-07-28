@@ -1,0 +1,25 @@
+#import clustering.properties.defaults
+
+clustering.modules=\
+    monitor:com.flaptor.clusterfest.monitoring.MonitorModule,\
+    controller:com.flaptor.clusterfest.controlling.ControllerModule,\
+    deploy:com.flaptor.clusterfest.deploy.DeployModule,\
+    statistics:com.flaptor.hounder.clusterfest.StatisticsChart,\
+    indexer:com.flaptor.hounder.indexer.clustering.IndexerActionModule
+
+clustering.monitor.checker.searcher=com.flaptor.hounder.searcher.SearcherChecker
+clustering.monitor.checker.multisearcher=com.flaptor.hounder.cluster.MultiSearcherChecker
+clustering.monitor.checker.indexer=com.flaptor.hounder.indexer.IndexerChecker
+clustering.monitor.checker.crawler=com.flaptor.hounder.crawler.CrawlerChecker
+clustering.monitor.checker.cacheServer=com.flaptor.hounder.cache.CacheServerChecker
+
+#This formatter will be used for all hounder, but you could use something like
+#clustering.monitor.formatter.searcher=... to use a specific formatter for
+#searcher nodes.
+clustering.monitor.formatter=com.flaptor.hounder.clusterfest.StatisticsPropertyFormatter
+
+#login for webapp
+clustering.web.login.enabled=false
+clustering.web.login.user=user
+clustering.web.login.pass=pass
+

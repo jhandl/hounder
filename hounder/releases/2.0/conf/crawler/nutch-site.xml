@@ -1,0 +1,86 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
+
+<configuration>
+
+<property>
+  <name>fetcher.threads.fetch</name>
+  <value>10</value>
+</property>
+
+<property>
+  <name>fetcher.threads.per.host</name>
+  <value>1</value>
+</property>
+
+<property>
+  <name>fetcher.distributed</name>
+  <value>false</value>
+</property>
+
+<property>
+  <name>fetcher.nodes.list</name>
+  <value></value>
+</property>
+
+<property>
+  <name>fetcher.server.delay</name>
+  <value>1.0</value>
+</property>
+
+<property>
+  <name>fetcher.max.crawl.delay</name>
+  <value>30</value>
+</property>
+
+<property>
+  <name>file.content.limit</name>
+  <value>65536</value>
+</property>
+
+<property>
+  <name>http.redirect.max</name>
+  <value>0</value>
+</property>
+
+<property>
+  <name>plugin.includes</name>
+  <value>protocol-http|scoring-opic</value>
+</property>
+
+<property>
+  <name>http.agent.name</name>
+  <value>HounderCrawl</value>
+</property>
+
+<property>
+  <name>http.agent.description</name>
+  <value>Hounder Search Bot</value>
+</property>
+
+<property>
+  <name>http.agent.url</name>
+  <value>http://www.flaptor.com/</value>
+</property>
+
+<property>
+  <name>http.agent.email</name>
+  <value></value>
+</property>
+
+<property>
+  <name>http.robots.agents</name>
+  <value>HounderCrawl,*</value>
+</property>
+
+<property>
+  <name>fetcher.parse</name>
+  <value>false</value>
+</property>
+
+<property>
+  <name>fetcher.store.content</name>
+  <value>true</value>
+</property>
+
+</configuration>

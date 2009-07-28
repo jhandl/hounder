@@ -1,0 +1,577 @@
+/*
+Copyright 2008 Flaptor (flaptor.com) 
+
+Licensed under the Apache License, Version 2.0 (the "License"); 
+you may not use this file except in compliance with the License. 
+You may obtain a copy of the License at 
+
+    http://www.apache.org/licenses/LICENSE-2.0 
+
+Unless required by applicable law or agreed to in writing, software 
+distributed under the License is distributed on an "AS IS" BASIS, 
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
+See the License for the specific language governing permissions and 
+limitations under the License.
+*/
+package com.flaptor.hounder.crawler.modules;
+
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Scanner;
+import java.util.Set;
+import java.util.Map.Entry;
+
+import org.apache.log4j.Logger;
+import org.dom4j.DocumentHelper;
+import org.dom4j.Element;
+
+import com.flaptor.hounder.crawler.pagedb.Page;
+import com.flaptor.hounder.crawler.pagedb.PageDB;
+import com.flaptor.hounder.crawler.APageMapper;
+import com.flaptor.hounder.crawler.UrlHashMapper;
+import com.flaptor.hounder.indexer.IRemoteIndexer;
+import com.flaptor.hounder.indexer.Indexer;
+import com.flaptor.hounder.indexer.IndexerReturnCode;
+import com.flaptor.hounder.indexer.MockIndexer;
+import com.flaptor.hounder.indexer.RmiIndexerStub;
+import com.flaptor.util.Config;
+import com.flaptor.util.DomUtil;
+import com.flaptor.util.Execute;
+import com.flaptor.util.Pair;
+import com.flaptor.util.PortUtil;
+import com.flaptor.util.QuadCurve;
+
+
+/**
+ * Indexer Module for FetchdataProcessor.
+ *
+ *  @todo check how to give better error messages. Those logged now can not 
+ *  help to identify the problematic document.
+ *  
+ * @author Flaptor Development Team
+ */
+public class IndexerModule extends AProcessorModule {
+    private static final Logger logger = Logger.getLogger(Execute.whoAmI());
+    private int textLengthLimit; // the maximum allowed page text length.
+    private int titleLengthLimit; // the maximum allowed page title length.
+    private int indexerBusyRetryTime; // time in seconds between retries when the indexer is busy.
+    private int categoryBoostDamp; // the amount of damping for the categoryBoost value in the boost formula.
+    private int pagerankBoostDamp; // the amount of damping for the pagerankBoost value in the boost formula.
+    private int spamrankBoostDamp; // the amount of damping for the spamrankBoost value in the boost formula.
+    private int logBoostDamp; // the amount of damping for the log value in the boost formula.
+    private int freshnessBoostDamp; // the amount of damping for the freshnessBoost value in the boost formula.
+    private int freshnessWeight; // the weight of the freshness parameter
+    private int freshnessDamp; // the number of days at which the freshness value halves.
+    private IRemoteIndexer[] indexers; // a list of Hounder indexer.
+    private APageMapper pageMapper; // a mapper to choose an indexer for a given page.
+    private String crawlName; // the name of the crawl, added to the index so searches can be restricted to the results of this crawler.
+    private float[] scoreThreshold; // the values for the (0 to 100 step 10) percentiles in the page score histogram.
+    private float[] antiScoreThreshold; // the values for the (0 to 100 step 10) percentiles in the page anti-score histogram.
+    private HashSet hostStopWords; // the parts of web host names that are not interesting, like www.
+    private boolean sendContent; // if true the page content will be sent to the indexer in a <body> tag.
+    
+
+    public IndexerModule (String moduleName, Config globalConfig) {
+        super(moduleName, globalConfig);
+        textLengthLimit = globalConfig.getInt("page.text.max.length");
+        titleLengthLimit = globalConfig.getInt("page.title.max.length");
+        Config mdlConfig = getModuleConfig();
+        indexerBusyRetryTime = mdlConfig.getInt("indexer.busy.retry.time");
+        crawlName = globalConfig.getString("crawler.name");
+
+        categoryBoostDamp = weightToDamp(mdlConfig.getFloat("category.boost.weight"));
+        pagerankBoostDamp = weightToDamp(mdlConfig.getFloat("pagerank.boost.weight"));
+        spamrankBoostDamp = weightToDamp(mdlConfig.getFloat("spamrank.boost.weight"));
+        logBoostDamp = weightToDamp(mdlConfig.getFloat("log.boost.weight"));
+        freshnessBoostDamp = weightToDamp(mdlConfig.getFloat("freshness.boost.weight"));
+        int[] freshnessParams = mdlConfig.getIntArray("freshness.params");
+        freshnessWeight = freshnessParams[0];
+        freshnessDamp = freshnessParams[1];
+        hostStopWords = new HashSet<String>(Arrays.asList(mdlConfig.getStringArray("host.stopwords")));
+        sendContent = mdlConfig.getBoolean("send.content.to.indexer");
+
+        // instantiate the indexer.
+        if (mdlConfig.getBoolean("use.mock.indexer")) {
+            logger.warn("Using a mock indexer. This should be used only for testing.");
+            this.indexers = new IRemoteIndexer[1];
+            this.indexers[0] = new MockIndexer();
+            pageMapper = new UrlHashMapper(mdlConfig, 1);
+        } else {
+        	String[] specs = null;
+        	try {
+        		specs = mdlConfig.getStringArray("indexer.node.list");
+        	} catch (Exception e) {
+        		// for backward compatibility:
+            	specs = mdlConfig.getStringArray("remoteRmiIndexer.host");
+        	}
+        	this.indexers = new IRemoteIndexer[specs.length];
+        	for (int i=0; i<specs.length; i++) {
+        		Pair<String, Integer> host = PortUtil.parseHost(specs[i], "indexer.rmi");
+        		this.indexers[i] = new RmiIndexerStub(host.last(), host.first());
+        	}
+            pageMapper = getPageMapper(mdlConfig, specs.length);
+        }        
+    }
+
+    public void close() {
+    }
+    
+    // Return the configured page mapper.
+    private APageMapper getPageMapper (Config config, int numberOfNodes) {
+        String[] parts = config.getStringArray("indexer.node.mapper");
+        if (null == parts || 0 == parts.length) {
+            throw new RuntimeException("No mapper defined for the distributed indexer");
+        } 
+        String mapperClass = parts[0].trim();
+        Config mapperConfig = config;
+        if (parts.length > 1) {
+            String mapperName = parts[1].trim();
+            mapperConfig = Config.getConfig(mapperName + "Mapper.properties");
+        }
+        APageMapper mapper;
+        try {
+            mapper = (APageMapper)Class.forName(mapperClass).getConstructor(new Class[]{Config.class, Integer.TYPE}).newInstance(new Object[]{mapperConfig, numberOfNodes});
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        return mapper;
+    }
+
+
+
+    /**
+     * @todo the pageDB is checked for null, but should be checked for
+     *	fetchedSize
+     */
+    @SuppressWarnings("unchecked")
+    @Override
+    protected void internalProcess(FetchDocument doc) {
+
+        Page page = doc.getPage();
+        if (null == page) {
+            logger.warn("Page is null. Ignoring this document.");
+            return;
+        }
+        if (logger.isDebugEnabled()) { 
+            logger.debug("Doc has tags: "+doc.getTags().toString());
+        } 
+        if (doc.hasTag(EMIT_DOC_TAG)) {
+            addToIndex(doc);
+        } else {
+            if (page.isEmitted()) {
+                deleteFromIndex(page);
+            }
+        }
+    }
+
+
+    // Delete a page from the index
+    private void deleteFromIndex (Page page) {
+        org.dom4j.Document dom = DocumentHelper.createDocument();
+        Element root = dom.addElement("documentDelete");
+
+        root.addElement("documentId").addText(getDocumentId(page));
+        try {
+        	int i = pageMapper.mapPage(page);
+            while (indexers[i].index(dom) == IndexerReturnCode.RETRY_QUEUE_FULL) {
+                try {
+                    Thread.sleep(indexerBusyRetryTime*1000);
+                } catch (InterruptedException e) {
+                    logger.debug("Sleep interrupted: " + e, e);
+                }
+            }
+            page.setEmitted(false);
+        } catch (Exception e) {
+            logger.error(e,e);
+        }
+    }
+
+
+    // Calcuate the category boost. TODO: range?
+    private float calculateCategoryBoost (Map<String,Object> attr) {
+        Double categoryBoost = (Double)attr.get("categroy_boost");
+        if (null == categoryBoost) {
+            categoryBoost = 1d;
+        }
+        return categoryBoost.floatValue();
+    }
+
+
+    // Calcuate the pagerank boost, range 0.1 - 10.
+    private float calculatePagerankBoost (Page page) {
+        // page rank 
+        float score = page.getScore();
+        int bucket = 0;
+        for (; bucket < scoreThreshold.length && scoreThreshold[bucket] <= score; bucket++);
+        float pagerankBoost = bucket-1;
+        if (bucket < scoreThreshold.length) {
+            float bucketSpan = (scoreThreshold[bucket] - scoreThreshold[bucket-1]);
+            if (bucketSpan > 0) {
+                pagerankBoost += (score - scoreThreshold[bucket-1]) / bucketSpan;
+            }
+            if (pagerankBoost < 0.1f) pagerankBoost = 0.1f;
+        }
+        return pagerankBoost;
+    }
+
+
+    // Calcuate the spamrank boost, range 0.01 - 1.
+    private float calculateSpamrankBoost (Page page) {
+        // spam rank 
+        float spamrank = 1f;
+        if (antiScoreThreshold[0] < antiScoreThreshold[antiScoreThreshold.length-1]) {
+            float score = page.getAntiScore();
+            int bucket = 0;
+            for (; bucket < antiScoreThreshold.length && antiScoreThreshold[bucket] <= score; bucket++);
+            spamrank = bucket-1;
+            if (bucket < antiScoreThreshold.length) {
+                float bucketSpan = (antiScoreThreshold[bucket] - antiScoreThreshold[bucket-1]);
+                if (bucketSpan > 0) {
+                    spamrank += (score - antiScoreThreshold[bucket-1]) / bucketSpan;
+                }
+            }
+            spamrank = (10f-spamrank)/10f;
+            if (spamrank < 0.01f) spamrank = 0.01f;
+        }
+        return spamrank;
+    }
+
+
+    // Calcuate the log(inlinks) boost, range 0.1 - 10 for up to 20000 inlinks
+    private float calculateLogBoost (Page page) {
+        // log(inlinks) boost 
+        float logBoost = 0.1f;
+        int inlinks = page.getNumInlinks();
+        if (inlinks > 1) {
+            logBoost = (float)Math.log(inlinks);
+        }
+        return logBoost;
+    }
+
+
+    // Calcuate the freshness boost. TODO: range?
+    private float calculateFreshnessBoost (Page page) {
+        final long MILLIS_IN_A_DAY = 24*60*60*1000L;
+        long daysSinceLastChange = (System.currentTimeMillis() - page.getLastChange()) / MILLIS_IN_A_DAY;
+        if (0 == daysSinceLastChange) daysSinceLastChange = 1;
+        return 1f+(freshnessWeight*freshnessDamp)/(daysSinceLastChange+freshnessDamp);
+    }
+
+
+    // Convert from a weight value in the [0.0, 1.0] range to a damp value in the corresponding [10, 0] range.
+    // This is a convenience so that the user can think in terms of weight (0 = no weight at all, 1 = full weight),
+    // but the program needs the damp factor (0 = no damp, 10 = full damp). 
+    // @see factor()
+    private int weightToDamp (float weight) {
+        return (int)(10.0 * (1.0f - weight));
+    }
+
+
+    // Damp the influence of a value in the boost formula.
+    // If damp == 0, the value is returned unchanged, so the value retains its full influence.
+    // If damp == 10, the value is disregarded and 1.0 is returned, so the value has no influence at all.
+    // If damp is in the [1,9] range, the damp-power-of-two root of the value is returned, which gets closer to 1.0 as damp increases.
+    private float factor (String name, float value, int damp) {
+        if (value < 0.01f || value > 15f) {
+            logger.warn(name+" boost value out of range! ("+value+")");
+            value = (value < 0.01f) ? 0.01f : 15f;
+        }
+        if (damp >= 10) return 1.0f;
+        for (int i = 0; i < damp; i++) {
+            value = (float)Math.sqrt(value);
+        }
+        return value;
+    }
+
+
+    /**
+     * Polymorphic method for deciding how to compose a documentId 
+     * from a page
+     * 
+     * @param page
+     * @return 
+     */
+    protected String getDocumentId(Page page) {
+        return page.getUrl();
+    }
+
+
+    // Add a page to the index
+    @SuppressWarnings("unchecked")
+    protected void addToIndex (FetchDocument doc) {
+
+        byte[] content = doc.getContent();
+        if (0 == content.length) {
+            logger.warn("Page has no data. Ignoring this document.");
+            return;
+        }
+
+        Set<String> categories = doc.getCategories();
+        Map<String,Object> attributes = doc.getAttributes();
+        Map<String,Object> indexableAttributes = doc.getIndexableAttributes();
+
+        // build xml doc
+        org.dom4j.Document dom = DocumentHelper.createDocument();
+        Element root = dom.addElement("documentAdd");
+        Page page = doc.getPage();
+        String text = doc.getText();
+        String url = page.getUrl();
+        String host = getHost(url);
+        String title = doc.getTitle(titleLengthLimit);
+        String tokenizedHost = tokenizeHost(host);
+        String anchorText = getAnchorText(page);
+
+        float categoryBoost = calculateCategoryBoost(attributes);
+        float pagerankBoost = calculatePagerankBoost(page);
+        float spamrankBoost = calculateSpamrankBoost(page);
+        float logBoost = calculateLogBoost(page);
+        float freshnessBoost = calculateFreshnessBoost(page);
+
+        // add overall score
+        float f1 = factor("category",categoryBoost,categoryBoostDamp);
+        float f2 = factor("pagerank",pagerankBoost,pagerankBoostDamp);
+        float f3 = factor("spamrank",spamrankBoost,spamrankBoostDamp);
+        float f4 = factor("log",logBoost,logBoostDamp);
+        float f5 = factor("freshness",freshnessBoost,freshnessBoostDamp);
+        float f6 = ((Double)attributes.get("boost")).floatValue(); // as calculated by the boost module, or 1.0 if no boost module is defined.
+        float boost = f1 * f2 * f3 * f4 * f5 * f6;
+
+        // System.out.println("BOOST url=["+url+"]  category="+f1+" ("+categoryBoost+":"+categoryBoostDamp+")  pagerank="+f2+" ("+pagerankBoost+":"+pagerankBoostDamp+")  log="+f3+" ("+logBoost+":"+logBoostDamp+")  freshness="+f4+" ("+freshnessBoost+":"+freshnessBoostDamp+") moduleBoost="+f5+"  Boost="+boost);
+
+        if (boost < 1e-6f) {
+            logger.warn("Boost too low! ("+boost+")  category="+f1+" ("+categoryBoost+":"+categoryBoostDamp+")  pagerank="+f2+" ("+pagerankBoost+":"+pagerankBoostDamp+")  spamrank="+f3+" ("+spamrankBoost+":"+spamrankBoostDamp+")  log="+f4+" ("+logBoost+":"+logBoostDamp+")  freshness="+f5+" ("+freshnessBoost+":"+freshnessBoostDamp+") moduleBoost="+f6);
+            boost = 1e-6f;
+        }
+        
+        if (null == title || "".equals(title)) {
+            title = "Untitled";
+        }
+
+        root.addElement("boost").addText(String.valueOf(boost));
+        root.addElement("documentId").addText(getDocumentId(page));
+
+        Map<String,Double> boostMap = (Map<String,Double>)attributes.get("field_boost");
+
+        // add the search fields
+        addField(root, "url", url, true, true, true, boostMap);
+        addField(root, "site", host, true, true, false, boostMap);
+        addField(root, "tokenizedHost", tokenizedHost, false, true, true, boostMap);
+        addField(root, "title", title, true, true, true, boostMap);
+        addField(root, "text", text, true, true, true, boostMap);
+        addField(root, "anchor", anchorText, false, true, true, boostMap);
+        addField(root, "crawl", crawlName, false, true, true, boostMap);
+
+        if (sendContent) {
+            addBody(root,doc,content);
+        }
+
+        // for debugging only
+        //addField(root, "boostinfo", "category="+f1+" ("+categoryBoost+":"+categoryBoostDamp+")  pagerank="+f2+" ("+pagerankBoost+":"+pagerankBoostDamp+")  log="+f3+" ("+logBoost+":"+logBoostDamp+")  freshness="+f4+" ("+freshnessBoost+":"+freshnessBoostDamp+") moduleBoost="+f5+"  Boost="+boost, true, false, false, null);
+
+        addAdditionalFields(root, page, boostMap);
+
+        // Adding metainfo from attributes
+        Set<Entry<String,Object>> attributeSet = indexableAttributes.entrySet();
+        for (Entry<String,Object> attribute : attributeSet) {
+            addField(root, attribute.getKey(), attribute.getValue() == null ? "" : attribute.getValue().toString(), true, true, true, boostMap);
+        }
+
+        StringBuffer assignedCategories = new StringBuffer();
+        if (null != categories) {
+            // iterate through the classes the page belongs to add each category and its score
+            for (Iterator<String> iter = categories.iterator(); iter.hasNext();) {
+                assignedCategories.append(iter.next());
+                assignedCategories.append(" ");
+
+                // repeat the field times proportional to the score (this is a way to boost the document by category);
+                //for (int rep = 0; rep < score*10; rep++) {
+                //    addField(root, "categoryBoost", categ, false, true, false);
+                //}
+            }
+            addField(root, "categories", assignedCategories.toString().trim(), true, true, true, boostMap);
+        }
+
+        if (logger.isDebugEnabled()) { 
+            logger.debug("Indexing dom: " + DomUtil.domToString(dom));
+        }
+        // Send the document to the indexer. If the queue is full, wait and retry.
+        try {
+        	int i = pageMapper.mapPage(page);
+            while (indexers[i].index(dom) == IndexerReturnCode.RETRY_QUEUE_FULL) {
+                try { 
+                    Thread.sleep(indexerBusyRetryTime*1000); 
+                } catch (InterruptedException e) {
+                    logger.debug("Sleep interrupted: " + e, e); 
+                }
+            }
+            page.setEmitted(true);
+        } catch (Exception e) {
+            logger.error(e,e);
+        }
+    }
+
+
+    /**
+     * Intended for extension.
+     * Any subclass of IndexerModule should override this method to add any additional field it needs.
+     *    
+     */
+    protected void addAdditionalFields(Element root, Page page,
+            Map<String, Double> boostMap) {
+        //Intended for extension.
+    }
+
+
+    /**
+     * Adds a new field to the <code>doc</code> Element. 
+     * 
+     * @param doc the element to add the field to
+     * @param name the name of the field
+     * @param value the String value for the field
+     * @param stored true iif should be stored
+     * @param indexed true iif should be indexed
+     * @param tokenized true iif should be tokenized
+     * @param boostMap map containing the boosts for each field name
+     */
+    protected final void addField (Element doc, String name, String value, boolean stored, boolean indexed, boolean tokenized, Map<String,Double> boostMap) {
+        Double boost = 1.0d;
+        if (null != boostMap && boostMap.containsKey(name)) {
+            boost = boostMap.get(name);
+        }
+        doc.addElement("field")
+            .addAttribute("name", name)
+            .addAttribute("stored", Boolean.toString(stored))
+            .addAttribute("indexed", Boolean.toString(indexed))
+            .addAttribute("tokenized", Boolean.toString(tokenized))
+            .addAttribute("boost", boost.toString())
+            .addText(value);
+    }
+
+
+    protected final void addBody(Element doc, FetchDocument fetchDoc, byte[] bytes) {
+        String encoding = null;
+        // find charset. http headers usually have a Content-Type line, but
+        // as it may not be in the same case, all headers are stored lowercased.
+        // Content-Type lines contain mime-type and charset, separated by ;
+        // for example
+        // Content-Type: text/html; charset=UTF-8
+        if (fetchDoc.getHeader().containsKey("content-type")) {
+            String[] tokens = fetchDoc.getHeader().get("content-type").split(";");
+            for (String token: tokens) {
+                if (token.toLowerCase().contains("charset") && token.contains("=")){
+                    encoding = token.split("=")[1].trim().toUpperCase();
+                    break;
+                }
+            }
+        }
+        // if not found, use default encoding
+        if (null == encoding) {
+            encoding = java.nio.charset.Charset.defaultCharset().name();
+        }
+
+        try {
+            doc.addElement("body").addText(new String(bytes,encoding));
+        } catch(java.io.UnsupportedEncodingException e) {
+            logger.error("while adding body: ",e); 
+        } 
+    }
+
+
+    // Extract the host part of the url
+    private String getHost (String url) {
+        String host;
+        try {
+            host = new URI(url).getHost();
+            if (null == host) {
+                host = "";
+            }
+            if (0 == host.trim().length()) {
+                logger.warn("Null or empty host ("+url+")");
+            }
+        } catch (URISyntaxException e) {
+            logger.warn("Invalid url ("+url+")");
+            host = "";
+        }
+        return host;
+    }
+
+
+    // Separate a host name into its parts
+    private String tokenizeHost (String host) {
+        String tokenizedHost;
+        if (0 == host.trim().length()) {
+            tokenizedHost="";
+        } else {
+            String[] hostParts = host.split("\\.");
+            StringBuffer buf = new StringBuffer();
+
+            // strip the common parts away
+            for (String part : hostParts) {
+                if (!hostStopWords.contains(part)) {
+                    buf.append(part);
+                    buf.append(" ");
+                }
+            }
+
+            // add the normalized domain (sans subdomain)
+            int keep = (hostParts[hostParts.length-1].length() == 2) ? 3 : 2;
+            keep = Math.min(keep, hostParts.length);
+            for (int i = hostParts.length-keep; i < hostParts.length; i++) {
+                buf.append(hostParts[i]);
+                if (i < hostParts.length-1) {
+                    buf.append(".");
+                }
+            }
+
+            tokenizedHost = buf.toString();
+        }
+        return tokenizedHost;
+    }
+
+
+    // Return a string with all the anchors
+    private String getAnchorText (Page page) {
+        StringBuffer anchorText = new StringBuffer();
+        String[] anchors = page.getAnchors();
+        for (int i=0; i<anchors.length; i++) {
+            anchorText.append(" ");
+            anchorText.append(anchors[i]);
+        }
+        return anchorText.toString();
+    }
+
+
+    public void applyCommand(Object command){
+        if ("optimize".equals(command.toString())) {
+            logger.info("optimize requested.");
+            try {
+                org.dom4j.Document dom = DocumentHelper.createDocument();
+                dom.addElement("command").addAttribute("name", "optimize");
+                for (int i=0; i<indexers.length; i++) {
+                	indexers[i].index(dom);
+                }
+            } catch (Exception e) {
+                logger.error(e,e);
+            }
+        } else if ("delete".equals(command.toString())) {
+            FetchDocument doc = ((CommandWithDoc)command).getDoc();
+            Page page = doc.getPage();
+            deleteFromIndex(page);
+        } else if ("startCycle".equals(command.toString())) {
+            PageDB pagedb = ((CommandWithPageDB)command).getPageDB();
+            scoreThreshold = new float[11];
+            for (int i = 0; i < 11; i++) {
+                scoreThreshold[i] = pagedb.getScoreThreshold(i*10);
+            }
+            antiScoreThreshold = new float[11];
+            for (int i = 0; i < 11; i++) {
+                antiScoreThreshold[i] = pagedb.getAntiScoreThreshold(i*10);
+            }            
+        }
+    }
+
+}
