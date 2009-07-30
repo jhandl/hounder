@@ -30,6 +30,8 @@ public class LazyParsedQuery extends AQuery {
         }
         queryStr = queryString;
     }
+    
+    
 
     public  org.apache.lucene.search.Query getLuceneQuery() {
         if (null == lq) {
@@ -37,6 +39,22 @@ public class LazyParsedQuery extends AQuery {
         }
         return lq;
     }
+    
+    public static LazyParsedQuery findLazyParsedQuery(AQuery query){
+        LazyParsedQuery res = null;
+        if (query instanceof LazyParsedQuery) { 
+            res = (LazyParsedQuery)query;
+        } else if (query instanceof ABinaryOperator) {
+            ABinaryOperator binary = (ABinaryOperator)query;
+            res = findLazyParsedQuery(binary.getLeftTerm());
+            if (res == null) {
+                res = findLazyParsedQuery(binary.getRightTerm());
+            }
+        }
+        return res;
+    }
+
+
 
     public String getQueryString() {
         return queryStr;

@@ -129,6 +129,9 @@ public class CompositeSearcher implements ISearcher {
                 throw new RuntimeException(e.getMessage(),e);
             }
         }
+        if (searcherConfig.getBoolean("compositeSearcher.useLoggingSearcher")) {
+            searcher = new LoggingSearcher(searcher);
+        }
     	searcher = new StatisticSearcher(searcher);
     }
 

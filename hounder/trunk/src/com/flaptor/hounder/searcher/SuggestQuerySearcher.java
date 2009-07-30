@@ -66,16 +66,16 @@ public class SuggestQuerySearcher implements ISearcher{
 
         // Check if there's the need to find a suggested query.
         if (res.totalGroupsEstimation() < groupsThreshold) {  
-            if (logger.isDebugEnabled()) { logger.debug("did not get enough results for query " + query.toString() + " . trying to suggest."); }
+            if (logger.isDebugEnabled()) { logger.debug("did not get enough results for query " + query.toString() + ". Will try to suggest."); }
             long start = System.currentTimeMillis();
             // suggest queries for this query
             List<AQuery> suggestions = suggestor.suggest(query);
             int bestSuggestion = -1;
-            float minResultCount = res.totalResults() * suggestionBetterByFactor;
+            float minResultCount = res.totalGroupsEstimation() * suggestionBetterByFactor;
 // System.out.println("Suggestion for query ["+query.toString()+"]: "+suggestions.toString());
             for (int i=0; i<suggestions.size() && i<maxSuggestionsToTry; i++) {
 // System.out.println("  "+suggestions.get(i).toString());
-                if (logger.isDebugEnabled()) { logger.debug("tryng suggested query " + suggestions.get(i).toString() + " for query " + query.toString()); }
+                if (logger.isDebugEnabled()) { logger.debug("trying suggested query " + suggestions.get(i).toString() + " for query " + query.toString()); }
                 // Do the search with the suggested query, using the same filter and grouping and ignoring 
                 // sorting as it doesn't affect the number of results and slows down the operation.
                 GroupedSearchResults resSuggested = searcher.search(suggestions.get(i), 0, 1, groupBy, groupSize, afilter, null);

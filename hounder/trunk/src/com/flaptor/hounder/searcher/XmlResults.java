@@ -48,7 +48,7 @@ public class XmlResults {
      * @return a DOM document.
      */
     public static final Document buildXml(GroupedSearchResults sr, int status, String statusMsg) {
-        return buildXml(null,0,0,null,sr,status,statusMsg,null,null,null,null,null);
+        return buildXml("",0,1,null,sr,status,statusMsg,null,null,null,null,null);
     }
     
     /**

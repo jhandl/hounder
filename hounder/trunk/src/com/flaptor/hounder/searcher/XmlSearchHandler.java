@@ -389,11 +389,10 @@ public class XmlSearchHandler extends AbstractHandler {
         } catch (RuntimeException e) {
             logger.error("SEARCHING",e);
             status = 100;
-            statusMessage = "Internal error in OpenSearchHandler: " +e.getMessage();
+            statusMessage = "Internal error in XmlSearchHandler: " +e.getMessage();
             sr = new GroupedSearchResults();
         }
-        System.out.println("Q "+formatter.format(new Date())+" "+sr.totalResults()+" "+queryString);
- 
+
         Document dom = XmlResults.buildXml(queryString, start, hitsPerPage, orderByParam, sr, status, statusMessage, xsltUri, rangeField, rangeStart, rangeEnd, params);
         return dom;
     }

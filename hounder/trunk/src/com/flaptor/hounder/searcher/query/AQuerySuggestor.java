@@ -56,30 +56,19 @@ public class AQuerySuggestor {
      *          A List<AQuery> of suggested queries.
      */
     public List<AQuery> suggest(AQuery query) {
-        query = findLazyParsedQuery(query);
+        query = LazyParsedQuery.findLazyParsedQuery(query);
         List<AQuery> suggested = suggestLinear(query);
         return suggested;
     }
    
-    private AQuery findLazyParsedQuery(AQuery query){
-        if (query instanceof LazyParsedQuery) { return query; }
-        if (query instanceof ABinaryOperator) {
-            ABinaryOperator binary = (ABinaryOperator)query;
-            AQuery res = findLazyParsedQuery(binary.getLeftTerm());
-            if (res != null ) { return res; }
-
-            res = findLazyParsedQuery(binary.getRightTerm());
-            if (res != null ) { return res; }
-        }
-
-        // else
-        return null;
-    }
-
     private List<AQuery> suggestLinear(AQuery query) {
         List<AQuery> queries = new ArrayList<AQuery>();
-
-        if (query instanceof LazyParsedQuery) {
+        if (null == query) {
+            logger.debug("Can't make a suggestion for a null query");
+        } else if (!(query instanceof LazyParsedQuery)) {
+            // TODO FIXME
+            logger.debug("can not make suggestions for queries of type " + query.getClass());
+        } else {
             String originalString = ((LazyParsedQuery)query).getQueryString();
             StandardTokenizer tokenizer = new StandardTokenizer(new StringReader(originalString));
             List<String> tokens = new ArrayList<String>();
@@ -94,7 +83,7 @@ public class AQuerySuggestor {
                 // for every word, suggest something
                 for (int i = 0; i < tokens.size(); i++) {
                     StringBuffer sb = new StringBuffer();
-                    sb.append("\"");
+//                    sb.append("\"");
                     for (int j = 0; j < i; j++) {
                         sb.append(tokens.get(j));
                         sb.append(" ");
@@ -107,9 +96,11 @@ public class AQuerySuggestor {
                         sbf.append(" ");
                         for (int k = i+1; k < tokens.size(); k++) {
                             sbf.append(tokens.get(k));
-                            sbf.append(" ");
+                            if (k+1 < tokens.size()) {
+                                sbf.append(" ");
+                            }
                         }
-                        sbf.append("\"");
+//                        sbf.append("\"");
                         queries.add(new LazyParsedQuery(sbf.toString()));
                     }
                 }
@@ -118,11 +109,7 @@ public class AQuerySuggestor {
                 logger.error("Error while suggesting query", e);
                 return new ArrayList<AQuery>(); 
             }
-        } else {
-            // TODO FIXME
-            logger.debug("can not make suggestions for queries of type " + query.getClass());
         }
-
         return queries;
     }
 }

@@ -48,7 +48,7 @@ public class KeywordBoostMethodTest extends TestCase {
         config.set("method.keyword.applyto.field",field);
         config.set("method.keyword.patterns.file","kbm.patterns");
 
-        com.flaptor.util.TestUtils.writeFile("kbm.patterns","*||"+keyword);
+        com.flaptor.util.TestUtils.writeFile("kbm.patterns","*|||"+keyword);
 
 
         //config.set("value.constant","1000");

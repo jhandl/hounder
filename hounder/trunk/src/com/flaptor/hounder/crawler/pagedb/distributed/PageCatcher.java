@@ -82,8 +82,6 @@ public class PageCatcher implements IRemotePageCatcher {
      * Stop the catcher by unregistering it.
      */
     public synchronized void stop () {
-System.out.println("STOPPING THE CATCHER !!!");
-Execute.printStackTrace();
         if (running) {
             this.server.requestStop();
             while (!this.server.isStopped()) {Execute.sleep(20);}
