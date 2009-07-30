@@ -36,39 +36,38 @@ import com.flaptor.util.TrieTree;
 
 /**
  * The UrlPatterns class keeps a large number of expressions against which a string can be matched.
- * The expressions are read from a file and have one of the folowing formats:
+ * The expressions are read from a file and must comply with the folowing format:
  *
- * 1. prefix 
- * 2. prefix | regex
- * 3. prefix || tokens
- * 4. prefix | regex || tokens
+ *    &lt;prefix&gt; [ | &lt;pattern&gt; ] [ || &lt;anti-pattern&gt; ] [ ||| &lt;tokens&gt; ]
  *
- * 5. *
- * 6. * | regex || tokens
- * 7. * || tokens
+ * The following forms are valid:
  *
+ *    1. prefix
+ *    2. prefix ||| tokens
+ *    3. prefix | pattern
+ *    4. prefix | pattern ||| tokens
+ *    5. prefix | pattern || anti-pattern
+ *    6. prefix | pattern || anti-pattern ||| tokens
+ *    7. *
  *
- * and are parsed as follows:
- *
- * 1. exact prefix match, no tokens associated
- * 2. if prefix matches, the ending of the string is matched against regex, 
- *    no tokens associated
- * 3. just prefix match, with tokens associated
- * 4. same as 2, but associating tokens
- * 5. everything matches, no tokens
- * 6. everything matches, regex is ignored, tokens associated
- * 7. everything matches, tokens associated
- *
- * "tokens" is a comma separated list of keywords associated with the 
- * prefix/regex of that line
+ * "tokens" is a comma separated list of keywords that are associated with the 
+ * prefix/regex of that line. The "*" prefix matches everything. If such a line 
+ * is included, everying else in the file is ignored.
  * 
- * A string matches the UrlPatterns class if it matches any given prefix that
+ * A string matches the UrlPattern if it matches any given prefix that
  * was not followed by a regular expression, or if some inicial part of it 
- * matches any given prefix, and the rest matches the regular expression that followed.
+ * matches any given prefix, and the rest matches the pattern that followed 
+ * and does not contain anything that matches the anti-pattern, if specified.
+ * Note that while the pattern needs to match the url after the prefix in its 
+ * entirety, the anti-pattern can match any substring of it. 
  *
- * For example, if the file contains the lines "abc" and "xyz | [0-9]+" (without the quotes),
- * then the strings "abc", "xyz3" and "xyz42" would match, 
- * but "ab", "abc3" or "xyzjk" would not.
+ * For example, if the file contains the following lines:
+ *    abc
+ *    jkl | [0-9]+
+ *    xyz | [a-z0-9/]+ || pag[0-9]
+ * then the strings "abc", "jkl123" and "xyz/foo/bar" would match, 
+ * but "ab", "abc3", "jkl", "jklx", "xyz/foo/pag3/bar" and "mno" would not.
+ *
  * @author Flaptor Development Team
  */
 public class UrlPatterns {
@@ -150,7 +149,7 @@ public class UrlPatterns {
                         }
                     }
                 }
-                try { sleep(checkDelay*1000); } catch (Exception e) {/* ingnore */}
+                try { sleep(checkDelay*1000); } catch (Exception e) {/* ignore */}
             }
         }
 
@@ -178,7 +177,7 @@ public class UrlPatterns {
 
     // Read the patterns from a file.
     private boolean readPatterns (String filename, TrieTree<Vector<PatternRule>> patterns) {
-        boolean matchAll = false;
+        boolean newMatchAll = false;
         if (null != filename) {
         	BufferedReader reader = null;
             try {
@@ -189,7 +188,7 @@ public class UrlPatterns {
                         String line = reader.readLine();
                         if (line.length() > 0 && line.charAt(0) != '#') {  // ignore empty lines and comments
                             if (line.startsWith("*")) {  // if any line is "*", all previous or following lines are ignored and any line will match
-                                matchAll = true;
+                                newMatchAll = true;
                                 parseDefaultTokens(line);
                                 continue;
                             }
@@ -225,7 +224,7 @@ public class UrlPatterns {
             	Execute.close(reader);
             }
         }
-        return matchAll;
+        return newMatchAll;
     }
 
     /**
@@ -302,29 +301,63 @@ public class UrlPatterns {
         public abstract PatternRule join (PatternRule rule);
     }
 
+    
+    // No Pattern, no tokens.
+    private class EmptyRule extends PatternRule {
+        public boolean matches(String url) { return (url.length() == 0); }
+        public PatternRule join(PatternRule rule) { return this; }
+    }
+
 
     // Just a pattern, without tokens
     private class OnlyPattern extends PatternRule{
-        private Pattern pattern;
+        private Pattern pattern, antiPattern;
 
-        public OnlyPattern(Pattern pattern) {
+        public OnlyPattern(Pattern pattern, Pattern antiPattern) {
             this.pattern = pattern;
+            this.antiPattern = antiPattern;
+        }
+        public OnlyPattern(Pattern pattern) {
+            this(pattern,null);
+        }
+        public OnlyPattern(String expr1, String expr2) {
+            this.pattern = Pattern.compile(expr1, Pattern.CASE_INSENSITIVE | Pattern.COMMENTS);
+            if (null != expr2 && expr2.trim().length() == 0) { expr2 = null; }
+            this.antiPattern = (null==expr2) ? null : Pattern.compile(".*"+expr2+".*", Pattern.CASE_INSENSITIVE | Pattern.COMMENTS);
         }
         public OnlyPattern(String expr) {
-            this.pattern = Pattern.compile(expr, Pattern.CASE_INSENSITIVE | Pattern.COMMENTS);  // compile the pattern 
+            this(expr,null);
         }
 
         public boolean matches(String suffix) {
-            return pattern.matcher(suffix).matches();
+            boolean match = pattern.matcher(suffix).matches();
+            if (match && null != antiPattern && antiPattern.matcher(suffix).matches()) {
+                match = false;
+            }
+            return match;
+        }
+        
+        @Override
+        public boolean canJoin(PatternRule other) {
+            // true if same class and (both antiPatterns are null (can't be same instance) or are equal)
+            boolean can = super.canJoin(other) && (
+                    ((null == this.antiPattern && null == ((OnlyPattern)other).antiPattern))
+                    || ((null != this.antiPattern && null != ((OnlyPattern)other).antiPattern) 
+                        && (this.antiPattern.toString().equals(((OnlyPattern)other).antiPattern.toString()))));
+            return can;
         }
 
         public PatternRule join(PatternRule other) {
-            if (!canJoin(other)) 
+            if (!canJoin(other)) {
                 throw new IllegalArgumentException(toString() +" can not join " + other.toString());
+            }
 
-
-            String expr = "(" + this.pattern.toString()+ ")|(" + ((OnlyPattern)other).pattern.toString() + ")";           
-            return new OnlyPattern(expr);
+            String expr1 = "(" + this.pattern.toString()+ ")|(" + ((OnlyPattern)other).pattern.toString() + ")";  
+            String expr2 = null;
+            if (null != this.antiPattern) { // they must both be equal (see canJoin)
+                expr2 = this.antiPattern.toString();
+            }
+            return new OnlyPattern(expr1,expr2);
         }
     }
 
@@ -334,8 +367,8 @@ public class UrlPatterns {
 
         public OnlyTokens(String[] tokenArray) {
             tokens = new HashSet<String>(tokenArray.length,1);
-            for (String token: tokenArray){
-                tokens.add(token);
+            for (String token : tokenArray){
+                tokens.add(token.trim());
             }
         }
 
@@ -344,9 +377,9 @@ public class UrlPatterns {
         }
 
         public PatternRule join(PatternRule other) {
-            if (!canJoin(other)) 
+            if (!canJoin(other)) {
                 throw new IllegalArgumentException(toString() +" can not join " + other.toString());
-
+            }
             Set<String> otherTokens = ((OnlyTokens)other).tokens;
             Set<String> newSet = new HashSet<String>(this.tokens.size() + otherTokens.size(),1);
             newSet.addAll(this.tokens);
@@ -359,96 +392,105 @@ public class UrlPatterns {
             return true;
         }
 
+        @Override
         public Set<String> getTokens(){
             return tokens;
         }
     }
 
     // Different tokens for different patterns
-    private class PatternAndTokens extends PatternRule{
-        private Set<String> tokens;
-        private Pattern pattern;
+    private class PatternAndTokens extends PatternRule {
+        private OnlyPattern pattern;
+        private OnlyTokens tokens;
 
-        public PatternAndTokens(String expr,String[] tokenArray){
-            this(Pattern.compile(expr,Pattern.CASE_INSENSITIVE | Pattern.COMMENTS),tokenArray);
+        public PatternAndTokens(String expr1, String expr2, String[] tokenArray) {
+            pattern = new OnlyPattern(expr1, expr2);
+            tokens = new OnlyTokens(tokenArray);
         }
         
-        public PatternAndTokens(String expr,Set<String> tokenSet){
-            this(Pattern.compile(expr,Pattern.CASE_INSENSITIVE | Pattern.COMMENTS),tokenSet);
+        public PatternAndTokens(String expr1, String expr2, Set<String> tokenSet) {
+            pattern = new OnlyPattern(expr1, expr2);
+            tokens = new OnlyTokens(tokenSet);
         }
 
-        public PatternAndTokens(Pattern pattern, String[] tokenArray) {
-            // construct a hashset that will be full (no append here)
-            this.tokens = new HashSet<String>(tokenArray.length,1);
+        private PatternAndTokens(OnlyPattern pattern, OnlyTokens tokens) {
             this.pattern = pattern;
-
-            for (String token: tokenArray) {
-                tokens.add(token);
-            }
+            this.tokens = tokens;
         }
-
-        public PatternAndTokens(Pattern pattern, Set<String> tokenSet) {
-            this.pattern = pattern;
-            this.tokens = new HashSet<String>(tokenSet);
-        }
-
+        
+        @Override
         public boolean canJoin(PatternRule other) {
-            return super.canJoin(other) && this.tokens.equals(((PatternAndTokens)other).tokens);
+            return super.canJoin(other) 
+                    && pattern.canJoin(((PatternAndTokens)other).pattern) 
+                    && tokens.canJoin(((PatternAndTokens)other).tokens);
         }
 
         public PatternRule join(PatternRule other){
-            if (!canJoin(other)) 
+            if (!canJoin(other)) {
                 throw new IllegalArgumentException(toString() +" can not join " + other.toString());
-
-            String expr = "(" + this.pattern.toString()+ ")|(" + ((PatternAndTokens)other).pattern.toString() + ")";           
-            Pattern regex = Pattern.compile(expr, Pattern.CASE_INSENSITIVE | Pattern.COMMENTS);  // compile the pattern 
-            // this.tokens equals other.tokens, so there is no problem on return this tokens
-            return new PatternAndTokens(regex,this.tokens);
+            }
+            OnlyPattern p = (OnlyPattern)pattern.join(((PatternAndTokens)other).pattern);
+            OnlyTokens t = (OnlyTokens)tokens.join(((PatternAndTokens)other).tokens);
+            return new PatternAndTokens(p,t);
         }
 
         public boolean matches(String suffix) {
-            return pattern.matcher(suffix).matches();
+            return pattern.matches(suffix);
         }
 
+        @Override
         public Set<String> getTokens() {
-            return tokens;
+            return tokens.getTokens();
         }
     }
 
+    
 
-
-    // string before first | is assumed to be prefix
-    // string after || is assumed to be tokens
-    // string between first | and || is assumed to be pattern.
+    // PatternRule syntax:  
+    //   <prefix> | <pattern> || <antiPattern> ||| <token> [, <token>] ... 
+    // Any part may be missing.
+    
     private Pair<String,PatternRule> getPatternRule(String line) {
-        if (line.matches(".*\\|\\|.*")) {
-            String[] parts = line.split("\\|\\|",2);
-            String[] tokens = parts[1].split(",");
-            String[] prefix = parts[0].split("\\|",2);
-
-            if (prefix.length == 1 ) {
-                logger.debug("only tokens: " + line);
-                return new Pair<String,PatternRule>(prefix[0].toLowerCase().trim(),new OnlyTokens(tokens));
-            } else { // length == 2
-                logger.debug("pattern and tokens: " + line);
-                return new Pair<String,PatternRule>(prefix[0].toLowerCase().trim(),new PatternAndTokens(prefix[1].toLowerCase().trim(),tokens));
-            }
-        } else { // does not match ||, only pattern
-            String[] parts = line.split("\\|",2);
-            String pattern = "";
-            String prefix = parts[0].toLowerCase().trim();
-            if (parts.length == 1) {
-                pattern = "^$";
-            } else {
-                pattern = parts[1].toLowerCase().trim();
-            }
-            logger.debug("only pattern: " + line + " pattern: "+pattern);
-            return new Pair<String,PatternRule>(prefix,new OnlyPattern(pattern));
+        line = line.trim();
+        int[] x = new int[5];
+        x[0] = -1;
+        x[1] = line.indexOf("|");
+        x[2] = line.indexOf("||");
+        x[3] = line.indexOf("|||");
+        x[4] = line.length();
+        if (x[1] == x[2] || x[1] == x[3]) { x[1] = -1; }
+        if (x[2] == x[3]) { x[2] = -1; }
+        int fst;
+        for (fst=3; fst > 0; fst--) { if (x[fst]!=-1) { break; } }
+        boolean hasPrefix = ((x[fst] > 0) || (fst==0 && line.length() > 0));
+        boolean hasPattern = (x[1] >= 0);
+        boolean hasAntiPattern = (x[2] > x[1]);
+        boolean hasTokens = (x[3] > x[2]);
+        for (int i=3; i>0; i--) { if (x[i] == -1) { x[i] = x[i+1]; } }
+        String prefix = "";
+        String pattern = null;
+        String antiPattern = null;
+        String[] tokens = null;
+        if (hasPrefix) { prefix = line.substring(0,x[1]).toLowerCase().trim(); }
+        if (hasPattern) { pattern = line.substring(x[1]+1,x[2]).toLowerCase().trim(); }
+        if (hasAntiPattern) { antiPattern = line.substring(x[2]+2,x[3]).toLowerCase().trim(); }
+        if (hasTokens) { tokens = line.substring(x[3]+3).split(","); }
+        
+        Pair<String,PatternRule> out;
+        if (hasPattern && hasTokens) {
+            out = new Pair<String,PatternRule>(prefix,new PatternAndTokens(pattern,antiPattern,tokens));
+        } else if (hasPattern) {
+            out = new Pair<String,PatternRule>(prefix,new OnlyPattern(pattern,antiPattern));
+        } else if (hasTokens) {
+            out = new Pair<String,PatternRule>(prefix,new OnlyTokens(tokens));
+        } else { // only prefix
+            out = new Pair<String,PatternRule>(prefix,new EmptyRule());
         }
+        return out;
     }
 
     private void parseDefaultTokens(String line) {
-        String[] parts = line.split("\\|\\|",2);
+        String[] parts = line.split("\\|\\|\\|",2);
         if (parts.length == 2 ) {
             String[] tokens = parts[1].trim().split(",");
             for (String token:tokens) {

@@ -134,7 +134,7 @@ public class PageDB implements IPageStore {
                 if (md5File.exists()) {
                     md5File.renameTo(unsortedFile);
                 }
-                boolean notNewDB = unsortedFile.exists();
+                boolean notNewDB = unsortedFile.exists() && unsortedFile.length() > 0;
                 if (append && notNewDB) {
                     // Rename the old unsorted output file to a temp file.
                     File orig = new File(dir, unsortedFileName);

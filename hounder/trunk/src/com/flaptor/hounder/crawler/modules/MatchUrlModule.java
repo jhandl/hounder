@@ -47,6 +47,7 @@ public class MatchUrlModule extends ATrueFalseModule {
     /**
      * Free resources.
      */
+    @Override
     public void close() {
         Execute.close(patterns);
     }

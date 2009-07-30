@@ -97,6 +97,18 @@ public class UrlPatternsTest extends TestCase {
         checkMatch("abc|.*", new String[] {"abc","abcd"}, new String[] {"xxx"});
         checkMatch("abc|[a-z]", new String[] {"abcd","abcz"}, new String[] {"abc1","xxx"});
         checkMatch("abc|[a-z]#abc|[1-9]", new String[] {"abcd","abc1","abcX"}, new String[] {"abc-","xxx"});
+        checkMatch("x | [a-c]+", new String[] {"xa","xabc","xabababcbc"}, new String[] {"","xd","xad","xabcd"});
+        checkMatch("x | a[0-9]*c || 55", new String[] {"xac","xa1c","xa2345c"}, new String[] {"xa55c"});
+        checkMatch("x | b[0-9]*d || [0-4] ", new String[] {"xbd","xb9d","xb6789d"}, new String[] {"xb0d","xb248d"});
+        checkMatch("x | f[0-9]*g || 55#x | f[0-9]*g || [0-4]", new String[] {"xfg","xf8g","xf123g","xf55g"}, new String[] {});
+        checkMatch("x | f[0-9]*g || 55#x | f[0-9]*g || [5-9]", new String[] {"xfg","xf1g","xf123g"}, new String[] {"xf55g"});
+        checkMatch("x | f[0-9]*g#x| f[0-9]*g || 55", new String[] {"xfg","xf1g","xf123g","xf55g"}, new String[] {});
+        checkMatch("x | f[0-9]*g || 55#x | f[0-9]*g", new String[] {"xfg","xf1g","xf123g","xf55g"}, new String[] {});
+        checkMatch("x | .* || no ||| a,b,c", new String[] {"x","xsi"}, new String[] {"xno"});
+        checkMatch("x ||| a,b,c", new String[] {"x"}, new String[] {"y"});
+        checkMatch("x | .* ||| a,b,c", new String[] {"x","xsi"}, new String[] {"yno"});
+        checkMatch("x | [a-z]* || no ||| a,b # x | [0-9]* || no ||| c,d", new String[] {"xsi","x55"}, new String[] {"xno"});
+        checkMatch("x | [a-z]* || no ||| a,b # x | [a-z]* || nu ||| c,d", new String[] {"xsi","xno","xnu"}, new String[] {});
     }
 
 }

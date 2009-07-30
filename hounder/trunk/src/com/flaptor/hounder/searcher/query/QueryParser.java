@@ -140,7 +140,7 @@ public class QueryParser implements Serializable {
 
     private class PhraseAdder {
         public String addPhrase(String queryStr) {
-            if (queryStr.indexOf('"') == -1) {
+            if (queryStr.indexOf('"') == -1 && queryStr.trim().length() > 0) {
                 queryStr = "(" + queryStr.trim() + ") OR \"" + queryStr.trim() + "\"";
             }
             if (logger.isDebugEnabled()) {
@@ -162,31 +162,35 @@ public class QueryParser implements Serializable {
             logger.error(s);
             throw new NullPointerException(s);
         }
-        queryStr = matchPhrases(queryStr);
-        queryStr = addPhrase(queryStr);
-
-        org.apache.lucene.search.Query q[];
+        org.apache.lucene.search.Query q[] = null;
         org.apache.lucene.search.BooleanQuery bq = new org.apache.lucene.search.BooleanQuery();
 
-        try {
-            q = new org.apache.lucene.search.Query[fieldsAndWeights.length];
-            for (int i = 0; i < fieldsAndWeights.length ; i++) {
-                org.apache.lucene.queryParser.QueryParser qp = 
-                    new org.apache.lucene.queryParser.QueryParser((String)fieldsAndWeights[i].first(), analyzer);
-                qp.setDefaultOperator(org.apache.lucene.queryParser.QueryParser.Operator.AND);
-                logger.debug("parse: parsing query: " + queryStr + " on field " + fieldsAndWeights[i].first());
-                q[i] = qp.parse(queryStr);
-                q[i].setBoost(((Float)fieldsAndWeights[i].last()).floatValue());
-                bq.add(q[i], BooleanClause.Occur.SHOULD);
+        queryStr = queryStr.trim();
+        if (queryStr.length() > 0) {
+            queryStr = matchPhrases(queryStr);
+            queryStr = addPhrase(queryStr);
+
+
+            try {
+                q = new org.apache.lucene.search.Query[fieldsAndWeights.length];
+                for (int i = 0; i < fieldsAndWeights.length ; i++) {
+                    org.apache.lucene.queryParser.QueryParser qp = 
+                        new org.apache.lucene.queryParser.QueryParser((String)fieldsAndWeights[i].first(), analyzer);
+                    qp.setDefaultOperator(org.apache.lucene.queryParser.QueryParser.Operator.AND);
+                    logger.debug("parse: parsing query: " + queryStr + " on field " + fieldsAndWeights[i].first());
+                    q[i] = qp.parse(queryStr);
+                    q[i].setBoost(((Float)fieldsAndWeights[i].last()).floatValue());
+                    bq.add(q[i], BooleanClause.Occur.SHOULD);
+                }
+            } catch (org.apache.lucene.queryParser.ParseException e) {
+                String s = "parse: lucene could not parse query: " + queryStr + ", message: " + e.getMessage();
+                logger.error(s);
+                throw new IllegalArgumentException(s);
             }
-        } catch (org.apache.lucene.queryParser.ParseException e) {
-            String s = "parse: lucene could not parse query: " + queryStr + ", message: " + e.getMessage();
-            logger.error(s);
-            throw new IllegalArgumentException(s);
         }
         //if there's just 1 default field, the boolean query will have just one term, and it will be an extra layer
         // that add nothing, so I remove it.
-        if (bq.getClauses().length == 1) {
+        if (bq.getClauses().length == 1 && null != q) {
             return q[0];
         } else {
             return bq;

@@ -20,39 +20,76 @@ import org.apache.log4j.Logger;
 import com.flaptor.hounder.searcher.filter.AFilter;
 import com.flaptor.hounder.searcher.group.AGroup;
 import com.flaptor.hounder.searcher.query.AQuery;
+import com.flaptor.hounder.searcher.query.LazyParsedQuery;
 import com.flaptor.hounder.searcher.sort.ASort;
-import com.flaptor.util.Config;
 import com.flaptor.util.Execute;
-import com.flaptor.util.Statistics;
-import java.util.Properties;
-import org.apache.log4j.PropertyConfigurator;
+import java.util.Enumeration;
+import org.apache.log4j.Appender;
+import org.apache.log4j.DailyRollingFileAppender;
+import org.apache.log4j.Level;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.PatternLayout;
+import org.apache.log4j.spi.Filter;
+import org.apache.log4j.spi.LoggingEvent;
+import org.apache.log4j.varia.LevelMatchFilter;
 
 /**
- * A searcher for taking query times, and print individual query statistics
+ * A searcher for registering search queries
  * 
- * @author Martin Massera, Spike, DButhay
+ * @author jhandl
  */
 public class LoggingSearcher implements ISearcher {
 	private static final Logger logger = Logger.getLogger(Execute.whoAmI());
 	private ISearcher searcher;
 	
 	public LoggingSearcher(ISearcher searcher) {
-		this.searcher = searcher;
-//        PropertyConfigurator.configureAndWatch("loggingsearcher.properties",60000);
-        Properties props = new Properties();
-        props.setProperty("log4j.rootLogger","INFO,rolling");
-        props.setProperty("log4j.appender.rolling","org.apache.log4j.DailyRollingFileAppender");
-        props.setProperty("log4j.appender.rolling.File","logs/queries.log");
-        props.setProperty("log4j.appender.rolling.DatePattern","'.'yyyy-MM-dd");
-        props.setProperty("log4j.appender.rolling.layout","org.apache.log4j.PatternLayout");
-        props.setProperty("log4j.appender.rolling.layout.ConversionPattern","%m");
-        PropertyConfigurator.configure(props);
-	}
+        this.searcher = searcher;
 
-	public GroupedSearchResults search(AQuery query, int firstResult, int count, AGroup group, int groupSize, AFilter filter, ASort sort)  throws SearcherException {
-		GroupedSearchResults results = searcher.search(query, firstResult, count, group, groupSize, filter, sort);
+        // We add a special logger to write to the file the log consumers expect to find.
+        DailyRollingFileAppender appender = new DailyRollingFileAppender();
+        appender.setName("QueriesAppender");
+        appender.setFile("logs/queries.log");
+        appender.setDatePattern("'.'yyyy-MM-dd");
+        PatternLayout layout = new PatternLayout();
+        layout.setConversionPattern("%m%n");
+        appender.setLayout(layout);
+        appender.activateOptions();
+        logger.setLevel(Level.INFO);    
+        logger.addAppender(appender);
+        logger.setAdditivity(true);
+        
+        // We need to filter this class out of any root appenders, otherwise the queries are logged through all of them.
+        ExcludeClassFilter filter = new ExcludeClassFilter(Execute.whoAmI());
+        for (Enumeration appenders = Logger.getRootLogger().getAllAppenders(); appenders.hasMoreElements();) {
+            Appender rootAppender = (Appender)appenders.nextElement();
+            rootAppender.addFilter(filter);
+        }
+        
+    }
+
+    private class ExcludeClassFilter extends Filter {
+        private String className = null;
+        public ExcludeClassFilter(String className) {
+            this.className = className;
+        }
+        @Override
+        public int decide(LoggingEvent event) {
+            if (className.equals(event.getLoggerName())) {
+                return Filter.DENY;
+            }
+            return Filter.NEUTRAL;
+        }
+    }
+    
+
+    @Override
+    public GroupedSearchResults search(AQuery query, int firstResult, int count, AGroup group, int groupSize, AFilter filter, ASort sort) throws SearcherException{
+        GroupedSearchResults results = searcher.search(query, firstResult, count, group, groupSize, filter, sort);
         if (null != results && results.totalResults() > 0) {
-            logger.info(query.toString());
+            LazyParsedQuery lazyParsedQuery = LazyParsedQuery.findLazyParsedQuery(query);
+            if (null != lazyParsedQuery) {
+                logger.info(lazyParsedQuery.getQueryString().toLowerCase().trim());
+            }
         }
 		return results;		
 	}
