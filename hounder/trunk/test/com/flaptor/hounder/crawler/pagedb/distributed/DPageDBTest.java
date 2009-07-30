@@ -186,13 +186,13 @@ public class DPageDBTest extends TestCase {
 
     @TestInfo(testType = TestInfo.TestType.INTEGRATION,
                 requiresPort = {port1,port2})
-    public void xtestIndependentDPageDB () throws Exception {
+    public void testIndependentDPageDB () throws Exception {
         runTwoDPageDBs(new PageCatcher[]{null,null});
     }
 
     @TestInfo(testType = TestInfo.TestType.INTEGRATION,
                 requiresPort = {1090,1091})
-    public void xtestDependentDPageDB () throws Exception {
+    public void testDependentDPageDB () throws Exception {
         PageCatcher catcher0 = new PageCatcher(tmpDir+"/catch0");
         PageCatcher catcher1 = new PageCatcher(tmpDir+"/catch1");
         runTwoDPageDBs(new PageCatcher[]{catcher0,catcher1});
