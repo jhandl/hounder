@@ -183,7 +183,7 @@ limitations under the License.
         <svn>
             <wcVersion  path="./" />
         </svn>
-        <condition property="version" value="r${revision.max}" else="dirty" >
+        <condition property="version" value="r${revision.max}" else="r${revision.max}-dirty" >
             <and>
                 <not>
                     <equals arg1="${modified}" arg2="true" />
@@ -275,7 +275,7 @@ limitations under the License.
 
     <!--******************************************************************************************************-->
     <target name="jar" depends="compile" description="builds the Hounder jar file" >
-		<jar jarfile="${output.dir}/${project}-${version}.jar" >
+		<jar jarfile="${output.dir}/${project}-trunk.jar" >
 			<manifest>
 				<attribute name="Built-By" value="${user.name}"/>
 				<attribute name="Version" value="${version}"/>
@@ -311,7 +311,7 @@ limitations under the License.
 
 	<!--******************************************************************************************************-->
     <target name="fatjar" depends="compile" description="builds the Hounder jar file" >
-		<jar jarfile="${output.dir}/${project}-${version}-fat.jar" >
+		<jar jarfile="${output.dir}/${project}-trunk-fat.jar" >
 			<manifest>
 				<attribute name="Built-By" value="${user.name}"/>
 				<attribute name="Version" value="${version}"/>
@@ -350,7 +350,7 @@ limitations under the License.
 
 	<!--******************************************************************************************************-->
     <target name="depjar" depends="prepare" description="builds the Hounder jar file" >
-		<jar jarfile="${output.dir}/${project}-deps-${version}.jar" >
+		<jar jarfile="${output.dir}/${project}-trunk-deps.jar" >
 			<manifest>
 				<attribute name="Built-By" value="${user.name}"/>
 				<attribute name="Version" value="${version}"/>
