@@ -47,6 +47,8 @@ cycles.between.discovery.waves = 30
 
 # File containing a list of grep patterns a url must match to become a hotspot.
 hotspot.file = hotspots.regex
+hotspot.tag = hotspot
+emitdoc.tag = emitdoc
 
 # The percentile of pages from the pagedb that should be fetched on a crawl cycle based on their priority.
 priority.percentile.to.fetch = 20
@@ -72,8 +74,12 @@ pagedb.node.list =
 # Base filename for the crawler progress report. Each cycle will produce one file, with the cycle number appended to the name.
 progress.report.filename = progress
 
+# Clustering settings
 clustering.enable=yes
 clustering.node.type=crawler
+# You can add many values with commas and use wildcards as in 192.168.*.*
+clustering.node.connections.accept=
+clustering.node.connections.deny=
 
 ###
 ### Used by the htmlparser on the crawler side

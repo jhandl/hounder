@@ -60,7 +60,7 @@ public class FetchlistFactory {
     }
     
     public void skip (long toSkip) {
-        logger.info("Skipping "+toSkip+" pages...");
+	if (toSkip>0) { logger.info("Skipping "+toSkip+" pages..."); }
         long seen = 0;
         long partial = 0;
         while (seen < toSkip && pages.hasNext()) {
