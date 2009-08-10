@@ -3,8 +3,7 @@
 
 if [ -f pid ]; then
         PID=`cat pid`
-        if ps -p $PID | grep -q $PID
-        then
+        if ps -p $PID | grep -q $PID; then
                 echo The indexer is running
                 exit 0
         else

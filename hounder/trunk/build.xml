@@ -207,7 +207,7 @@ limitations under the License.
 
     <!--******************************************************************************************************-->
     <target name="jar-for-servlets" depends="compile" description="builds a hounder jar containing the bare minimum to run a searcher on tomcat." >
-		<jar jarfile="${output.dir}/${project}-forTomcat-${version}.jar" >
+		<jar jarfile="${output.dir}/${project}-forTomcat-trunk.jar" >
 			<manifest>
 				<attribute name="Built-By" value="${user.name}"/>
 				<attribute name="Version" value="${version}"/>
@@ -515,8 +515,8 @@ limitations under the License.
 	<!--target name="dist-lib"-->
         <tar destfile="${dist.dir}/lib.tgz" compression="gzip">
             <tarfileset dir="${output.dir}" prefix="lib">
-                <include name="${project}-${version}.jar" />
-            	<include name="${project}-deps-${version}.jar" />
+                <include name="${project}-trunk.jar" />
+            	<include name="${project}-trunk-deps.jar" />
             </tarfileset>
         </tar>
    	</target>

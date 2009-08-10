@@ -1,29 +1,10 @@
 #!/bin/bash
 
-# pid=`cat pid`
-# if [ -z "$pid" ]; then
-#   echo The crawler is not running.
-# else
-#   kill $pid
-#   echo The crawler has stopped.
-#   rm pid
-# fi
-# 
-# exit
-
-MULTICRAWLER="no"
-
-if [ $MULTICRAWLER = "yes" ]; then
-    name=`pwd | awk '{n=split($0,a,"/"); print a[n]}'`
-else
-    name=""
-fi
-
 ok=0
 if [ -f pid ]; then
   pid=`cat pid`
   if ps aux | grep -q "^$USER[[:space:]]*$pid[[:space:]]"; then
-    echo -n Stopping the $name crawler...
+    echo -n Stopping the crawler...
     echo >stop  
     while ps aux | grep -q "^$USER[[:space:]]*$pid[[:space:]]"; do
       sleep 5
@@ -36,6 +17,6 @@ fi
 if [ $ok = 1 ]; then
   echo stopped.
 else
-  echo The $name crawler was not running.
+  echo The crawler was not running.
 fi
 
