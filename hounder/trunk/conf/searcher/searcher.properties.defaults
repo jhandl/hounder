@@ -8,7 +8,7 @@ rmiInterface=yes
 xmlRpcInterface=yes
 openSearchInterface=yes
 webInterface=yes
-xmlInterface=yes
+xmlInterface=no
 
 
 #Configuration for QueryParser.
@@ -66,6 +66,7 @@ websearch.redirect.to=/websearch
 opensearch.context=/opensearch
 websearch.context=/websearch
 xmlsearch.context=/xmlsearch
+xmlsearch.transformMap=
 
 # Whether to use payloads or not
 Searcher.usePayloads=no

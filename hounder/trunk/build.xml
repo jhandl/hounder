@@ -383,7 +383,7 @@ limitations under the License.
 			  <path refid="classpath.jars.tools" />
 		      <path refid="classpath.jars.hounder" />
 		    </classpath>
-			<link href="http://lucene.zones.apache.org:8080/hudson/job/Lucene-Nightly/javadoc/" />
+			<link href="http://lucene.apache.org/java/2_4_1/api/index.html" />
 			<link href="http://s1/javadocs/log4j/1.2.11/" />
 			<link href="http://junit.sourceforge.net/javadoc/" />
 			<taglet name="ToDo" path="tools/taglets.jar" />
@@ -722,8 +722,8 @@ limitations under the License.
 	<target name="dist" depends="dist-searcher, dist-indexer, dist-crawler, dist-cache-server, dist-clustering-web, dist-learning-web, dist-loganalysis, dist-bin-all"/>
 
     <target name="distsrc" depends="prepare, doc" description="builds the source distribution tar ball">
-        <property name="prefix" value="${project}-${version}"/>
-        <tar destfile="${product.output.dir}/${project}-${version}-src.tgz" compression="gzip">
+        <property name="prefix" value="${project}-trunk"/>
+        <tar destfile="${product.output.dir}/${project}-trunk-src.tgz" compression="gzip">
 
             <tarfileset file="*.xml" prefix="${prefix}"/>
             <tarfileset file="${docs.dir}/LICENSE" prefix="${prefix}"/>
@@ -739,11 +739,11 @@ limitations under the License.
     </target>
 
 	<target name="distbin" depends="prepareproduct" description="builds the product binary distribution tar ball">
-        <tar destfile="${product.output.dir}/${project}-${version}-binary_installer.tgz" compression="gzip">
-            <tarfileset dir="${tmp.dir}" prefix="${project}-${version}">
+        <tar destfile="${product.output.dir}/${project}-trunk-binary_installer.tgz" compression="gzip">
+            <tarfileset dir="${tmp.dir}" prefix="${project}-trunk">
                 <exclude name="*.sh"/>
         	</tarfileset>
-            <tarfileset dir="${tmp.dir}" prefix="${project}-${version}" mode="755">
+            <tarfileset dir="${tmp.dir}" prefix="${project}-trunk" mode="755">
                 <include name="*.sh"/>
             </tarfileset>
         </tar>
