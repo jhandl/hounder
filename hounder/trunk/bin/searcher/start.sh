@@ -40,7 +40,7 @@ echo Starting the searcher...
 
 ARGS="-server \
       -Xms300m \
-      -Xmx3500m \
+      -Xmx800m \
       -XX:+UseConcMarkSweepGC \
       -XX:+CMSIncrementalMode \
       -XX:+CMSIncrementalPacing \
