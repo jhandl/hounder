@@ -28,6 +28,7 @@ import com.flaptor.util.NetUtil;
 import com.flaptor.util.remote.RpcException;
 
 import com.flaptor.hounder.crawler.APageMapper;
+import com.flaptor.util.PortUtil;
 
 
 /**
@@ -91,7 +92,10 @@ public class DPageDB extends PageDB {
             Integer port = null;
             if (parts.length > 1) {
                 port = Integer.parseInt(parts[1].trim());
+            } else {
+                port = PortUtil.getBasePort();
             }
+            logger.debug("Adding node at "+ip+" : "+port);
             nodeList.add(new NodeAddress(ip, port));
         }
         return nodeList;
