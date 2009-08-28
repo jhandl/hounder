@@ -33,7 +33,6 @@ public class NodeAddress implements Serializable {
      * @param port the port of this node address.
      */
     public NodeAddress (String ip, Integer port) {
-        if (null == port) port = 1099;
         this.ip = ip;
         this.port = port;
     }

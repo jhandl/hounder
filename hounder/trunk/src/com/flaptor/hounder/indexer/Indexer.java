@@ -97,7 +97,7 @@ public class Indexer implements IRmiIndexer, IIndexer, Stoppable {
         }
 
 
-		indexManager = new IndexManager(this);
+	indexManager = new IndexManager(this);
         maxQueueSize = config.getInt("Indexer.maxQueueSize");
         logger.info("Maximum queue size set to " + maxQueueSize);
         // create all the modules requested in the configuration file AND

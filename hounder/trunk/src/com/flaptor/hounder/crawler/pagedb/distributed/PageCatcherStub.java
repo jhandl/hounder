@@ -76,7 +76,7 @@ public class PageCatcherStub extends ARmiClientStub implements IRemotePageCatche
                 remotePageCatcher.addPage(page);
                 super.connectionSuccess();
             } else {
-                throw new RpcException("AddPage failed trying to connect to remote PageCatcher");
+                throw new RpcException("AddPage failed trying to connect to remote PageCatcher. Please check the value of rmiServer.host in common.properties.");
             }
         } catch (RemoteException e) {
             logger.error(e,e);
