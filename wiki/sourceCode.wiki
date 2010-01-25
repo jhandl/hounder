@@ -1,0 +1,6 @@
+[http://hounder.org http://hounder.org/images/hounder2.png]
+= Source Code =
+
+Hounder source code can be downloaded in the [http://hounder.org/downloads.html downloads section].
+
+The development SVN is hosted at flaptor. To submit changes or request access to the SVN please write to the [http://groups.google.com/group/hounder mailing list]
