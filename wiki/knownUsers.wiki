@@ -1,0 +1,8 @@
+#summary if you are using Hounder register your project here
+
+= Projects that use Hounder =
+
+  * [http://search.wordpress.com WordPress]
+  * [http://wink.com People search]
+  * [http://search.trendistic.com Trendistic]
+  * [http://buscador.clarin.com Clarin]
