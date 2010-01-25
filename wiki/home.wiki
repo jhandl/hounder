@@ -1,0 +1,29 @@
+[http://hounder.org http://hounder.org/images/hounder2.png]
+
+   _Checking out Hounder?_ Check out the [5minuteTutorial 5 minute tutorial]
+
+== Project Info ==
+
+  [http://hounder.org/downloads/Brochure.odt Brochure] (.odt file)
+
+  Some of the [knownUsers Projects] using hounder
+  
+  [nextVersionIdeas ideas, new features and limitations to overcome for next version]
+
+== Documentation ==
+
+  [http://hounder.org/downloads/ImplementationDetails.odt Implementation Details] (.odt file)
+
+  [http://opensource.flaptor.com/hounder/javadoc API documentation]
+
+  [ports RPC ports]
+
+  [http://hounder.org/downloads/TrainingApplication.odt Training Application] (.odt file)
+
+== Misc ==
+
+  [http://code.google.com/p/clusterfest/wiki/home Clusterfest]
+
+  [http://code.google.com/p/wiz4j Wiz4j]
+
+  [http://code.google.com/p/flaptor-util Flaptor Util]
